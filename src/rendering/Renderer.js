@@ -170,33 +170,70 @@ export class Renderer {
     // Shadow
     ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.beginPath();
-    ctx.ellipse(screenX, screenY + 12, 10, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(screenX, screenY + 16, 12, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Player body
-    if (player.hitFlash > 0) {
-      ctx.fillStyle = "#ff0000";
-      player.hitFlash--;
-    } else {
-      ctx.fillStyle = "#3b82f6";
-    }
-
-    // Make player rounder
-    ctx.beginPath();
-    ctx.arc(screenX, screenY, player.width / 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Player eyes/details (Directional)
     ctx.save();
     ctx.translate(screenX, screenY);
     ctx.rotate(player.direction);
 
-    ctx.fillStyle = "#fff";
-    // Eyes relative to rotation
-    ctx.beginPath();
-    ctx.arc(8, -5, 3, 0, Math.PI * 2); // Right eye
-    ctx.arc(8, 5, 3, 0, Math.PI * 2); // Left eye
-    ctx.fill();
+    // Hit flash effect
+    const isHit = player.hitFlash > 0;
+    if (isHit) player.hitFlash--;
+
+    // Scale for pixel art (each pixel = 2x2)
+    const scale = 2;
+    ctx.scale(scale, scale);
+
+    // Center the sprite
+    ctx.translate(-8, -8);
+
+    // Disable image smoothing for crisp pixels
+    ctx.imageSmoothingEnabled = false;
+
+    // Body - Dark blue shirt
+    ctx.fillStyle = isHit ? "#ff0000" : "#2c4c8c";
+    ctx.fillRect(4, 8, 8, 6); // Torso
+
+    // Arms
+    ctx.fillStyle = isHit ? "#ff6666" : "#5a7bb8";
+    ctx.fillRect(2, 9, 2, 4); // Left arm
+    ctx.fillRect(12, 9, 2, 4); // Right arm
+
+    // Head - Skin tone
+    ctx.fillStyle = isHit ? "#ff9999" : "#f4a460";
+    ctx.fillRect(4, 3, 8, 6); // Head
+
+    // Hair - Brown
+    ctx.fillStyle = isHit ? "#8b4513" : "#6b4423";
+    ctx.fillRect(3, 2, 10, 3); // Hair top
+    ctx.fillRect(3, 3, 2, 2); // Left hair
+    ctx.fillRect(11, 3, 2, 2); // Right hair
+    ctx.fillRect(5, 1, 6, 2); // Hair spikes
+
+    // Eyes - White
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(5, 5, 2, 2); // Left eye
+    ctx.fillRect(9, 5, 2, 2); // Right eye
+
+    // Pupils - Black
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(6, 5, 1, 1); // Left pupil
+    ctx.fillRect(10, 5, 1, 1); // Right pupil
+
+    // Mouth
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(6, 7, 4, 1); // Smile
+
+    // Legs - Dark pants
+    ctx.fillStyle = isHit ? "#333333" : "#1a1a2e";
+    ctx.fillRect(5, 14, 2, 3); // Left leg
+    ctx.fillRect(9, 14, 2, 3); // Right leg
+
+    // Feet
+    ctx.fillStyle = isHit ? "#555555" : "#2d2d44";
+    ctx.fillRect(4, 16, 3, 1); // Left foot
+    ctx.fillRect(9, 16, 3, 1); // Right foot
 
     ctx.restore();
 
@@ -219,33 +256,75 @@ export class Renderer {
     ctx.ellipse(screenX, screenY + 10, 8, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Zombie body
+    // Zombie Body (more realistic)
     if (zombie.hitFlash > 0) {
-      ctx.fillStyle = "#ff0000";
+      ctx.fillStyle = "#ff0000"; // Flash of red when hit
       zombie.hitFlash--;
     } else if (zombie.burning) {
-      ctx.fillStyle = "#ff6600";
+      ctx.fillStyle = "#ff6600"; // Burning effect
     } else {
-      ctx.fillStyle = "#22c55e";
+      ctx.fillStyle = "#22c55e"; // Default healthy zombie skin
     }
 
-    // Round zombie
+    // Draw Zombie Body (with more details)
     ctx.beginPath();
-    ctx.arc(screenX, screenY, zombie.width / 2, 0, Math.PI * 2);
+    ctx.arc(screenX, screenY, zombie.width / 2, 0, Math.PI * 2); // Round body
     ctx.fill();
 
-    // Details (Rotten skin spots)
+    // Rotten skin spots (more detailed)
     ctx.fillStyle = "#14532d";
     ctx.beginPath();
-    ctx.arc(screenX - 5, screenY - 5, 3, 0, Math.PI * 2);
-    ctx.arc(screenX + 4, screenY + 6, 2, 0, Math.PI * 2);
+    ctx.arc(screenX - 12, screenY - 5, 4, 0, Math.PI * 2); // More detailed rot
+    ctx.arc(screenX + 10, screenY + 7, 3, 0, Math.PI * 2);
+    ctx.arc(screenX, screenY + 10, 6, 0, Math.PI * 2);
     ctx.fill();
 
-    // Health bar
+    // Draw zombie head (separate from body)
+    ctx.fillStyle = "#3b3b3b"; // Skin color for head
+    ctx.beginPath();
+    ctx.arc(
+      screenX,
+      screenY - zombie.width / 2 - 10,
+      zombie.width / 3,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    // Eyes (with a creepy look)
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(screenX - 7, screenY - zombie.width / 2 - 15, 3, 0, Math.PI * 2); // Left eye
+    ctx.arc(screenX + 7, screenY - zombie.width / 2 - 15, 3, 0, Math.PI * 2); // Right eye
+    ctx.fill();
+
+    ctx.fillStyle = "#000000"; // Dark pupils
+    ctx.beginPath();
+    ctx.arc(screenX - 7, screenY - zombie.width / 2 - 15, 1, 0, Math.PI * 2); // Left pupil
+    ctx.arc(screenX + 7, screenY - zombie.width / 2 - 15, 1, 0, Math.PI * 2); // Right pupil
+    ctx.fill();
+
+    // Mouth (add details)
+    ctx.fillStyle = "#cc0000"; // Red for blood
+    ctx.beginPath();
+    ctx.arc(screenX, screenY - zombie.width / 2 - 5, 6, 0, Math.PI);
+    ctx.fill();
+
+    // Blood dripping down from mouth
+    ctx.strokeStyle = "#8B0000"; // Dark red for blood
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(screenX - 4, screenY - zombie.width / 2); // Start from mouth
+    ctx.lineTo(screenX - 8, screenY - zombie.width / 2 + 10); // First drip
+    ctx.lineTo(screenX, screenY - zombie.width / 2 + 15); // Second drip
+    ctx.lineTo(screenX + 4, screenY - zombie.width / 2 + 10); // Third drip
+    ctx.stroke();
+
+    // Health bar (with realistic color coding)
     const healthBarWidth = zombie.width;
     const healthPercent = zombie.health / zombie.maxHealth;
     ctx.fillStyle = "#000";
-    ctx.fillRect(screenX - healthBarWidth / 2, screenY - 20, healthBarWidth, 4);
+    ctx.fillRect(screenX - healthBarWidth / 2, screenY - 30, healthBarWidth, 4);
     ctx.fillStyle =
       healthPercent > 0.5
         ? "#22c55e"
@@ -254,7 +333,7 @@ export class Renderer {
         : "#ef4444";
     ctx.fillRect(
       screenX - healthBarWidth / 2,
-      screenY - 20,
+      screenY - 30,
       healthBarWidth * healthPercent,
       4
     );
