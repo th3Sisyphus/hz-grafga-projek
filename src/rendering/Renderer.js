@@ -167,77 +167,196 @@ export class Renderer {
     const screenX = player.x - camera.x;
     const screenY = player.y - camera.y;
 
-    // Shadow
+    // 1. Tentukan Arah Hadap (Direction)
+    // Mengubah radian (-PI s/d PI) menjadi 4 arah mata angin
+    let facing = "down";
+    const angle = player.direction;
+
+    // Logika pembagian sudut (4 Kuadran)
+    if (Math.abs(angle) < Math.PI / 4) {
+      facing = "right";
+    } else if (Math.abs(angle) > (3 * Math.PI) / 4) {
+      facing = "left";
+    } else if (angle > Math.PI / 4 && angle < (3 * Math.PI) / 4) {
+      facing = "down";
+    } else {
+      facing = "up";
+    }
+
+    // 2. Gambar Shadow (Bayangan di kaki)
     ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.beginPath();
-    ctx.ellipse(screenX, screenY + 16, 12, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(screenX, screenY + 14, 10, 4, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // 3. Persiapan Menggambar Body
     ctx.save();
     ctx.translate(screenX, screenY);
-    ctx.rotate(player.direction);
 
-    // Hit flash effect
+    // PENTING: Kita TIDAK rotate body ctx.rotate(player.direction) di sini
+    // agar sprite terlihat tegak lurus sesuai arah mata angin.
+
+    // Hit flash effect logic
     const isHit = player.hitFlash > 0;
     if (isHit) player.hitFlash--;
+
+    // Setup Warna (Normal vs Kena Hit)
+    const colors = {
+      shirt: isHit ? "#ff0000" : "#2c4c8c",
+      shirtLight: isHit ? "#ff6666" : "#5a7bb8",
+      skin: isHit ? "#ff9999" : "#f4a460",
+      hair: isHit ? "#8b4513" : "#6b4423",
+      pants: isHit ? "#333333" : "#1a1a2e",
+      shoes: isHit ? "#555555" : "#2d2d44",
+      white: "#ffffff",
+      black: "#000000",
+    };
 
     // Scale for pixel art (each pixel = 2x2)
     const scale = 2;
     ctx.scale(scale, scale);
-
-    // Center the sprite
-    ctx.translate(-8, -8);
-
-    // Disable image smoothing for crisp pixels
+    ctx.translate(-8, -8); // Center sprite (asumsi grid 16x16)
     ctx.imageSmoothingEnabled = false;
 
-    // Body - Dark blue shirt
-    ctx.fillStyle = isHit ? "#ff0000" : "#2c4c8c";
-    ctx.fillRect(4, 8, 8, 6); // Torso
+    // 4. Gambar Aset Berdasarkan Arah (Procedural Pixel Art)
 
-    // Arms
-    ctx.fillStyle = isHit ? "#ff6666" : "#5a7bb8";
-    ctx.fillRect(2, 9, 2, 4); // Left arm
-    ctx.fillRect(12, 9, 2, 4); // Right arm
+    if (facing === "down") {
+      // === HADAP DEPAN (BAWAH) ===
 
-    // Head - Skin tone
-    ctx.fillStyle = isHit ? "#ff9999" : "#f4a460";
-    ctx.fillRect(4, 3, 8, 6); // Head
+      // Kepala & Rambut
+      ctx.fillStyle = colors.hair;
+      ctx.fillRect(4, 2, 8, 3); // Top hair
+      ctx.fillRect(3, 3, 1, 3); // Side hair L
+      ctx.fillRect(12, 3, 1, 3); // Side hair R
 
-    // Hair - Brown
-    ctx.fillStyle = isHit ? "#8b4513" : "#6b4423";
-    ctx.fillRect(3, 2, 10, 3); // Hair top
-    ctx.fillRect(3, 3, 2, 2); // Left hair
-    ctx.fillRect(11, 3, 2, 2); // Right hair
-    ctx.fillRect(5, 1, 6, 2); // Hair spikes
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(4, 3, 8, 5); // Face
 
-    // Eyes - White
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(5, 5, 2, 2); // Left eye
-    ctx.fillRect(9, 5, 2, 2); // Right eye
+      // Mata
+      ctx.fillStyle = colors.white;
+      ctx.fillRect(5, 5, 2, 2);
+      ctx.fillRect(9, 5, 2, 2);
+      ctx.fillStyle = colors.black;
+      ctx.fillRect(6, 5, 1, 1);
+      ctx.fillRect(10, 5, 1, 1);
 
-    // Pupils - Black
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(6, 5, 1, 1); // Left pupil
-    ctx.fillRect(10, 5, 1, 1); // Right pupil
+      // Badan
+      ctx.fillStyle = colors.shirt;
+      ctx.fillRect(4, 8, 8, 6);
 
-    // Mouth
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(6, 7, 4, 1); // Smile
+      // Tangan (di samping badan)
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(2, 9, 2, 3);
+      ctx.fillRect(12, 9, 2, 3);
 
-    // Legs - Dark pants
-    ctx.fillStyle = isHit ? "#333333" : "#1a1a2e";
-    ctx.fillRect(5, 14, 2, 3); // Left leg
-    ctx.fillRect(9, 14, 2, 3); // Right leg
+      // Celana & Kaki
+      ctx.fillStyle = colors.pants;
+      ctx.fillRect(5, 14, 2, 2);
+      ctx.fillRect(9, 14, 2, 2);
+      ctx.fillStyle = colors.shoes;
+      ctx.fillRect(5, 16, 2, 1);
+      ctx.fillRect(9, 16, 2, 1);
+    } else if (facing === "up") {
+      // === HADAP BELAKANG (ATAS) ===
 
-    // Feet
-    ctx.fillStyle = isHit ? "#555555" : "#2d2d44";
-    ctx.fillRect(4, 16, 3, 1); // Left foot
-    ctx.fillRect(9, 16, 3, 1); // Right foot
+      // Rambut (Full belakang)
+      ctx.fillStyle = colors.hair;
+      ctx.fillRect(4, 2, 8, 6);
+      ctx.fillRect(3, 3, 10, 4);
+
+      // Badan (Punggung)
+      ctx.fillStyle = colors.shirt;
+      ctx.fillRect(4, 8, 8, 6);
+
+      // Tangan
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(2, 9, 2, 3);
+      ctx.fillRect(12, 9, 2, 3);
+
+      // Celana
+      ctx.fillStyle = colors.pants;
+      ctx.fillRect(5, 14, 2, 2);
+      ctx.fillRect(9, 14, 2, 2);
+
+      // Sepatu
+      ctx.fillStyle = colors.shoes;
+      ctx.fillRect(5, 16, 2, 1);
+      ctx.fillRect(9, 16, 2, 1);
+    } else if (facing === "right") {
+      // === HADAP KANAN ===
+
+      // Rambut (Samping)
+      ctx.fillStyle = colors.hair;
+      ctx.fillRect(4, 2, 7, 3);
+      ctx.fillRect(3, 3, 3, 5); // Back hair
+
+      // Wajah (Profile)
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(6, 3, 5, 5);
+
+      // Mata (Satu saja di kanan)
+      ctx.fillStyle = colors.white;
+      ctx.fillRect(9, 5, 2, 2);
+      ctx.fillStyle = colors.black;
+      ctx.fillRect(10, 5, 1, 1);
+
+      // Badan
+      ctx.fillStyle = colors.shirt;
+      ctx.fillRect(5, 8, 6, 6);
+
+      // Tangan (Satu di tengah/depan)
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(7, 9, 3, 3);
+
+      // Kaki (Melangkah)
+      ctx.fillStyle = colors.pants;
+      ctx.fillRect(5, 14, 2, 2); // Back leg
+      ctx.fillRect(8, 14, 2, 2); // Front leg
+
+      // Sepatu
+      ctx.fillStyle = colors.shoes;
+      ctx.fillRect(5, 16, 2, 1);
+      ctx.fillRect(8, 16, 2, 1);
+    } else if (facing === "left") {
+      // === HADAP KIRI (Mirror dari Kanan) ===
+
+      // Rambut
+      ctx.fillStyle = colors.hair;
+      ctx.fillRect(5, 2, 7, 3);
+      ctx.fillRect(10, 3, 3, 5); // Back hair
+
+      // Wajah
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(5, 3, 5, 5);
+
+      // Mata (Kiri)
+      ctx.fillStyle = colors.white;
+      ctx.fillRect(5, 5, 2, 2);
+      ctx.fillStyle = colors.black;
+      ctx.fillRect(5, 5, 1, 1);
+
+      // Badan
+      ctx.fillStyle = colors.shirt;
+      ctx.fillRect(5, 8, 6, 6);
+
+      // Tangan
+      ctx.fillStyle = colors.skin;
+      ctx.fillRect(6, 9, 3, 3);
+
+      // Kaki
+      ctx.fillStyle = colors.pants;
+      ctx.fillRect(6, 14, 2, 2); // Front leg
+      ctx.fillRect(9, 14, 2, 2); // Back leg
+
+      // Sepatu
+      ctx.fillStyle = colors.shoes;
+      ctx.fillRect(6, 16, 2, 1);
+      ctx.fillRect(9, 16, 2, 1);
+    }
 
     ctx.restore();
 
-    // Weapon
+    // 5. Gambar Senjata (Tetap berputar mengikuti mouse)
     ctx.save();
     ctx.translate(screenX, screenY);
     ctx.rotate(player.direction);

@@ -42,16 +42,12 @@ export class GameManager {
   }
 
   togglePause() {
-    if (
-      !this.context.running ||
-      (this.context.player && this.context.player.health <= 0)
-    )
-      return;
+    if (!this.context.running || (this.context.player && this.context.player.health <= 0)) return;
     this.context.paused = !this.context.paused;
     if (this.context.paused) {
-      this.uiElements.pauseMenu.classList.remove("hidden");
+        this.uiElements.pauseMenu.classList.remove("hidden");
     } else {
-      this.uiElements.pauseMenu.classList.add("hidden");
+        this.uiElements.pauseMenu.classList.add("hidden");
     }
   }
 
@@ -60,7 +56,7 @@ export class GameManager {
 
     // FIX: Selalu update arah hadap player mengikuti mouse (Hover Aiming)
     if (this.context.player && !this.context.paused) {
-      this.context.player.updateAim(this.context.mousePos, this.context.camera);
+        this.context.player.updateAim(this.context.mousePos, this.context.camera);
     }
 
     // Handle Attack
@@ -71,9 +67,9 @@ export class GameManager {
         this.context.projectiles,
         this.context.effects
       );
-
+      
       if (didAttack && this.context.player.weapon.type === "melee") {
-        this.combatSystem.handleMeleeAttack(this.context.player);
+          this.combatSystem.handleMeleeAttack(this.context.player);
       }
     }
 
@@ -108,10 +104,10 @@ export class GameManager {
     }
 
     if (!this.context.paused) {
-      this.update();
+        this.update();
     }
     this.render();
-
+    
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
@@ -191,9 +187,9 @@ export class GameManager {
     if (this.context.player && this.context.player.health <= 0) {
       const finalScore = document.getElementById("finalScore");
       const finalWave = document.getElementById("finalWave");
-      if (finalScore) finalScore.textContent = this.context.score;
-      if (finalWave) finalWave.textContent = this.context.wave;
-
+      if(finalScore) finalScore.textContent = this.context.score;
+      if(finalWave) finalWave.textContent = this.context.wave;
+      
       this.uiElements.gameOver.classList.remove("hidden");
     }
     this.uiElements.menu.classList.add("hidden");

@@ -1,5 +1,5 @@
 import { BASE_ZOMBIE_HEALTH, BASE_ZOMBIE_SPEED } from "../core/Constants.js";
-import { DamageNumber, BurnEffect, DeathEffect } from "./Effect.js";
+import { DamageNumber, BurnEffect } from "./Effect.js";
 
 export class Zombie {
   constructor(x, y, wave) {
@@ -8,10 +8,24 @@ export class Zombie {
     this.width = 25;
     this.height = 25;
     this.wave = wave;
-    this.health = BASE_ZOMBIE_HEALTH + (wave - 1) * 3;
+
+    // --- DIFFICULTY SCALING (REVISI) ---
+
+    // Health: Bertambah 1.2 poin per wave (Additive)
+    // Wave 1 = 100
+    // Wave 2 = 100 + 1.2 = 101.2 (dibulatkan jadi 101)
+    // Wave 10 = 100 + 10.8 = 110.8 (dibulatkan jadi 110)
+    // Note: Kenaikan ini sangat kecil.
+    this.health = Math.floor(BASE_ZOMBIE_HEALTH + (wave - 1) * 1.2);
     this.maxHealth = this.health;
+
+    // Speed: Bertambah 0.1 unit tiap wave
     this.speed = BASE_ZOMBIE_SPEED + (wave - 1) * 0.1;
+
+    // Damage: Bertambah 2 tiap wave
     this.damage = 5 + (wave - 1) * 2;
+
+    // --- STATE LAINNYA ---
     this.lastAttack = 0;
     this.attackCooldown = 1000;
     this.hitFlash = 0;
@@ -20,13 +34,12 @@ export class Zombie {
     this.burnDamage = 0;
     this.lastBurnTick = 0;
 
-    // AI STATE (BARU)
-    this.detectionRadius = 250; // Jarak pandang zombie (agak pendek agar stealth mungkin)
-    this.wanderAngle = Math.random() * Math.PI * 2; // Arah jalan acak awal
-    this.wanderTimer = 0; // Timer untuk ganti arah
+    // AI STATE
+    this.detectionRadius = 250;
+    this.wanderAngle = Math.random() * Math.PI * 2;
+    this.wanderTimer = 0;
   }
 
-  // ... (Method takeDamage dan applyBurn tetap sama, tidak perlu diubah)
   takeDamage(damage, isCritical = false, effects) {
     this.health -= damage;
     this.hitFlash = 5;
