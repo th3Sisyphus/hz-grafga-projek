@@ -71,9 +71,14 @@ canvas {
     color: #ff3333;
     transform: scale(1.1);
 }
+/* *** PERBAIKAN BUG INI *** */
+/* Hapus blok berikut:
 #weaponSelect, #tutorial {
-    display: none;
-}
+    display: none; 
+} 
+*/
+/* Sekarang visibilitas sepenuhnya dikendalikan oleh class 'hidden' di HTML */
+
 .weapon-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -146,3 +151,4 @@ canvas {
     background: linear-gradient(90deg, #ff3333, #ff6666);
     transition: width 0.3s;
 }
+/* } */
