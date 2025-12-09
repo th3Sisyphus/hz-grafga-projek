@@ -8,7 +8,10 @@ export class CombatSystem {
   applyDamage(entity, damage, isCritical = false) {
     const isDead = entity.takeDamage(damage, isCritical, this.context.effects);
     if (isDead) {
-      if (entity.constructor.name === "Zombie") {
+      if (
+        entity.constructor.name === "Zombie" ||
+        entity.constructor.name === "ZombieBoss"
+      ) {
         this.killZombie(entity);
       } else if (entity.constructor.name === "Player") {
         this.context.effects.push(new DeathEffect(entity.x, entity.y));
@@ -24,16 +27,36 @@ export class CombatSystem {
     const now = Date.now();
     for (let zombie of zombies) {
       const dist = Math.hypot(player.x - zombie.x, player.y - zombie.y);
-      if (dist < 30) {
+
+      // Hitbox Boss lebih besar (50 vs 30)
+      const attackRange = zombie.constructor.name === "ZombieBoss" ? 50 : 30;
+
+      if (dist < attackRange) {
         if (now - zombie.lastAttack > zombie.attackCooldown) {
+          // === LOGIKA SERANGAN ===
           this.applyDamage(player, zombie.damage);
           zombie.lastAttack = now;
+
+          // === KHUSUS BOSS: STUN ABILITY ===
+          if (zombie.constructor.name === "ZombieBoss") {
+            zombie.attackCount++;
+            // Pukulan ke-4 (setelah 3x hit)
+            if (zombie.attackCount >= 4) {
+              player.applyStun(2000); // Stun 2 detik
+              zombie.attackCount = 0; // Reset counter
+
+              // Visual effect untuk menandakan stun (Damage Text "STUNNED!")
+              this.context.effects.push(
+                new DamageNumber(player.x, player.y - 30, "STUNNED!", true)
+              );
+            }
+          }
         }
       }
+
       // Handle DOT Burn
       if (zombie.burning && now < zombie.burnEndTime) {
         if (now - zombie.lastBurnTick > 500) {
-          // Tick lebih cepat (0.5s)
           this.applyDamage(zombie, zombie.burnDamage, false);
           zombie.lastBurnTick = now;
           this.context.effects.push(new BurnEffect(zombie.x, zombie.y));
@@ -65,45 +88,36 @@ export class CombatSystem {
   }
 
   updateProjectiles() {
-    // SINGLE LOOP ARCHITECTURE: Update Posisi & Cek Collision disini
     const activeProjectiles = [];
     const { zombies, projectiles, effects, player } = this.context;
 
     for (let p of projectiles) {
-      // 1. Update Movement via Method Projectile (mengembalikan false jika hit wall/range)
       const isAlive = p.update(this.context);
+      if (!isAlive) continue;
 
-      if (!isAlive) continue; // Skip jika mati kena tembok/range
-
-      // 2. Cek Collision dengan Zombie
       let hitZombie = null;
       for (let zombie of zombies) {
         const dist = Math.hypot(zombie.x - p.x, zombie.y - p.y);
-        // Hitbox agak diperbesar sedikit (30)
-        if (dist < 30) {
+        // Hitbox projectile ke Boss juga diperbesar
+        const hitRadius = zombie.constructor.name === "ZombieBoss" ? 50 : 30;
+        if (dist < hitRadius) {
           hitZombie = zombie;
           break;
         }
       }
 
       if (hitZombie) {
-        // Apply Damage Logic
         this.applyDamage(hitZombie, p.weapon.damage);
-
-        // Special Effects
         if (p.weapon.name === "Wizard Book") {
           hitZombie.applyBurn(p.weapon.dotDamage, p.weapon.dotDuration);
           effects.push(new BurnEffect(hitZombie.x, hitZombie.y));
         } else if (p.weapon.name === "Dual Gun") {
           this.handleExplosion(hitZombie, p.weapon);
         }
-        // Proyektil hancur setelah kena
       } else {
-        // Keep projectile
         activeProjectiles.push(p);
       }
     }
-
     this.context.projectiles = activeProjectiles;
   }
 
@@ -128,23 +142,18 @@ export class CombatSystem {
     const range = weapon.range;
 
     for (let zombie of zombies) {
-      // 1. Cek Jarak
       const dist = Math.hypot(zombie.x - player.x, zombie.y - player.y);
-      if (dist <= range) {
-        // 2. Cek Sudut (Agar tidak pukul zombie di belakang)
+      // Range check ditambah radius badan zombie
+      if (dist <= range + zombie.width / 2) {
         const angleToZombie = Math.atan2(
           zombie.y - player.y,
           zombie.x - player.x
         );
         let angleDiff = angleToZombie - player.direction;
-
-        // Normalisasi sudut agar selalu di range -PI sampai PI
         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
         while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-        // Sudut toleransi 1.5 radian (~85 derajat kiri-kanan)
         if (Math.abs(angleDiff) < 1.5) {
-          // HIT!
           const isCritical = Math.random() < 0.3;
           const damage =
             weapon.damage * (isCritical ? weapon.criticalMultiplier : 1);

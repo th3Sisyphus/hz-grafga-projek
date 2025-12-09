@@ -19,6 +19,7 @@ export class Player {
     this.lastAttack = 0;
     this.hitFlash = 0;
     this.direction = 0;
+    this.stunEndTime = 0;
   }
 
   setWeapon(weaponKey) {
@@ -30,6 +31,11 @@ export class Player {
     this.health -= damage;
     this.hitFlash = 10;
     return this.health <= 0;
+  }
+
+  // Cek apakah player sedang stun
+  get isStunned() {
+    return Date.now() < this.stunEndTime;
   }
 
   /**
@@ -47,6 +53,8 @@ export class Player {
    * Arah (this.direction) sudah diurus oleh updateAim.
    */
   attemptAttack(mousePos, camera, projectiles, effects) {
+    if (this.isStunned) return false;
+
     const now = Date.now();
     if (now - this.lastAttack < this.weapon.cooldown) return false;
     this.lastAttack = now;

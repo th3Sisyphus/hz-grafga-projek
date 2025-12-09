@@ -61,6 +61,41 @@ export class ExplosionEffect {
   }
 }
 
+export class MagicTrail {
+  constructor(x, y) {
+    this.x = x + (Math.random() - 0.5) * 10; // Sedikit acak posisinya
+    this.y = y + (Math.random() - 0.5) * 10;
+    this.life = 15;
+    this.maxLife = 15;
+    this.size = Math.random() * 4 + 2;
+    // Warna acak antara Ungu dan Biru Cyan
+    this.colorType = Math.random() > 0.5 ? "purple" : "cyan";
+  }
+  update() {
+    this.life--;
+    this.size *= 0.9; // Mengecil seiring waktu
+    return this.life > 0;
+  }
+}
+
+export class SmokeTrail {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.life = 8; // Umur pendek
+    this.maxLife = 8;
+    this.size = Math.random() * 3 + 1;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+  }
+  update() {
+    this.life--;
+    this.x += this.vx;
+    this.y += this.vy;
+    return this.life > 0;
+  }
+}
+
 export class DeathEffect {
   constructor(x, y) {
     this.x = x;

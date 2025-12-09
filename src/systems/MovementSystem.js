@@ -7,18 +7,11 @@ export class MovementSystem {
 
   moveEntity(entity, dx, dy) {
     const { isObstacle } = this.context;
-    // Gunakan speed entity. Jika zombie sedang wander (tidak ngejar), kita kurangi speednya sedikit agar terlihat santai
-    // Kita handle speed multiplier di updateZombieMovement saja agar moveEntity tetap murni
     const nextX = entity.x + dx * entity.speed;
     const nextY = entity.y + dy * entity.speed;
     const halfW = entity.width / 2;
     const halfH = entity.height / 2;
 
-    const checkCollision = (cx, cy) => {
-      return isObstacle(cx, cy);
-    };
-
-    // Collision Check (Slide againts walls)
     if (!this.context.isObstacle(nextX, entity.y)) {
       entity.x = nextX;
     }
@@ -26,7 +19,6 @@ export class MovementSystem {
       entity.y = nextY;
     }
 
-    // Boundary Check
     entity.x = Math.max(
       halfW,
       Math.min(MAP_WIDTH * TILE_SIZE - halfW, entity.x)
@@ -40,6 +32,9 @@ export class MovementSystem {
   updatePlayerMovement() {
     const { player, keys } = this.context;
     if (!player) return;
+
+    // LOGIC STUN: Player beku
+    if (player.isStunned) return;
 
     let dx = 0;
     let dy = 0;
@@ -64,44 +59,34 @@ export class MovementSystem {
       const zombie = zombies[i];
       let dx = 0;
       let dy = 0;
-      let currentSpeedMultiplier = 1; // Default speed
+      let currentSpeedMultiplier = 1;
 
-      // 1. Cek Jarak ke Player (AI Brain)
       const distToPlayer = Math.hypot(player.x - zombie.x, player.y - zombie.y);
 
       if (distToPlayer < zombie.detectionRadius) {
-        // === STATE: CHASE (Mengejar) ===
         dx = player.x - zombie.x;
         dy = player.y - zombie.y;
-
-        // Normalize vector
         const dist = Math.hypot(dx, dy);
         if (dist > 0) {
           dx /= dist;
           dy /= dist;
         }
-        // Zombie lari full speed saat mengejar
       } else {
-        // === STATE: WANDER (Jalan-jalan Gabut) ===
-        // Zombie jalan lebih pelan saat santai (0.5x speed)
         currentSpeedMultiplier = 0.5;
-
-        // Update arah wander sesekali agar gerakan "organic" (seperti semut)
         zombie.wanderTimer--;
         if (zombie.wanderTimer <= 0) {
-          // Ubah arah sedikit random (-1 sampai +1 radian)
           zombie.wanderAngle += (Math.random() - 0.5) * 2;
-          zombie.wanderTimer = 30 + Math.random() * 60; // Reset timer (0.5 - 1.5 detik)
+          zombie.wanderTimer = 30 + Math.random() * 60;
         }
-
         dx = Math.cos(zombie.wanderAngle);
         dy = Math.sin(zombie.wanderAngle);
       }
 
-      // 2. Separation Logic (Wajib ada biar ga numpuk)
       let pushX = 0;
       let pushY = 0;
-      const separationRadius = 30;
+      // Radius separasi Boss lebih besar
+      const separationRadius =
+        zombie.constructor.name === "ZombieBoss" ? 50 : 30;
 
       for (let j = 0; j < zombies.length; j++) {
         if (i === j) continue;
@@ -115,34 +100,23 @@ export class MovementSystem {
         }
       }
 
-      // Gabungkan Vector Utama + Separation
       const finalDx = dx + pushX * 1.5;
       const finalDy = dy + pushY * 1.5;
-
-      // Normalisasi akhir
       const finalLen = Math.hypot(finalDx, finalDy);
+
       if (finalLen > 0) {
-        // Simpan posisi lama untuk cek tabrakan
         const oldX = zombie.x;
         const oldY = zombie.y;
-
-        // Hack sementara: Manipulasi speed zombie langsung di objectnya untuk frame ini
         const originalSpeed = zombie.speed;
         zombie.speed = originalSpeed * currentSpeedMultiplier;
-
         this.moveEntity(zombie, finalDx / finalLen, finalDy / finalLen);
-
-        // Kembalikan speed asli
         zombie.speed = originalSpeed;
 
-        // 3. WANDER STUCK CHECK
-        // Jika sedang WANDER dan posisi tidak berubah (nabrak tembok/batu), putar balik!
         if (distToPlayer >= zombie.detectionRadius) {
           if (
             Math.abs(zombie.x - oldX) < 0.1 &&
             Math.abs(zombie.y - oldY) < 0.1
           ) {
-            // Putar balik + sedikit acak
             zombie.wanderAngle += Math.PI + (Math.random() - 0.5);
           }
         }
