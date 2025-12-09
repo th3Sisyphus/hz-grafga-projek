@@ -19,17 +19,18 @@ export class Zombie {
     this.burnEndTime = 0;
     this.burnDamage = 0;
     this.lastBurnTick = 0;
+
+    // AI STATE (BARU)
+    this.detectionRadius = 250; // Jarak pandang zombie (agak pendek agar stealth mungkin)
+    this.wanderAngle = Math.random() * Math.PI * 2; // Arah jalan acak awal
+    this.wanderTimer = 0; // Timer untuk ganti arah
   }
 
-  // Logic movement dipindahkan ke MovementSystem
-  // Logic combat dipindahkan ke CombatSystem
-
+  // ... (Method takeDamage dan applyBurn tetap sama, tidak perlu diubah)
   takeDamage(damage, isCritical = false, effects) {
     this.health -= damage;
     this.hitFlash = 5;
-
     effects.push(new DamageNumber(this.x, this.y, damage, isCritical));
-
     return this.health <= 0;
   }
 
