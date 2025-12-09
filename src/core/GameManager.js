@@ -11,7 +11,6 @@ export class GameManager {
     this.renderer = new Renderer(this.context);
     this.uiElements = uiElements;
 
-    // Inisialisasi Systems (Lapisan Aplikasi)
     this.movementSystem = new MovementSystem(this.context);
     this.combatSystem = new CombatSystem(this.context);
     this.waveSystem = new WaveSystem(this.context);
@@ -19,7 +18,6 @@ export class GameManager {
     this.setupInputHandlers();
   }
 
-  // ========== INPUT HANDLERS ==========
   setupInputHandlers() {
     document.addEventListener("keydown", (e) => {
       this.context.keys[e.key.toLowerCase()] = true;
@@ -32,42 +30,36 @@ export class GameManager {
       this.context.mousePos.x = e.clientX - rect.left;
       this.context.mousePos.y = e.clientY - rect.top;
     });
-    this.context.canvas.addEventListener("click", () => {
-      if (this.context.running && this.context.player) {
-        // Player Domain memicu event/entitas baru. Systems yang mengurus hasilnya.
-        this.context.player.attemptAttack(
-          this.context.mousePos,
-          this.context.camera,
-          this.context.projectiles,
-          this.context.effects
-        );
-      }
+    this.context.canvas.addEventListener("mousedown", () => {
+      this.context.mouseDown = true;
+    });
+    this.context.canvas.addEventListener("mouseup", () => {
+      this.context.mouseDown = false;
     });
   }
 
-  // ========== GAME LOOP & UPDATE ==========
   update() {
-    if (!this.context.running) {
-      // Jika game tidak berjalan, cek apakah ini karena Game Over
-      if (this.context.player && this.context.player.health <= 0) {
-        this.handleGameOver();
-        this.context.running = false; // Memastikan loop berhenti
-      }
-      return;
+    if (!this.context.running) return;
+
+    // 0. Handle Continuous Input (Auto fire jika mouse ditahan)
+    if (this.context.mouseDown && this.context.player) {
+      this.context.player.attemptAttack(
+        this.context.mousePos,
+        this.context.camera,
+        this.context.projectiles,
+        this.context.effects
+      );
     }
 
-    // 1. Systems Update (mengubah state GameContext)
+    // 1. Systems Update
     this.movementSystem.update();
-    this.combatSystem.update();
+    this.combatSystem.update(); // Sekarang handle projectiles movement & collision
     this.waveSystem.update();
 
-    // 2. Projectile & Effect Update (self-contained logic)
-    this.context.projectiles = this.context.projectiles.filter((p) =>
-      p.update(this.context)
-    );
+    // 2. Effect Update (Visual only)
     this.context.effects = this.context.effects.filter((e) => e.update());
 
-    // 3. Camera Update (View Layer)
+    // 3. Camera Update
     this.renderer.updateCamera();
 
     // 4. UI Update
@@ -76,25 +68,25 @@ export class GameManager {
 
   render() {
     this.renderer.render();
-    // Render Wave Delay Banner
     if (this.context.waveDelay && this.context.zombies.length === 0) {
       this.renderer.drawWaveDelayBanner(this.context.wave);
     }
   }
 
   gameLoop() {
+    if (!this.context.running) {
+      if (this.context.player && this.context.player.health <= 0) {
+        this.handleGameOver();
+      }
+      return;
+    }
+
     this.update();
     this.render();
-    // Hanya minta frame berikutnya jika state game masih running
-    if (this.context.running) {
-      requestAnimationFrame(this.gameLoop.bind(this));
-    } else if (this.context.player && this.context.player.health <= 0) {
-      // Jika loop berhenti karena Player mati, panggil Game Over di sini
-      this.handleGameOver();
-    }
+    requestAnimationFrame(this.gameLoop.bind(this));
   }
 
-  // ========== UI HANDLERS (View Controller) ==========
+  // ... (UI Handlers dibawahnya biarkan tetap sama, itu sudah oke)
   updateUI() {
     const player = this.context.player;
     if (!player) return;
@@ -147,11 +139,9 @@ export class GameManager {
 
   startGame() {
     if (!this.context.selectedWeapon) return;
-
     this.uiElements.weaponSelect.classList.add("hidden");
-    this.context.start(this.context.selectedWeapon); // Inisialisasi Player & Context
+    this.context.start(this.context.selectedWeapon);
 
-    // Delayed start untuk wave pertama
     setTimeout(() => {
       if (this.context.running) {
         this.context.waveDelay = false;
@@ -159,7 +149,7 @@ export class GameManager {
       }
     }, WAVE_DELAY);
 
-    this.gameLoop(); // Mulai loop
+    this.gameLoop();
   }
 
   restartGame() {
@@ -168,15 +158,11 @@ export class GameManager {
   }
 
   handleGameOver() {
-    // Dipanggil ketika this.context.running = false
     if (this.context.player && this.context.player.health <= 0) {
       document.getElementById("finalScore").textContent = this.context.score;
       document.getElementById("finalWave").textContent = this.context.wave;
       this.uiElements.gameOver.classList.remove("hidden");
     }
-    // Pastikan menu UI lain disembunyikan
     this.uiElements.menu.classList.add("hidden");
-    this.uiElements.tutorial.classList.add("hidden");
-    this.uiElements.weaponSelect.classList.add("hidden");
   }
 }

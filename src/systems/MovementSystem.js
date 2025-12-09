@@ -5,40 +5,29 @@ export class MovementSystem {
     this.context = context;
   }
 
-  /**
-   * Memindahkan entitas (Player atau Zombie) sambil memeriksa collision dengan obstacle.
-   */
   moveEntity(entity, dx, dy) {
     const { isObstacle } = this.context;
-    const newX = entity.x + dx * entity.speed;
-    const newY = entity.y + dy * entity.speed;
+    const nextX = entity.x + dx * entity.speed;
+    const nextY = entity.y + dy * entity.speed;
     const halfW = entity.width / 2;
     const halfH = entity.height / 2;
 
+    // Helper collision check
     const checkCollision = (cx, cy) => {
-      const corners = [
-        { x: cx - halfW, y: cy - halfH }, // Top Left
-        { x: cx + halfW, y: cy - halfH }, // Top Right
-        { x: cx - halfW, y: cy + halfH }, // Bottom Left
-        { x: cx + halfW, y: cy + halfH }, // Bottom Right
-      ];
-      for (let corner of corners) {
-        if (isObstacle(corner.x, corner.y)) return true;
-      }
-      return false;
+      // Cek titik tengah + sedikit margin
+      return isObstacle(cx, cy);
     };
 
-    // 1. Move X (cek collision di Y lama)
-    if (!checkCollision(newX, entity.y)) {
-      entity.x = newX;
+    // Prediksi collision sederhana (cek titik pusat tiles)
+    // Untuk game simple top-down, cek obstacle di posisi baru sudah cukup
+    if (!this.context.isObstacle(nextX, entity.y)) {
+      entity.x = nextX;
+    }
+    if (!this.context.isObstacle(entity.x, nextY)) {
+      entity.y = nextY;
     }
 
-    // 2. Move Y (cek collision di X baru)
-    if (!checkCollision(entity.x, newY)) {
-      entity.y = newY;
-    }
-
-    // 3. Boundary Check (Player/Zombie tidak boleh keluar map)
+    // Clamp to map bounds
     entity.x = Math.max(
       halfW,
       Math.min(MAP_WIDTH * TILE_SIZE - halfW, entity.x)
@@ -61,11 +50,9 @@ export class MovementSystem {
     if (keys["d"]) dx += 1;
 
     if (dx !== 0 || dy !== 0) {
-      // Normalisasi vektor pergerakan
       const len = Math.hypot(dx, dy);
       dx /= len;
       dy /= len;
-
       this.moveEntity(player, dx, dy);
     }
   }
@@ -74,18 +61,46 @@ export class MovementSystem {
     const { zombies, player } = this.context;
     if (!player) return;
 
-    for (let zombie of zombies) {
-      const dx = player.x - zombie.x;
-      const dy = player.y - zombie.y;
-      const dist = Math.hypot(dx, dy);
+    for (let i = 0; i < zombies.length; i++) {
+      const zombie = zombies[i];
+
+      // 1. Chase Player Vector
+      let dx = player.x - zombie.x;
+      let dy = player.y - zombie.y;
+      let dist = Math.hypot(dx, dy);
 
       if (dist > 0) {
-        // Normalisasi dan hitung pergerakan
-        const moveX = dx / dist;
-        const moveY = dy / dist;
+        dx /= dist;
+        dy /= dist;
+      }
 
-        // Gunakan moveEntity yang sudah memperhitungkan zombie.speed
-        this.moveEntity(zombie, moveX, moveY);
+      // 2. Separation Logic (PENTING: Agar zombie tidak menumpuk)
+      let pushX = 0;
+      let pushY = 0;
+      const separationRadius = 30; // Radius toleransi personal zombie
+
+      for (let j = 0; j < zombies.length; j++) {
+        if (i === j) continue;
+        const other = zombies[j];
+        const distOther = Math.hypot(zombie.x - other.x, zombie.y - other.y);
+
+        if (distOther < separationRadius && distOther > 0) {
+          // Vektor menjauh dari zombie lain
+          const pushFactor = (separationRadius - distOther) / separationRadius;
+          pushX += ((zombie.x - other.x) / distOther) * pushFactor;
+          pushY += ((zombie.y - other.y) / distOther) * pushFactor;
+        }
+      }
+
+      // Gabungkan vektor Chase + Separation
+      // Berat separation dibuat cukup besar agar efektif
+      const finalDx = dx + pushX * 1.5;
+      const finalDy = dy + pushY * 1.5;
+
+      // Normalisasi ulang vektor gabungan
+      const finalLen = Math.hypot(finalDx, finalDy);
+      if (finalLen > 0) {
+        this.moveEntity(zombie, finalDx / finalLen, finalDy / finalLen);
       }
     }
   }

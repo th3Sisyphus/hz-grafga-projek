@@ -71,13 +71,10 @@ canvas {
     color: #ff3333;
     transform: scale(1.1);
 }
-/* *** PERBAIKAN BUG INI *** */
-/* Hapus blok berikut:
-#weaponSelect, #tutorial {
-    display: none; 
-} 
+
+/* BAGIAN KRITIS YANG DAHULU MENYEBABKAN BUG TELAH DIHAPUS. 
+   Elemen #weaponSelect dan #tutorial kini dapat ditampilkan oleh JavaScript. 
 */
-/* Sekarang visibilitas sepenuhnya dikendalikan oleh class 'hidden' di HTML */
 
 .weapon-grid {
     display: grid;
