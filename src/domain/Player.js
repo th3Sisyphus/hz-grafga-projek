@@ -38,11 +38,17 @@ export class Player {
     return Date.now() < this.stunEndTime;
   }
 
+  applyStun(duration) {
+    this.stunEndTime = Date.now() + duration;
+  }
+
   /**
    * BARU: Mengupdate arah hadap senjata berdasarkan posisi mouse.
    * Dipanggil setiap frame oleh GameManager.
    */
   updateAim(mousePos, camera) {
+    if (this.isStunned) return;
+
     const dx = mousePos.x + camera.x - this.x;
     const dy = mousePos.y + camera.y - this.y;
     this.direction = Math.atan2(dy, dx);

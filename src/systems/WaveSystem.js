@@ -1,4 +1,5 @@
-import { Zombie, ZombieBoss } from "../domain/Zombie.js"; // Import Boss
+// Import ZombieBoss
+import { Zombie, ZombieBoss } from "../domain/Zombie.js";
 import {
   TILE_SIZE,
   MAP_WIDTH,
@@ -15,16 +16,18 @@ export class WaveSystem {
     const zombieCount = 5 + this.context.wave * 3;
     const { player } = this.context;
 
-    // Fungsi helper spawn
+    // Helper function untuk spawn entity di lokasi aman
     const spawnEntity = (EntityClass) => {
       let spawned = false;
       let attempts = 0;
+      // Coba cari posisi aman maksimal 50 kali
       while (!spawned && attempts < 50) {
         const x = Math.random() * MAP_WIDTH * TILE_SIZE;
         const y = Math.random() * MAP_HEIGHT * TILE_SIZE;
 
         if (!this.context.isObstacle(x, y)) {
           const dist = Math.hypot(player.x - x, player.y - y);
+          // Jarak aman dari player
           if (dist > 400) {
             this.context.zombies.push(new EntityClass(x, y, this.context.wave));
             spawned = true;
@@ -34,13 +37,13 @@ export class WaveSystem {
       }
     };
 
-    // 1. Spawn Regular Zombies
+    // 1. Spawn Zombie Biasa
     for (let i = 0; i < zombieCount; i++) {
       spawnEntity(Zombie);
     }
 
-    // 2. Spawn BOSS (Setiap kelipatan 6)
-    if (this.context.wave % 6 === 0) {
+    // 2. Spawn Zombie BOSS (Setiap kelipatan 3 Wave)
+    if (this.context.wave % 3 === 0) {
       spawnEntity(ZombieBoss);
     }
   }

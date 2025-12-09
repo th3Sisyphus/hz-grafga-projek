@@ -291,6 +291,8 @@ export class Renderer {
     const ctx = this.ctx;
     const screenX = zombie.x - camera.x;
     const screenY = zombie.y - camera.y;
+
+    // Cek apakah Boss
     const isBoss = zombie.constructor.name === "ZombieBoss";
 
     // Shadow
@@ -307,28 +309,27 @@ export class Renderer {
     );
     ctx.fill();
 
-    // Color Setup
+    // Setup Warna
     if (zombie.hitFlash > 0) {
       ctx.fillStyle = "#ff0000";
     } else if (zombie.burning) {
       ctx.fillStyle = "#ff6600";
     } else if (isBoss) {
-      ctx.fillStyle = "#1e3a8a"; // BOSS COLOR: Dark Blue / Purple-ish tint override
+      // Warna Boss: Sedikit kebiruan/gelap untuk membedakan
+      ctx.fillStyle = "#1e3a8a";
     } else {
       ctx.fillStyle = "#22c55e";
     }
 
-    // BOSS SCALE
-    // Kita gunakan scale agar gambar zombie tetap sama tapi lebih besar
+    // === SCALE BOSS ===
     ctx.save();
     ctx.translate(screenX, screenY);
     if (isBoss) {
       ctx.scale(2.2, 2.2); // Boss 2.2x lebih besar
     }
 
-    // === DRAW ZOMBIE (Relative to 0,0 because of translate) ===
-
-    // Body
+    // Draw Body (Logic menggambar sama, hanya di-scale)
+    // Override warna jika bukan hit/burn (karena fillStyle diatas bisa tertimpa logic draw lama)
     if (!isBoss)
       ctx.fillStyle =
         zombie.hitFlash > 0
@@ -336,15 +337,14 @@ export class Renderer {
           : zombie.burning
           ? "#ff6600"
           : "#22c55e";
-    // Untuk Boss kita warnai ulang manual jika tidak hit/burn
     if (isBoss && zombie.hitFlash <= 0 && !zombie.burning)
-      ctx.fillStyle = "#064e3b"; // Darker Green for Boss
+      ctx.fillStyle = "#064e3b"; // Dark green boss
 
     ctx.beginPath();
-    ctx.arc(0, 0, 12.5, 0, Math.PI * 2); // Radius ~ width/2 (25/2)
+    ctx.arc(0, 0, 12.5, 0, Math.PI * 2);
     ctx.fill();
 
-    // Rotten spots
+    // Details (Rotten spots)
     ctx.fillStyle = "#14532d";
     ctx.beginPath();
     ctx.arc(-12, -5, 4, 0, Math.PI * 2);
@@ -359,13 +359,13 @@ export class Renderer {
     ctx.fill();
 
     // Eyes
-    ctx.fillStyle = isBoss ? "#ff0000" : "#ffffff"; // Boss eyes red
+    ctx.fillStyle = isBoss ? "#ff0000" : "#ffffff"; // Boss mata merah
     ctx.beginPath();
     ctx.arc(-7, -12.5 - 15, 3, 0, Math.PI * 2);
     ctx.arc(7, -12.5 - 15, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = isBoss ? "#ffff00" : "#000000"; // Boss pupils yellow
+    ctx.fillStyle = isBoss ? "#ffff00" : "#000000"; // Boss pupil kuning
     ctx.beginPath();
     ctx.arc(-7, -12.5 - 15, 1, 0, Math.PI * 2);
     ctx.arc(7, -12.5 - 15, 1, 0, Math.PI * 2);
@@ -387,12 +387,12 @@ export class Renderer {
     ctx.lineTo(4, -12.5 + 10);
     ctx.stroke();
 
-    ctx.restore(); // Restore scale & translate
+    ctx.restore(); // Restore scale
 
-    // Health Bar (Tetap di posisi layar absolute, tidak ikut scale)
+    // Health Bar (Tetap di posisi absolut)
     const healthBarWidth = zombie.width; // Width boss sudah 60
     const healthPercent = zombie.health / zombie.maxHealth;
-    const barYOffset = isBoss ? 50 : 30;
+    const barYOffset = isBoss ? 50 : 30; // Boss bar lebih tinggi
 
     ctx.fillStyle = "#000";
     ctx.fillRect(

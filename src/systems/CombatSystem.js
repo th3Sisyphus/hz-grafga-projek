@@ -1,4 +1,9 @@
-import { ExplosionEffect, BurnEffect, DeathEffect } from "../domain/Effect.js";
+import {
+  ExplosionEffect,
+  BurnEffect,
+  DeathEffect,
+  DamageNumber,
+} from "../domain/Effect.js";
 
 export class CombatSystem {
   constructor(context) {
@@ -28,33 +33,34 @@ export class CombatSystem {
     for (let zombie of zombies) {
       const dist = Math.hypot(player.x - zombie.x, player.y - zombie.y);
 
-      // Hitbox Boss lebih besar (50 vs 30)
+      // Jangkauan serangan: Boss (50) lebih luas dari Zombie biasa (30)
       const attackRange = zombie.constructor.name === "ZombieBoss" ? 50 : 30;
 
       if (dist < attackRange) {
         if (now - zombie.lastAttack > zombie.attackCooldown) {
-          // === LOGIKA SERANGAN ===
+          // 1. Berikan damage ke player
           this.applyDamage(player, zombie.damage);
           zombie.lastAttack = now;
 
-          // === KHUSUS BOSS: STUN ABILITY ===
+          // 2. LOGIKA BOSS ABILITY: STUN
           if (zombie.constructor.name === "ZombieBoss") {
             zombie.attackCount++;
-            // Pukulan ke-4 (setelah 3x hit)
+
+            // Jika sudah memukul 3 kali sebelumnya, pukulan ke-4 ini memberi STUN
             if (zombie.attackCount >= 4) {
-              player.applyStun(2000); // Stun 2 detik
+              player.applyStun(2000); // Stun selama 2 detik (2000ms)
               zombie.attackCount = 0; // Reset counter
 
-              // Visual effect untuk menandakan stun (Damage Text "STUNNED!")
+              // Visual Text feedback
               this.context.effects.push(
-                new DamageNumber(player.x, player.y - 30, "STUNNED!", true)
+                new DamageNumber(player.x, player.y - 40, "STUNNED!", true)
               );
             }
           }
         }
       }
 
-      // Handle DOT Burn
+      // Handle Burn DOT
       if (zombie.burning && now < zombie.burnEndTime) {
         if (now - zombie.lastBurnTick > 500) {
           this.applyDamage(zombie, zombie.burnDamage, false);
@@ -71,20 +77,21 @@ export class CombatSystem {
     const index = this.context.zombies.indexOf(zombie);
     if (index > -1) {
       this.context.zombies.splice(index, 1);
-      this.context.score += this.context.wave;
+      // Boss memberikan score lebih banyak
+      const scoreReward =
+        zombie.constructor.name === "ZombieBoss"
+          ? this.context.wave * 10
+          : this.context.wave;
+      this.context.score += scoreReward;
       this.context.zombiesKilled++;
     }
   }
 
+  // ... (Sisa method tidak berubah: checkPlayerMeleeAttack, updateProjectiles, handleExplosion, dll)
+
   checkPlayerMeleeAttack() {
     const { player } = this.context;
     if (!player || player.weapon.type !== "melee") return;
-
-    // Melee hanya perlu di cek sekali saat animasi serangan terjadi (di handle terpisah via event biasanya),
-    // tapi untuk arsitektur saat ini kita cek jarak setiap frame sangat boros.
-    // Namun karena struktur yang ada, kita biarkan tapi pastikan logic-nya benar.
-    // Note: Seharusnya damage melee hanya apply SEKALI per swing, bukan per frame.
-    // Logic ini ada flaw, tapi kita perbaiki collision-nya dulu.
   }
 
   updateProjectiles() {
@@ -98,7 +105,7 @@ export class CombatSystem {
       let hitZombie = null;
       for (let zombie of zombies) {
         const dist = Math.hypot(zombie.x - p.x, zombie.y - p.y);
-        // Hitbox projectile ke Boss juga diperbesar
+        // Hitbox projectile juga disesuaikan untuk Boss
         const hitRadius = zombie.constructor.name === "ZombieBoss" ? 50 : 30;
         if (dist < hitRadius) {
           hitZombie = zombie;
@@ -131,7 +138,7 @@ export class CombatSystem {
         otherZombie.y - centerZombie.y
       );
       if (aoeDist < weapon.aoeRadius) {
-        this.applyDamage(otherZombie, weapon.damage * 0.7); // 70% damage
+        this.applyDamage(otherZombie, weapon.damage * 0.7);
       }
     }
   }
@@ -143,7 +150,7 @@ export class CombatSystem {
 
     for (let zombie of zombies) {
       const dist = Math.hypot(zombie.x - player.x, zombie.y - player.y);
-      // Range check ditambah radius badan zombie
+      // Kompensasi ukuran zombie
       if (dist <= range + zombie.width / 2) {
         const angleToZombie = Math.atan2(
           zombie.y - player.y,
@@ -164,8 +171,18 @@ export class CombatSystem {
   }
 
   update() {
-    // Kita pindahkan logic update projectile sepenuhnya kesini
     this.updateProjectiles();
     this.checkZombieAttack();
   }
 }
+
+// checkPlayerMeleeAttack() {
+//     const { player } = this.context;
+//     if (!player || player.weapon.type !== "melee") return;
+
+//     // Melee hanya perlu di cek sekali saat animasi serangan terjadi (di handle terpisah via event biasanya),
+//     // tapi untuk arsitektur saat ini kita cek jarak setiap frame sangat boros.
+//     // Namun karena struktur yang ada, kita biarkan tapi pastikan logic-nya benar.
+//     // Note: Seharusnya damage melee hanya apply SEKALI per swing, bukan per frame.
+//     // Logic ini ada flaw, tapi kita perbaiki collision-nya dulu.
+//   }

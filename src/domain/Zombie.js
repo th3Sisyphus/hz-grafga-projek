@@ -43,24 +43,26 @@ export class Zombie {
   }
 }
 
-// ========== CLASS BARU: ZOMBIE BOSS ==========
+// === ZOMBIE BOSS (New Class) ===
 export class ZombieBoss extends Zombie {
   constructor(x, y, wave) {
     super(x, y, wave);
-    // VISUAL: Lebih Besar
-    this.width = 60;
+    // Visual: Lebih besar
+    this.width = 60; 
     this.height = 60;
-
-    // STATS: Lebih Tanky & Sakit
-    this.health = this.health * 5;
+    
+    // Stats: Sangat tanky dan sakit
+    this.health = this.health * 8; // Darah 8x lipat
     this.maxHealth = this.health;
     this.damage = this.damage * 1.5;
-    this.speed = this.speed * 0.8; // Boss biasanya agak lambat
+    
+    // Speed: Boss biasanya sedikit lebih lambat
+    this.speed = this.speed * 0.85; 
+    
+    // AI: Jangkauan deteksi sangat luas
+    this.detectionRadius = 500; 
 
-    // AI: Range Deteksi Luas
-    this.detectionRadius = 500;
-
-    // ABILITY: Stun Counter
+    // Ability: Hit Counter untuk Stun
     this.attackCount = 0;
   }
 }
