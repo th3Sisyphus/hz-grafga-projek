@@ -32,7 +32,10 @@
       </div>
 
       <div id="menu">
-        <h1>⚔️ 🏹 Hunty Zombie 🧟🤠</h1>
+        <h1 style="font-size: 80px">🧟 HUNTY ZOMBIE 🧟</h1>
+        <p style="color: #888; margin-bottom: 40px; letter-spacing: 3px">
+          SURVIVE THE APOCALYPSE
+        </p>
         <button class="btn" onclick="window.gameApp.showWeaponSelect()">
           START GAME
         </button>
@@ -42,26 +45,37 @@
       </div>
 
       <div id="tutorial" class="hidden">
-        <h2>TUTORIAL</h2>
-        <p>
-          <strong>MISI:</strong> Bertahan hidup selama mungkin dan bunuh
-          sebanyak mungkin zombie!
-        </p>
-        <p><strong>KONTROL:</strong></p>
-        <ul>
-          <li>W/A/S/D - Bergerak</li>
-          <li>Left Click - Serang</li>
-        </ul>
-        <p><strong>MEKANIK:</strong></p>
-        <ul>
-          <li>Setiap wave, zombie akan lebih kuat dan lebih cepat</li>
-          <li>Poin per zombie bertambah setiap wave (+1)</li>
-          <li>Hindari obstacle dan jangan sampai terkena serangan zombie</li>
-          <li>Pilih senjata yang sesuai dengan gaya bermain Anda</li>
-        </ul>
-        <button class="btn" onclick="window.gameApp.backToMenu()">
-          KEMBALI
-        </button>
+        <div class="tutorial-content">
+          <h2>TUTORIAL</h2>
+          <p style="color: #ffaa00; margin-bottom: 20px">
+            <strong>MISI:</strong> Bertahan hidup selama mungkin dan bunuh
+            sebanyak mungkin zombie!
+          </p>
+          <hr style="border-color: #333; margin-bottom: 20px" />
+
+          <p style="font-size: 18px; color: #fff"><strong>KONTROL:</strong></p>
+          <ul>
+            <li>[W, A, S, D] - Bergerak</li>
+            <li>[MOUSE] - Arahkan Senjata</li>
+            <li>[KLIK KIRI] - Serang / Tembak</li>
+            <li>[ESC] - Pause Game</li>
+          </ul>
+          <br />
+          <p style="font-size: 18px; color: #fff"><strong>MEKANIK:</strong></p>
+          <ul>
+            <li>Zombie bertambah kuat setiap wave.</li>
+            <li><strong>BOSS</strong> muncul setiap wave ke-3!</li>
+            <li>Hindari obstacle (Batu, Duri, Pohon).</li>
+            <li>
+              Boss bisa memberikan efek <strong>STUN</strong> jika memukulmu 4x.
+            </li>
+          </ul>
+          <div style="text-align: center; margin-top: 30px">
+            <button class="btn" onclick="window.gameApp.backToMenu()">
+              KEMBALI KE MENU
+            </button>
+          </div>
+        </div>
       </div>
 
       <div id="weaponSelect" class="hidden">
