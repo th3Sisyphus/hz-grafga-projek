@@ -20,6 +20,14 @@
         </div>
       </div>
 
+      <div id="pauseMenu" class="hidden">
+        <h2>GAME PAUSED</h2>
+        <button class="btn" onclick="window.gameApp.togglePause()">
+          RESUME
+        </button>
+        <button class="btn" onclick="window.gameApp.backToMenu()">MENU</button>
+      </div>
+
       <div id="menu">
         <h1>⚔️ 🏹 Hunty Zombie 🧟🤠</h1>
         <button class="btn" onclick="window.gameApp.showWeaponSelect()">
@@ -155,6 +163,7 @@
         weaponSelect: document.getElementById("weaponSelect"),
         gameOver: document.getElementById("gameOver"),
         confirmWeapon: document.getElementById("confirmWeapon"),
+        pauseMenu: document.getElementById("pauseMenu"),
       };
 
       // Inisialisasi Game Manager dan pasang ke window

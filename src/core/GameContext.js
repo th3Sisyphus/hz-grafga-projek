@@ -3,7 +3,6 @@ import {
   MAP_WIDTH,
   MAP_HEIGHT,
   TILES,
-  BASE_PLAYER_HEALTH,
 } from "./Constants.js";
 import { Player } from "../domain/Player.js";
 
@@ -43,6 +42,7 @@ export class GameContext {
    */
   init() {
     this.running = false;
+    this.paused = false;
     this.wave = 1;
     this.score = 0;
     this.zombiesKilled = 0;

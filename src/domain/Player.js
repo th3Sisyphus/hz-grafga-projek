@@ -71,6 +71,8 @@ export class Player {
         new Projectile(this.x, this.y, this.direction, this.weapon)
       );
     }
+
+    return true; // Serangan berhasil dipicu
   }
 
   // --- Catatan: Fungsi yang Dihapus ---

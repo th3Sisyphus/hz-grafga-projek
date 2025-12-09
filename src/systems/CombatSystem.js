@@ -122,6 +122,38 @@ export class CombatSystem {
     }
   }
 
+  handleMeleeAttack(player) {
+    const { zombies } = this.context;
+    const weapon = player.weapon;
+    const range = weapon.range;
+
+    for (let zombie of zombies) {
+      // 1. Cek Jarak
+      const dist = Math.hypot(zombie.x - player.x, zombie.y - player.y);
+      if (dist <= range) {
+        // 2. Cek Sudut (Agar tidak pukul zombie di belakang)
+        const angleToZombie = Math.atan2(
+          zombie.y - player.y,
+          zombie.x - player.x
+        );
+        let angleDiff = angleToZombie - player.direction;
+
+        // Normalisasi sudut agar selalu di range -PI sampai PI
+        while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+        while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+        // Sudut toleransi 1.5 radian (~85 derajat kiri-kanan)
+        if (Math.abs(angleDiff) < 1.5) {
+          // HIT!
+          const isCritical = Math.random() < 0.3;
+          const damage =
+            weapon.damage * (isCritical ? weapon.criticalMultiplier : 1);
+          this.applyDamage(zombie, damage, isCritical);
+        }
+      }
+    }
+  }
+
   update() {
     // Kita pindahkan logic update projectile sepenuhnya kesini
     this.updateProjectiles();

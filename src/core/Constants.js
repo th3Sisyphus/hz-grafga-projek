@@ -3,8 +3,8 @@ export const MAP_WIDTH = 40;
 export const MAP_HEIGHT = 30;
 
 // BALANCE FIX: Kecepatan asli terlalu lambat.
-export const BASE_PLAYER_SPEED = 3.5;
-export const BASE_ZOMBIE_SPEED = 2.0;
+export const BASE_PLAYER_SPEED = 4.5;
+export const BASE_ZOMBIE_SPEED = 1.2;
 
 export const BASE_ZOMBIE_HEALTH = 100;
 export const BASE_PLAYER_HEALTH = 150;

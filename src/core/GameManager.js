@@ -20,6 +20,10 @@ export class GameManager {
 
   setupInputHandlers() {
     document.addEventListener("keydown", (e) => {
+      // Toggle Pause dengan tombol ESC
+      if (e.key === "Escape") {
+        this.togglePause();
+      }
       this.context.keys[e.key.toLowerCase()] = true;
     });
     document.addEventListener("keyup", (e) => {
@@ -38,25 +42,46 @@ export class GameManager {
     });
   }
 
+  togglePause() {
+    // Jangan pause jika game tidak jalan atau player sudah mati
+    if (
+      !this.context.running ||
+      (this.context.player && this.context.player.health <= 0)
+    )
+      return;
+
+    this.context.paused = !this.context.paused;
+
+    if (this.context.paused) {
+      this.uiElements.pauseMenu.classList.remove("hidden");
+    } else {
+      this.uiElements.pauseMenu.classList.add("hidden");
+    }
+  }
+
   update() {
     if (!this.context.running) return;
 
-    // 0. Handle Continuous Input (Auto fire jika mouse ditahan)
-    if (this.context.mouseDown && this.context.player) {
-      this.context.player.attemptAttack(
+    // Handle Attack (Termasuk Melee Fix dari step sebelumnya)
+    if (this.context.mouseDown && this.context.player && !this.context.paused) {
+      const didAttack = this.context.player.attemptAttack(
         this.context.mousePos,
         this.context.camera,
         this.context.projectiles,
         this.context.effects
       );
+
+      if (didAttack && this.context.player.weapon.type === "melee") {
+        this.combatSystem.handleMeleeAttack(this.context.player);
+      }
     }
 
     // 1. Systems Update
     this.movementSystem.update();
-    this.combatSystem.update(); // Sekarang handle projectiles movement & collision
+    this.combatSystem.update();
     this.waveSystem.update();
 
-    // 2. Effect Update (Visual only)
+    // 2. Effect Update
     this.context.effects = this.context.effects.filter((e) => e.update());
 
     // 3. Camera Update
@@ -81,12 +106,16 @@ export class GameManager {
       return;
     }
 
-    this.update();
+    // PAUSE CHECK: Hanya update logika jika tidak paused
+    if (!this.context.paused) {
+      this.update();
+    }
+    // Render tetap jalan agar layar tidak hitam (bisa lihat game di balik menu)
     this.render();
+
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
-  // ... (UI Handlers dibawahnya biarkan tetap sama, itu sudah oke)
   updateUI() {
     const player = this.context.player;
     if (!player) return;
@@ -120,6 +149,7 @@ export class GameManager {
     this.uiElements.tutorial.classList.add("hidden");
     this.uiElements.weaponSelect.classList.add("hidden");
     this.uiElements.gameOver.classList.add("hidden");
+    this.uiElements.pauseMenu.classList.add("hidden"); // Hide pause menu
     this.uiElements.confirmWeapon.disabled = true;
     document
       .querySelectorAll(".weapon-card")
@@ -159,10 +189,14 @@ export class GameManager {
 
   handleGameOver() {
     if (this.context.player && this.context.player.health <= 0) {
-      document.getElementById("finalScore").textContent = this.context.score;
-      document.getElementById("finalWave").textContent = this.context.wave;
+      const finalScore = document.getElementById("finalScore");
+      const finalWave = document.getElementById("finalWave");
+      if (finalScore) finalScore.textContent = this.context.score;
+      if (finalWave) finalWave.textContent = this.context.wave;
+
       this.uiElements.gameOver.classList.remove("hidden");
     }
     this.uiElements.menu.classList.add("hidden");
+    this.uiElements.pauseMenu.classList.add("hidden");
   }
 }
