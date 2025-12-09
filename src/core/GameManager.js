@@ -20,7 +20,6 @@ export class GameManager {
 
   setupInputHandlers() {
     document.addEventListener("keydown", (e) => {
-      // Toggle Pause dengan tombol ESC
       if (e.key === "Escape") {
         this.togglePause();
       }
@@ -43,15 +42,12 @@ export class GameManager {
   }
 
   togglePause() {
-    // Jangan pause jika game tidak jalan atau player sudah mati
     if (
       !this.context.running ||
       (this.context.player && this.context.player.health <= 0)
     )
       return;
-
     this.context.paused = !this.context.paused;
-
     if (this.context.paused) {
       this.uiElements.pauseMenu.classList.remove("hidden");
     } else {
@@ -62,7 +58,12 @@ export class GameManager {
   update() {
     if (!this.context.running) return;
 
-    // Handle Attack (Termasuk Melee Fix dari step sebelumnya)
+    // FIX: Selalu update arah hadap player mengikuti mouse (Hover Aiming)
+    if (this.context.player && !this.context.paused) {
+      this.context.player.updateAim(this.context.mousePos, this.context.camera);
+    }
+
+    // Handle Attack
     if (this.context.mouseDown && this.context.player && !this.context.paused) {
       const didAttack = this.context.player.attemptAttack(
         this.context.mousePos,
@@ -106,16 +107,15 @@ export class GameManager {
       return;
     }
 
-    // PAUSE CHECK: Hanya update logika jika tidak paused
     if (!this.context.paused) {
       this.update();
     }
-    // Render tetap jalan agar layar tidak hitam (bisa lihat game di balik menu)
     this.render();
 
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
+  // ... (Sisa method UI tetap sama seperti sebelumnya)
   updateUI() {
     const player = this.context.player;
     if (!player) return;
@@ -149,7 +149,7 @@ export class GameManager {
     this.uiElements.tutorial.classList.add("hidden");
     this.uiElements.weaponSelect.classList.add("hidden");
     this.uiElements.gameOver.classList.add("hidden");
-    this.uiElements.pauseMenu.classList.add("hidden"); // Hide pause menu
+    this.uiElements.pauseMenu.classList.add("hidden");
     this.uiElements.confirmWeapon.disabled = true;
     document
       .querySelectorAll(".weapon-card")

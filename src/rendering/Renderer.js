@@ -14,10 +14,6 @@ export class Renderer {
     this.canvas = context.canvas;
   }
 
-  // ========== CAMERA SYSTEM (Infrastructure/View Layer) ==========
-  /**
-   * Memperbarui posisi kamera berdasarkan posisi Player.
-   */
   updateCamera() {
     const { player, camera, canvas } = this.context;
     if (!player) return;
@@ -25,11 +21,9 @@ export class Renderer {
     const targetX = player.x - canvas.width / 2;
     const targetY = player.y - canvas.height / 2;
 
-    // Interpolasi (Lerp) pergerakan kamera untuk efek halus
     camera.x += (targetX - camera.x) * CAMERA_LERP;
     camera.y += (targetY - camera.y) * CAMERA_LERP;
 
-    // Batasan kamera agar tidak keluar dari batas peta
     const maxCameraX = MAP_WIDTH * TILE_SIZE - canvas.width;
     const maxCameraY = MAP_HEIGHT * TILE_SIZE - canvas.height;
 
@@ -37,52 +31,133 @@ export class Renderer {
     camera.y = Math.max(0, Math.min(maxCameraY, camera.y));
   }
 
-  // ========== DRAWING HELPERS ==========
+  // ========== ASSET DRAWING (NEW) ==========
+
+  drawTree(ctx, screenX, screenY) {
+    // Bayangan
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.beginPath();
+    ctx.ellipse(
+      screenX + TILE_SIZE / 2,
+      screenY + TILE_SIZE - 5,
+      12,
+      6,
+      0,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+
+    // Batang
+    ctx.fillStyle = "#5d4037";
+    ctx.fillRect(screenX + 16, screenY + 15, 8, 20);
+
+    // Daun (Cluster of circles)
+    ctx.fillStyle = "#1b5e20"; // Dark Green
+    ctx.beginPath();
+    ctx.arc(screenX + 20, screenY + 15, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#2e7d32"; // Lighter Green
+    ctx.beginPath();
+    ctx.arc(screenX + 12, screenY + 12, 10, 0, Math.PI * 2); // Kiri
+    ctx.arc(screenX + 28, screenY + 12, 10, 0, Math.PI * 2); // Kanan
+    ctx.arc(screenX + 20, screenY + 6, 10, 0, Math.PI * 2); // Atas
+    ctx.fill();
+  }
+
+  drawSpike(ctx, screenX, screenY) {
+    // Base Plate
+    ctx.fillStyle = "#4a4a4a";
+    ctx.fillRect(screenX + 5, screenY + 5, TILE_SIZE - 10, TILE_SIZE - 10);
+
+    // Spikes (3 triangles)
+    ctx.fillStyle = "#d1d5db"; // Silver
+    const drawTri = (ox, oy) => {
+      ctx.beginPath();
+      ctx.moveTo(ox, oy + 20);
+      ctx.lineTo(ox + 5, oy); // Tip
+      ctx.lineTo(ox + 10, oy + 20);
+      ctx.fill();
+
+      // Darah di ujung (Opsional, biar serem dikit)
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.moveTo(ox + 5, oy);
+      ctx.lineTo(ox + 3, oy + 5);
+      ctx.lineTo(ox + 7, oy + 5);
+      ctx.fill();
+      ctx.fillStyle = "#d1d5db"; // Reset color
+    };
+
+    drawTri(screenX + 8, screenY + 10);
+    drawTri(screenX + 22, screenY + 10);
+    drawTri(screenX + 15, screenY + 15);
+  }
+
+  drawRock(ctx, screenX, screenY) {
+    // Main rock
+    ctx.fillStyle = "#57534e";
+    ctx.beginPath();
+    ctx.arc(screenX + 20, screenY + 25, 12, 0, Math.PI * 2); // Bottom part
+    ctx.arc(screenX + 20, screenY + 15, 10, 0, Math.PI * 2); // Top part
+    ctx.fill();
+
+    // Highlight
+    ctx.fillStyle = "#78716c";
+    ctx.beginPath();
+    ctx.arc(screenX + 18, screenY + 15, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   drawTile(x, y, tile, screenX, screenY) {
     const ctx = this.ctx;
+
+    // Render Ground Layer First
+    if (tile !== TILES.STONE) {
+      // Default Grass background for transparence
+      ctx.fillStyle = "#2d5016";
+      ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+    }
+
     switch (tile) {
       case TILES.GRASS:
-        ctx.fillStyle = "#2d5016";
-        ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+        // Texture rumput sederhana
         ctx.fillStyle = "#3d6020";
-        for (let i = 0; i < 3; i++) {
-          ctx.fillRect(
-            screenX + Math.random() * TILE_SIZE,
-            screenY + Math.random() * TILE_SIZE,
-            2,
-            2
-          );
+        if ((x + y) % 3 === 0) {
+          // Pattern simple
+          ctx.fillRect(screenX + 10, screenY + 10, 4, 4);
+          ctx.fillRect(screenX + 30, screenY + 25, 3, 3);
         }
         break;
+
       case TILES.DIRT:
-        ctx.fillStyle = "#4a3728";
+        ctx.fillStyle = "#5c4033";
         ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+        // Detail kerikil
+        ctx.fillStyle = "#3e2723";
+        ctx.fillRect(screenX + 5, screenY + 5, 4, 4);
+        ctx.fillRect(screenX + 25, screenY + 30, 4, 4);
         break;
-      case TILES.STONE:
-        ctx.fillStyle = "#6b7280";
+
+      case TILES.STONE: // Wall Border
+        ctx.fillStyle = "#1f2937";
         ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+        // Brick pattern
+        ctx.strokeStyle = "#374151";
+        ctx.strokeRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
         break;
+
       case TILES.TREE:
-        ctx.fillStyle = "#2d5016";
-        ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
-        ctx.fillStyle = "#654321";
-        ctx.fillRect(screenX + 12, screenY + 10, 16, 20);
-        ctx.fillStyle = "#1a4d0a";
-        ctx.beginPath();
-        ctx.arc(screenX + 20, screenY + 15, 15, 0, Math.PI * 2);
-        ctx.fill();
+        this.drawTree(ctx, screenX, screenY);
         break;
+
       case TILES.ROCK:
-        ctx.fillStyle = "#2d5016";
-        ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
-        ctx.fillStyle = "#4b5563";
-        ctx.beginPath();
-        ctx.moveTo(screenX + 10, screenY + 30);
-        ctx.lineTo(screenX + 20, screenY + 10);
-        ctx.lineTo(screenX + 30, screenY + 30);
-        ctx.closePath();
-        ctx.fill();
+        this.drawRock(ctx, screenX, screenY);
+        break;
+
+      case TILES.SPIKE:
+        this.drawSpike(ctx, screenX, screenY);
         break;
     }
   }
@@ -92,28 +167,40 @@ export class Renderer {
     const screenX = player.x - camera.x;
     const screenY = player.y - camera.y;
 
-    // Player body - Menggunakan state hitFlash dari Domain untuk logika visual
+    // Shadow
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath();
+    ctx.ellipse(screenX, screenY + 12, 10, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player body
     if (player.hitFlash > 0) {
       ctx.fillStyle = "#ff0000";
       player.hitFlash--;
     } else {
       ctx.fillStyle = "#3b82f6";
     }
-    ctx.fillRect(
-      screenX - player.width / 2,
-      screenY - player.height / 2,
-      player.width,
-      player.height
-    );
 
-    // Player eyes/details
-    ctx.fillStyle = "#1e40af";
-    ctx.fillRect(screenX - 10, screenY - 5, 20, 10);
+    // Make player rounder
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, player.width / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Player eyes/details (Directional)
+    ctx.save();
+    ctx.translate(screenX, screenY);
+    ctx.rotate(player.direction);
+
     ctx.fillStyle = "#fff";
-    ctx.fillRect(screenX - 5, screenY - 15, 4, 4);
-    ctx.fillRect(screenX + 2, screenY - 15, 4, 4);
+    // Eyes relative to rotation
+    ctx.beginPath();
+    ctx.arc(8, -5, 3, 0, Math.PI * 2); // Right eye
+    ctx.arc(8, 5, 3, 0, Math.PI * 2); // Left eye
+    ctx.fill();
 
-    // Weapon - Menggunakan state direction dari Domain untuk rotasi
+    ctx.restore();
+
+    // Weapon
     ctx.save();
     ctx.translate(screenX, screenY);
     ctx.rotate(player.direction);
@@ -126,6 +213,12 @@ export class Renderer {
     const screenX = zombie.x - camera.x;
     const screenY = zombie.y - camera.y;
 
+    // Shadow
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath();
+    ctx.ellipse(screenX, screenY + 10, 8, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     // Zombie body
     if (zombie.hitFlash > 0) {
       ctx.fillStyle = "#ff0000";
@@ -136,20 +229,17 @@ export class Renderer {
       ctx.fillStyle = "#22c55e";
     }
 
-    ctx.fillRect(
-      screenX - zombie.width / 2,
-      screenY - zombie.height / 2,
-      zombie.width,
-      zombie.height
-    );
+    // Round zombie
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, zombie.width / 2, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Zombie details
-    ctx.fillStyle = "#166534";
-    ctx.fillRect(screenX - 8, screenY - 8, 6, 8);
-    ctx.fillRect(screenX + 2, screenY - 8, 6, 8);
-    ctx.fillStyle = "#dc2626";
-    ctx.fillRect(screenX - 6, screenY + 5, 3, 3);
-    ctx.fillRect(screenX + 3, screenY + 5, 3, 3);
+    // Details (Rotten skin spots)
+    ctx.fillStyle = "#14532d";
+    ctx.beginPath();
+    ctx.arc(screenX - 5, screenY - 5, 3, 0, Math.PI * 2);
+    ctx.arc(screenX + 4, screenY + 6, 2, 0, Math.PI * 2);
+    ctx.fill();
 
     // Health bar
     const healthBarWidth = zombie.width;
@@ -197,7 +287,6 @@ export class Renderer {
     const screenY = effect.y - camera.y;
     const alpha = effect.life / (effect.maxLife || 20);
 
-    // Menggunakan constructor.name untuk menentukan efek yang digambar
     if (effect.constructor.name === "MeleeEffect") {
       ctx.save();
       ctx.translate(screenX, screenY);
@@ -207,13 +296,13 @@ export class Renderer {
         ctx.strokeStyle = `rgba(255, 0, 0, ${alpha})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(0, 0, 30, -Math.PI / 4, Math.PI / 4);
+        ctx.arc(0, 0, 40, -Math.PI / 3, Math.PI / 3); // Slash lebih lebar
         ctx.stroke();
       } else {
         ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(0, 0, 25, -Math.PI / 6, Math.PI / 6);
+        ctx.arc(0, 0, 30, -Math.PI / 4, Math.PI / 4);
         ctx.stroke();
       }
       ctx.restore();
@@ -273,7 +362,6 @@ export class Renderer {
     );
   }
 
-  // ========== MAIN RENDER LOOP ==========
   render() {
     const { tilemap, camera, zombies, player, projectiles, effects } =
       this.context;
@@ -282,7 +370,6 @@ export class Renderer {
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // 1. Draw Tilemap
     const startX = Math.floor(camera.x / TILE_SIZE);
     const startY = Math.floor(camera.y / TILE_SIZE);
     const endX = Math.min(
@@ -302,7 +389,6 @@ export class Renderer {
       }
     }
 
-    // 2. Draw Entities
     for (let zombie of zombies) {
       this.drawZombie(zombie, camera);
     }
@@ -311,12 +397,10 @@ export class Renderer {
       this.drawPlayer(player, camera);
     }
 
-    // 3. Draw Projectiles
     for (let projectile of projectiles) {
       this.drawProjectile(projectile, camera);
     }
 
-    // 4. Draw Effects (on top of everything)
     for (let effect of effects) {
       this.drawEffect(effect, camera);
     }

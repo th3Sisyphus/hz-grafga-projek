@@ -2,13 +2,13 @@ export const TILE_SIZE = 40;
 export const MAP_WIDTH = 40;
 export const MAP_HEIGHT = 30;
 
-// BALANCE FIX: Kecepatan asli terlalu lambat.
+// BALANCE FIX:
 export const BASE_PLAYER_SPEED = 4.5;
 export const BASE_ZOMBIE_SPEED = 1.2;
 
 export const BASE_ZOMBIE_HEALTH = 100;
 export const BASE_PLAYER_HEALTH = 150;
-export const WAVE_DELAY = 3000; // 3 seconds cukup, 5 kelamaan
+export const WAVE_DELAY = 3000;
 export const CAMERA_LERP = 0.1;
 
 export const TILES = {
@@ -17,6 +17,7 @@ export const TILES = {
   STONE: 2,
   TREE: 3,
   ROCK: 4,
+  SPIKE: 5, // TILE BARU
 };
 
 export const WEAPONS = {
@@ -26,7 +27,7 @@ export const WEAPONS = {
     damage: 40,
     criticalMultiplier: 2.5,
     speedBonus: 0.5,
-    range: 60, // Range diperbesar sedikit
+    range: 65,
     cooldown: 400,
   },
   fist: {
@@ -34,7 +35,7 @@ export const WEAPONS = {
     type: "melee",
     damage: 50,
     criticalMultiplier: 1,
-    speedBonus: 1.0, // Mobilitas tinggi
+    speedBonus: 1.2,
     range: 45,
     cooldown: 300,
   },
@@ -45,7 +46,7 @@ export const WEAPONS = {
     dotDamage: 10,
     dotDuration: 3000,
     speedBonus: 0.2,
-    range: 300, // Range diperbaiki agar worth it
+    range: 300,
     cooldown: 600,
   },
   dualgun: {
@@ -54,7 +55,7 @@ export const WEAPONS = {
     damage: 25,
     aoeRadius: 100,
     speedBonus: 0.4,
-    range: 400, // Range tembak harus jauh
+    range: 400,
     cooldown: 500,
   },
 };
