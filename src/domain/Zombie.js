@@ -1,5 +1,5 @@
 import { BASE_ZOMBIE_HEALTH, BASE_ZOMBIE_SPEED } from "../core/Constants.js";
-import { DamageNumber, BurnEffect } from "./Effect.js";
+import { DamageNumber, BurnEffect, DeathEffect } from "./Effect.js";
 
 export class Zombie {
   constructor(x, y, wave) {
@@ -8,8 +8,6 @@ export class Zombie {
     this.width = 25;
     this.height = 25;
     this.wave = wave;
-
-    // --- DIFFICULTY SCALING (REVISI) ---
 
     // Health: Bertambah 1.2 poin per wave (Additive)
     // Wave 1 = 100
@@ -44,7 +42,11 @@ export class Zombie {
     this.health -= damage;
     this.hitFlash = 5;
     effects.push(new DamageNumber(this.x, this.y, damage, isCritical));
-    return this.health <= 0;
+    if (this.health <= 0) {
+      effects.push(new DeathEffect(this.x, this.y, damage, isCritical));
+      return true;
+    }
+    return false;
   }
 
   applyBurn(damage, duration) {
