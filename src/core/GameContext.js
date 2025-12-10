@@ -60,6 +60,8 @@ export class GameContext {
     this.zombies = [];
     this.projectiles = [];
     this.effects = [];
+
+    this.joystick = { x: 0, y: 0, active: false };
   }
 
   isObstacle(x, y) {
@@ -120,11 +122,8 @@ export class GameContext {
   start(weaponKey) {
     this.init();
     this.selectedWeapon = weaponKey;
-
-    // GANTI LOGIC SPAWN LAMA DENGAN SAFE SPAWN
     const spawnPos = this.findSafeSpawn();
     this.player = new Player(spawnPos.x, spawnPos.y);
-
     this.player.setWeapon(weaponKey);
     this.running = true;
   }

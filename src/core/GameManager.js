@@ -88,13 +88,12 @@ export class GameManager {
         this.joystick.active = false;
         this.joystick.x = 0;
         this.joystick.y = 0;
+
         // Reset Visual
         joystickKnob.style.transform = `translate(-50%, -50%)`;
-        // Reset Keys
-        this.context.keys["w"] = false;
-        this.context.keys["a"] = false;
-        this.context.keys["s"] = false;
-        this.context.keys["d"] = false;
+
+        // FIX: Reset State Context Joystick
+        this.context.joystickInput = { x: 0, y: 0, active: false };
       };
 
       joystickZone.addEventListener("touchstart", handleJoyStart, {
@@ -149,9 +148,16 @@ export class GameManager {
     // translate(-50%, -50%) diperlukan karena CSS centering
     this.uiElements.joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 
-    // Normalize Input (-1 to 1)
-    this.joystick.x = dx / maxRadius;
-    this.joystick.y = dy / maxRadius;
+    const normalizedDistance = distance > maxRadius ? maxRadius : distance;
+    const inputRatio = normalizedDistance / maxRadius;
+
+    this.context.joystickInput = {
+      x: (dx / normalizedDistance) * inputRatio || 0,
+      y: (dy / normalizedDistance) * inputRatio || 0,
+      active: distance > 5, // Deadzone 5px
+    };
+
+    // Map Joystick to WASD Keys (Threshold 0.2)
 
     // Map Joystick to WASD Keys (Threshold 0.2)
     const threshold = 0.2;
@@ -160,15 +166,14 @@ export class GameManager {
     this.context.keys["a"] = this.joystick.x < -threshold;
     this.context.keys["d"] = this.joystick.x > threshold;
 
-    // === MOBILE AIMING HACK ===
-    // Agar player menghadap ke arah jalan, kita manipulasi mousePos
-    // seolah-olah mouse ada di depan player sesuai arah joystick
+    // === MOBILE AIMING ===
+    // Player menghadap ke arah joystick bergerak
     if (distance > 5) {
-      // Hanya update aim jika joystick digerakkan
       const rect = this.context.canvas.getBoundingClientRect();
-      // Set mousePos relatif terhadap tengah layar + offset arah joystick
-      this.context.mousePos.x = rect.width / 2 + this.joystick.x * 100;
-      this.context.mousePos.y = rect.height / 2 + this.joystick.y * 100;
+      this.context.mousePos.x =
+        rect.width / 2 + this.context.joystickInput.x * 100;
+      this.context.mousePos.y =
+        rect.height / 2 + this.context.joystickInput.y * 100;
     }
   }
 
@@ -281,6 +286,7 @@ export class GameManager {
     this.uiElements.weaponSelect.classList.add("hidden");
     this.uiElements.gameOver.classList.add("hidden");
     this.uiElements.pauseMenu.classList.add("hidden");
+    this.uiElements.mobileControls.classList.add("hidden");
     this.uiElements.confirmWeapon.disabled = true;
     document
       .querySelectorAll(".weapon-card")
@@ -301,6 +307,7 @@ export class GameManager {
   startGame() {
     if (!this.context.selectedWeapon) return;
     this.uiElements.weaponSelect.classList.add("hidden");
+    this.uiElements.mobileControls.classList.remove("hidden");
     this.context.start(this.context.selectedWeapon);
 
     setTimeout(() => {
