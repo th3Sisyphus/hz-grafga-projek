@@ -378,7 +378,7 @@ h2 {
 /* Opsional: Media Query agar hanya muncul di layar kecil/touch */
 @media (min-width: 1024px) and (pointer: fine) {
   /* Bisa di-uncomment jika ingin sembunyi di Desktop */
-  /* #mobileControls {
+   #mobileControls {
     display: none;
-  } */
+  }
 }
