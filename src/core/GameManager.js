@@ -131,21 +131,18 @@ export class GameManager {
   }
 
   updateJoystick(clientX, clientY) {
-    const maxRadius = 40; // Jarak maksimal knob bisa bergerak
+    const maxRadius = 40;
     let dx = clientX - this.joystick.origin.x;
     let dy = clientY - this.joystick.origin.y;
 
     const distance = Math.hypot(dx, dy);
 
-    // Clamp distance
     if (distance > maxRadius) {
       const ratio = maxRadius / distance;
       dx *= ratio;
       dy *= ratio;
     }
 
-    // Update Visual Knob
-    // translate(-50%, -50%) diperlukan karena CSS centering
     this.uiElements.joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 
     const normalizedDistance = distance > maxRadius ? maxRadius : distance;
@@ -154,26 +151,28 @@ export class GameManager {
     this.context.joystickInput = {
       x: (dx / normalizedDistance) * inputRatio || 0,
       y: (dy / normalizedDistance) * inputRatio || 0,
-      active: distance > 5, // Deadzone 5px
+      active: distance > 5,
     };
 
-    // Map Joystick to WASD Keys (Threshold 0.2)
-
-    // Map Joystick to WASD Keys (Threshold 0.2)
-    const threshold = 0.2;
-    this.context.keys["w"] = this.joystick.y < -threshold;
-    this.context.keys["s"] = this.joystick.y > threshold;
-    this.context.keys["a"] = this.joystick.x < -threshold;
-    this.context.keys["d"] = this.joystick.x > threshold;
-
-    // === MOBILE AIMING ===
-    // Player menghadap ke arah joystick bergerak
+    // === FIX: MOBILE AIMING ===
+    // Jangan pakai tengah layar (rect.width/2).
+    // Pakai posisi relatif player terhadap kamera.
     if (distance > 5) {
-      const rect = this.context.canvas.getBoundingClientRect();
-      this.context.mousePos.x =
-        rect.width / 2 + this.context.joystickInput.x * 100;
-      this.context.mousePos.y =
-        rect.height / 2 + this.context.joystickInput.y * 100;
+      const { player, camera } = this.context;
+
+      // Default ke tengah jika player belum ada
+      let originX = this.context.canvas.width / 2;
+      let originY = this.context.canvas.height / 2;
+
+      // Jika player ada, gunakan posisi layarnya yang akurat
+      if (player) {
+        originX = player.x - camera.x;
+        originY = player.y - camera.y;
+      }
+
+      // Set mousePos relatif terhadap posisi player yang sebenarnya
+      this.context.mousePos.x = originX + this.context.joystickInput.x * 100;
+      this.context.mousePos.y = originY + this.context.joystickInput.y * 100;
     }
   }
 
