@@ -15,6 +15,15 @@ export class GameManager {
     this.combatSystem = new CombatSystem(this.context);
     this.waveSystem = new WaveSystem(this.context);
 
+    // Mobile joystick state
+    this.joystick = {
+      active: false,
+      x: 0,
+      y: 0,
+      origin: { x: 0, y: 0 },
+      pointerId: null,
+    };
+
     this.setupInputHandlers();
   }
 
@@ -39,15 +48,141 @@ export class GameManager {
     this.context.canvas.addEventListener("mouseup", () => {
       this.context.mouseDown = false;
     });
+
+    // Mobile joystick handlers
+    const { joystickZone, joystickKnob, attackBtn } = this.uiElements;
+    if (joystickZone && joystickKnob && attackBtn) {
+      // --- Joystick Logic ---
+      const handleJoyStart = (e) => {
+        e.preventDefault();
+        const touch = e.changedTouches[0];
+        this.joystick.pointerId = touch.identifier;
+        this.joystick.active = true;
+
+        // Set Origin ke tengah zona
+        const rect = joystickZone.getBoundingClientRect();
+        this.joystick.origin = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+        this.updateJoystick(touch.clientX, touch.clientY);
+      };
+
+      const handleJoyMove = (e) => {
+        e.preventDefault();
+        if (!this.joystick.active) return;
+
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === this.joystick.pointerId) {
+            this.updateJoystick(
+              e.changedTouches[i].clientX,
+              e.changedTouches[i].clientY
+            );
+            break;
+          }
+        }
+      };
+
+      const handleJoyEnd = (e) => {
+        e.preventDefault();
+        this.joystick.active = false;
+        this.joystick.x = 0;
+        this.joystick.y = 0;
+        // Reset Visual
+        joystickKnob.style.transform = `translate(-50%, -50%)`;
+        // Reset Keys
+        this.context.keys["w"] = false;
+        this.context.keys["a"] = false;
+        this.context.keys["s"] = false;
+        this.context.keys["d"] = false;
+      };
+
+      joystickZone.addEventListener("touchstart", handleJoyStart, {
+        passive: false,
+      });
+      joystickZone.addEventListener("touchmove", handleJoyMove, {
+        passive: false,
+      });
+      joystickZone.addEventListener("touchend", handleJoyEnd, {
+        passive: false,
+      });
+      joystickZone.addEventListener("touchcancel", handleJoyEnd, {
+        passive: false,
+      });
+
+      // --- Attack Button Logic ---
+      const handleAttackStart = (e) => {
+        e.preventDefault();
+        this.context.mouseDown = true;
+        attackBtn.classList.add("pressed");
+      };
+      const handleAttackEnd = (e) => {
+        e.preventDefault();
+        this.context.mouseDown = false;
+        attackBtn.classList.remove("pressed");
+      };
+
+      attackBtn.addEventListener("touchstart", handleAttackStart, {
+        passive: false,
+      });
+      attackBtn.addEventListener("touchend", handleAttackEnd, {
+        passive: false,
+      });
+    }
+  }
+
+  updateJoystick(clientX, clientY) {
+    const maxRadius = 40; // Jarak maksimal knob bisa bergerak
+    let dx = clientX - this.joystick.origin.x;
+    let dy = clientY - this.joystick.origin.y;
+
+    const distance = Math.hypot(dx, dy);
+
+    // Clamp distance
+    if (distance > maxRadius) {
+      const ratio = maxRadius / distance;
+      dx *= ratio;
+      dy *= ratio;
+    }
+
+    // Update Visual Knob
+    // translate(-50%, -50%) diperlukan karena CSS centering
+    this.uiElements.joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+
+    // Normalize Input (-1 to 1)
+    this.joystick.x = dx / maxRadius;
+    this.joystick.y = dy / maxRadius;
+
+    // Map Joystick to WASD Keys (Threshold 0.2)
+    const threshold = 0.2;
+    this.context.keys["w"] = this.joystick.y < -threshold;
+    this.context.keys["s"] = this.joystick.y > threshold;
+    this.context.keys["a"] = this.joystick.x < -threshold;
+    this.context.keys["d"] = this.joystick.x > threshold;
+
+    // === MOBILE AIMING HACK ===
+    // Agar player menghadap ke arah jalan, kita manipulasi mousePos
+    // seolah-olah mouse ada di depan player sesuai arah joystick
+    if (distance > 5) {
+      // Hanya update aim jika joystick digerakkan
+      const rect = this.context.canvas.getBoundingClientRect();
+      // Set mousePos relatif terhadap tengah layar + offset arah joystick
+      this.context.mousePos.x = rect.width / 2 + this.joystick.x * 100;
+      this.context.mousePos.y = rect.height / 2 + this.joystick.y * 100;
+    }
   }
 
   togglePause() {
-    if (!this.context.running || (this.context.player && this.context.player.health <= 0)) return;
+    if (
+      !this.context.running ||
+      (this.context.player && this.context.player.health <= 0)
+    )
+      return;
     this.context.paused = !this.context.paused;
     if (this.context.paused) {
-        this.uiElements.pauseMenu.classList.remove("hidden");
+      this.uiElements.pauseMenu.classList.remove("hidden");
     } else {
-        this.uiElements.pauseMenu.classList.add("hidden");
+      this.uiElements.pauseMenu.classList.add("hidden");
     }
   }
 
@@ -56,7 +191,7 @@ export class GameManager {
 
     // FIX: Selalu update arah hadap player mengikuti mouse (Hover Aiming)
     if (this.context.player && !this.context.paused) {
-        this.context.player.updateAim(this.context.mousePos, this.context.camera);
+      this.context.player.updateAim(this.context.mousePos, this.context.camera);
     }
 
     // Handle Attack
@@ -67,9 +202,9 @@ export class GameManager {
         this.context.projectiles,
         this.context.effects
       );
-      
+
       if (didAttack && this.context.player.weapon.type === "melee") {
-          this.combatSystem.handleMeleeAttack(this.context.player);
+        this.combatSystem.handleMeleeAttack(this.context.player);
       }
     }
 
@@ -104,10 +239,10 @@ export class GameManager {
     }
 
     if (!this.context.paused) {
-        this.update();
+      this.update();
     }
     this.render();
-    
+
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
@@ -187,10 +322,12 @@ export class GameManager {
     if (this.context.player && this.context.player.health <= 0) {
       const finalScore = document.getElementById("finalScore");
       const finalWave = document.getElementById("finalWave");
-      if(finalScore) finalScore.textContent = this.context.score;
-      if(finalWave) finalWave.textContent = this.context.wave;
-      
+      if (finalScore) finalScore.textContent = this.context.score;
+      if (finalWave) finalWave.textContent = this.context.wave;
+
       this.uiElements.gameOver.classList.remove("hidden");
+      // kontrol joystik disembunyikan saat game over
+      this.uiElements.mobileControls.classList.add("hidden");
     }
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.pauseMenu.classList.add("hidden");

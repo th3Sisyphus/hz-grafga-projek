@@ -300,3 +300,83 @@ h2 {
     text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
   }
 }
+
+/* MOBILE CONTROLS */
+#mobileControls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Agar tidak memblokir area tengah */
+  z-index: 15;
+  /* Hanya muncul di layar sentuh atau layar kecil jika diinginkan */
+}
+
+/* Joystick Zone (Kiri Bawah) */
+#joystickZone {
+  position: absolute;
+  bottom: 50px;
+  left: 50px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: auto; /* Bisa diklik/touch */
+  touch-action: none; /* Mencegah scroll saat drag */
+}
+
+/* Joystick Knob (Tongkat) */
+#joystickKnob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 51, 51, 0.8); /* Merah */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* Attack Button (Kanan Bawah) */
+#mobileAttackBtn {
+  position: absolute;
+  bottom: 50px;
+  right: 50px;
+  width: 90px;
+  height: 90px;
+  background: rgba(200, 0, 0, 0.6);
+  border: 3px solid #ff3333;
+  border-radius: 50%;
+  font-size: 40px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  user-select: none;
+  transition: transform 0.1s, background 0.1s;
+}
+
+#mobileAttackBtn:active,
+#mobileAttackBtn.pressed {
+  transform: scale(0.9);
+  background: rgba(255, 50, 50, 0.9);
+  box-shadow: 0 0 20px #ff0000;
+}
+
+/* Sembunyikan kontrol jika di Menu/Pause/GameOver */
+#mobileControls.hidden {
+  display: none !important;
+}
+
+/* Opsional: Media Query agar hanya muncul di layar kecil/touch */
+@media (min-width: 1024px) and (pointer: fine) {
+  /* Bisa di-uncomment jika ingin sembunyi di Desktop */
+  /* #mobileControls { display: none; } */
+}
