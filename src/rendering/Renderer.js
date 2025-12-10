@@ -476,6 +476,11 @@ export class Renderer {
           : `rgba(255, 255, 255, ${alpha})`;
         ctx.fillText(effect.damage, screenX, screenY);
       }
+    } else if (effect.constructor.name === "HealEffect") {
+      ctx.font = "bold 18px monospace";
+      ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`; // Warna Hijau
+      // Tampilkan dengan tanda plus
+      ctx.fillText("+" + effect.amount, screenX, screenY);
     } else if (effect.constructor.name === "BurnEffect") {
       const size = 8 * (effect.life / 20);
       ctx.fillStyle = `rgba(255, 100, 0, ${alpha})`;

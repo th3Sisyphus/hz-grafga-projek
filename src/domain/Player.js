@@ -32,7 +32,12 @@ export class Player {
     this.hitFlash = 10;
     return this.health <= 0;
   }
-
+  heal(amount) {
+    this.health += amount;
+    if (this.health > this.maxHealth) {
+      this.health = this.maxHealth;
+    }
+  }
   // Cek apakah player sedang stun
   get isStunned() {
     return Date.now() < this.stunEndTime;

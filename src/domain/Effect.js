@@ -95,7 +95,20 @@ export class SmokeTrail {
     return this.life > 0;
   }
 }
-
+export class HealEffect {
+  constructor(x, y, amount) {
+    this.x = x;
+    this.y = y;
+    this.amount = Math.floor(amount);
+    this.life = 40; // Tampil sedikit lebih lama
+    this.vy = -1; // Naik perlahan
+  }
+  update() {
+    this.y += this.vy;
+    this.life--;
+    return this.life > 0;
+  }
+}
 export class DeathEffect {
   constructor(x, y) {
     this.x = x;

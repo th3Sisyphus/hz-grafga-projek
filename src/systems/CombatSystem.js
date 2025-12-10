@@ -3,6 +3,7 @@ import {
   BurnEffect,
   DeathEffect,
   DamageNumber,
+  HealEffect,
 } from "../domain/Effect.js";
 
 export class CombatSystem {
@@ -165,6 +166,18 @@ export class CombatSystem {
           const damage =
             weapon.damage * (isCritical ? weapon.criticalMultiplier : 1);
           this.applyDamage(zombie, damage, isCritical);
+
+          // === LOGIKA LIFESTEAL (BARU) ===
+          if (weapon.lifesteal && weapon.lifesteal > 0) {
+            const healAmount = Math.floor(damage * weapon.lifesteal);
+            if (healAmount >= 1) {
+              player.heal(healAmount);
+              // Spawn efek visual angka hijau
+              this.context.effects.push(
+                new HealEffect(player.x, player.y - 30, healAmount)
+              );
+            }
+          }
         }
       }
     }

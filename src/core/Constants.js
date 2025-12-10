@@ -3,8 +3,8 @@ export const MAP_WIDTH = 40;
 export const MAP_HEIGHT = 30;
 
 // BALANCE FIX:
-export const BASE_PLAYER_SPEED = 3.7;
-export const BASE_ZOMBIE_SPEED = 1.11;
+export const BASE_PLAYER_SPEED = 2.7;
+export const BASE_ZOMBIE_SPEED = 0.9;
 
 export const BASE_ZOMBIE_HEALTH = 85;
 export const BASE_PLAYER_HEALTH = 300;
@@ -29,6 +29,7 @@ export const WEAPONS = {
     speedBonus: 0.5,
     range: 65,
     cooldown: 400,
+    lifesteal: 0.05,
   },
   fist: {
     name: "Tangan Kosong",
@@ -38,6 +39,7 @@ export const WEAPONS = {
     speedBonus: 1.2,
     range: 45,
     cooldown: 300,
+    lifesteal: 0.1,
   },
   wizard: {
     name: "Wizard Book",
