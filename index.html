@@ -23,6 +23,13 @@
 
       <button id="pauseBtn" onclick="window.gameApp.togglePause()">⏸️</button>
 
+      <div id="mobileControls">
+        <div id="joystickZone">
+          <div id="joystickKnob"></div>
+        </div>
+        <button id="mobileAttackBtn">⚔️</button>
+      </div>
+
       <div id="pauseMenu" class="hidden">
         <h2>GAME PAUSED</h2>
         <button class="btn" onclick="window.gameApp.togglePause()">
@@ -181,11 +188,11 @@
         gameOver: document.getElementById("gameOver"),
         confirmWeapon: document.getElementById("confirmWeapon"),
         pauseMenu: document.getElementById("pauseMenu"),
-        // Mobile controls (elements) 
+        // Mobile controls (elements)
         mobileControls: document.getElementById("mobileControls"),
         joystickZone: document.getElementById("joystickZone"),
         joystickKnob: document.getElementById("joystickKnob"),
-        attackBtn: document.getElementById("mobileAttackBtn")
+        attackBtn: document.getElementById("mobileAttackBtn"),
       };
 
       // Inisialisasi Game Manager dan pasang ke window
