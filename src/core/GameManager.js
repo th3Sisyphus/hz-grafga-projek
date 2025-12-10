@@ -271,11 +271,17 @@ export class GameManager {
   showTutorial() {
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.tutorial.classList.remove("hidden");
+    this.hideAllUI();
+    this.ui.tutorial.classList.remove("hidden");
+    document.getElementById("pauseBtn").style.display = "none";
   }
 
   showWeaponSelect() {
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.weaponSelect.classList.remove("hidden");
+    this.hideAllUI();
+    this.ui.weaponSelect.classList.remove("hidden");
+    document.getElementById("pauseBtn").style.display = "none";
   }
 
   backToMenu() {
@@ -287,6 +293,9 @@ export class GameManager {
     this.uiElements.pauseMenu.classList.add("hidden");
     this.uiElements.mobileControls.classList.add("hidden");
     this.uiElements.confirmWeapon.disabled = true;
+    this.hideAllUI();
+    this.ui.menu.classList.remove("hidden");
+    document.getElementById("pauseBtn").style.display = "none"; // sembunyikan pause
     document
       .querySelectorAll(".weapon-card")
       .forEach((card) => card.classList.remove("selected"));
@@ -308,6 +317,12 @@ export class GameManager {
     this.uiElements.weaponSelect.classList.add("hidden");
     this.uiElements.mobileControls.classList.remove("hidden");
     this.context.start(this.context.selectedWeapon);
+    this.hideAllUI();
+    this.isPlaying = true;
+
+    document.getElementById("pauseBtn").style.display = "block"; // tampilkan pause
+
+    this.startWave();
 
     setTimeout(() => {
       if (this.context.running) {
@@ -337,5 +352,7 @@ export class GameManager {
     }
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.pauseMenu.classList.add("hidden");
+    this.ui.gameOver.classList.remove("hidden");
+    document.getElementById("pauseBtn").style.display = "none";
   }
 }
