@@ -99,6 +99,7 @@ canvas {
   cursor: pointer;
   z-index: 20;
   transition: all 0.2s;
+  display:none
 }
 
 #pauseBtn:hover {
