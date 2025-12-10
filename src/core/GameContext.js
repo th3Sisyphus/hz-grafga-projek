@@ -53,6 +53,8 @@ export class GameContext {
     this.mousePos = { x: 0, y: 0 };
     this.mouseDown = false;
 
+    this.joystickInput = { x: 0, y: 0, active: false };
+
     this.camera = { x: 0, y: 0 };
     this.tilemap = generateMap();
 
@@ -60,8 +62,6 @@ export class GameContext {
     this.zombies = [];
     this.projectiles = [];
     this.effects = [];
-
-    this.joystick = { x: 0, y: 0, active: false };
   }
 
   isObstacle(x, y) {

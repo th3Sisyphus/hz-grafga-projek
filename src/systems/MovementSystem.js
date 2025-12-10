@@ -30,7 +30,7 @@ export class MovementSystem {
   }
 
   updatePlayerMovement() {
-    const { player, keys } = this.context;
+    const { player, keys, joystickInput } = this.context;
     if (!player) return;
 
     // LOGIC STUN: Player beku
@@ -38,6 +38,17 @@ export class MovementSystem {
 
     let dx = 0;
     let dy = 0;
+
+    if (joystickInput && joystickInput.active) {
+      dx = joystickInput.x;
+      dy = joystickInput.y;
+
+      // Langsung gerakkan player menggunakan vector joystick
+      this.moveEntity(player, dx, dy);
+
+      // Return agar tidak ditimpa oleh logic keyboard
+      return;
+    }
     if (keys["w"]) dy -= 1;
     if (keys["s"]) dy += 1;
     if (keys["a"]) dx -= 1;
