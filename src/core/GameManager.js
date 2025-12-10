@@ -271,11 +271,13 @@ export class GameManager {
   showTutorial() {
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.tutorial.classList.remove("hidden");
+    document.getElementById("pauseBtn").style.display = "none"; // ADDED
   }
 
   showWeaponSelect() {
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.weaponSelect.classList.remove("hidden");
+    document.getElementById("pauseBtn").style.display = "none"; // ADDED
   }
 
   backToMenu() {
@@ -290,6 +292,7 @@ export class GameManager {
     document
       .querySelectorAll(".weapon-card")
       .forEach((card) => card.classList.remove("selected"));
+    document.getElementById("pauseBtn").style.display = "none"; // ADDED
   }
 
   selectWeapon(weapon) {
@@ -308,6 +311,7 @@ export class GameManager {
     this.uiElements.weaponSelect.classList.add("hidden");
     this.uiElements.mobileControls.classList.remove("hidden");
     this.context.start(this.context.selectedWeapon);
+    document.getElementById("pauseBtn").style.display = "block"; // ADDED
 
     setTimeout(() => {
       if (this.context.running) {
@@ -335,6 +339,7 @@ export class GameManager {
       // kontrol joystik disembunyikan saat game over
       this.uiElements.mobileControls.classList.add("hidden");
     }
+    document.getElementById("pauseBtn").style.display = "none"; // ADDED
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.pauseMenu.classList.add("hidden");
   }
