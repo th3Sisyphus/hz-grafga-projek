@@ -15,7 +15,7 @@ body {
 
   /* FIX: Background Image dipasang di BODY, bukan container game */
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    /* Overlay gelap agar teks terbaca */ url("../icon/background.jpeg"); /* Mundur satu folder dari css/ ke root/ lalu ke icon/ */
+    /* Overlay gelap agar teks terbaca */ url("../assets/icon/background.jpeg"); /* Mundur satu folder dari css/ ke root/ lalu ke icon/ */
 
   background-size: cover;
   background-position: center;

@@ -59,6 +59,15 @@ export class MovementSystem {
       dx /= len;
       dy /= len;
       this.moveEntity(player, dx, dy);
+
+      // PLAY FOOTSTEP SOUND
+      const now = Date.now();
+      if (now - player.lastFootstepTime > player.footstepInterval) {
+        this.context.soundManager.playFootstep();
+        player.lastFootstepTime = now;
+      } else {
+        this.context.soundManager.stopFootstepLoop(); // Stop saat diam
+      }
     }
   }
 

@@ -20,6 +20,8 @@ export class Player {
     this.hitFlash = 0;
     this.direction = 0;
     this.stunEndTime = 0;
+    this.lastFootstepTime = 0;
+    this.footstepInterval = 500;
   }
 
   setWeapon(weaponKey) {

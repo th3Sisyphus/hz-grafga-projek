@@ -149,6 +149,8 @@ export class CombatSystem {
     const weapon = player.weapon;
     const range = weapon.range;
 
+    let hitAnyZombie = false; // Track apakah ada zombie yang kena
+
     for (let zombie of zombies) {
       const dist = Math.hypot(zombie.x - player.x, zombie.y - player.y);
       // Kompensasi ukuran zombie
@@ -167,6 +169,8 @@ export class CombatSystem {
             weapon.damage * (isCritical ? weapon.criticalMultiplier : 1);
           this.applyDamage(zombie, damage, isCritical);
 
+          hitAnyZombie = true; // Ada zombie yang kena!
+
           // === LOGIKA LIFESTEAL (BARU) ===
           if (weapon.lifesteal && weapon.lifesteal > 0) {
             const healAmount = Math.floor(damage * weapon.lifesteal);
@@ -180,6 +184,10 @@ export class CombatSystem {
           }
         }
       }
+    }
+
+    if (hitAnyZombie) {
+      this.context.soundManager.playWeaponSound(weapon.name, true);
     }
   }
 

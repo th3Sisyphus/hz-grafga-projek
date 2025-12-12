@@ -1,5 +1,6 @@
 import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT, TILES } from "./Constants.js";
 import { Player } from "../domain/Player.js";
+import { SoundManager } from "./SoundManager.js";
 
 /**
  * World Generation dengan probabilitas Spike
@@ -37,6 +38,10 @@ export class GameContext {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
+
+    this.soundManager = new SoundManager();
+    this.soundManager.loadSounds();
+
     this.init();
   }
 
