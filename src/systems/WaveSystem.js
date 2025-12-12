@@ -30,7 +30,7 @@ export class WaveSystem {
           // Jarak aman dari player
           if (dist > 400) {
             this.context.zombies.push(new EntityClass(x, y, this.context.wave));
-            spawned = true;
+            spawned = true; 
           }
         }
         attempts++;
@@ -45,6 +45,9 @@ export class WaveSystem {
     // 2. Spawn Zombie BOSS (Setiap kelipatan 3 Wave)
     if (this.context.wave % 3 === 0) {
       spawnEntity(ZombieBoss);
+      setTimeout(() => {
+        this.context.soundManager.playZombieSound();
+      }, Math.random() * 500);
     }
   }
 

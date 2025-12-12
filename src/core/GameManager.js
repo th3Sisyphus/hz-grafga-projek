@@ -207,8 +207,21 @@ export class GameManager {
         this.context.effects
       );
 
-      if (didAttack && this.context.player.weapon.type === "melee") {
-        this.combatSystem.handleMeleeAttack(this.context.player);
+      if (didAttack) {
+        const weapon = this.context.player.weapon;
+
+        // MELEE WEAPONS: Play miss sound first
+        if (weapon.type === "melee") {
+            // Play "miss" sound dulu
+            this.context.soundManager.playWeaponSound(weapon.name, false);
+
+            // Handle melee attack (akan trigger hit sound di CombatSystem jika hit)
+            this.combatSystem.handleMeleeAttack(this.context.player);
+        } 
+        // RANGED WEAPONS: Play shoot sound immediately
+        else if (weapon.type === "range") {
+            this.context.soundManager.playWeaponSound(weapon.name);
+        }
       }
     }
 
