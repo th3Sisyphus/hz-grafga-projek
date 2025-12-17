@@ -1,5 +1,6 @@
 import { BASE_ZOMBIE_HEALTH, BASE_ZOMBIE_SPEED } from "../core/Constants.js";
 import { DamageNumber, BurnEffect, DeathEffect } from "./Effect.js";
+import { ZombieSprite } from "../rendering/ZombieSprite.js";
 
 export class Zombie {
   constructor(x, y, wave) {
@@ -22,6 +23,13 @@ export class Zombie {
     this.detectionRadius = 250;
     this.wanderAngle = Math.random() * Math.PI * 2;
     this.wanderTimer = 0;
+
+    // Animation properties
+    this.sprite = new ZombieSprite(false); // false = normal zombie
+    this.facingRight = true;
+    this.isAttacking = false;
+    this.attackAnimationEnd = 0;
+    this.lastX = x;
   }
 
   takeDamage(damage, isCritical = false, effects) {
@@ -48,21 +56,24 @@ export class ZombieBoss extends Zombie {
   constructor(x, y, wave) {
     super(x, y, wave);
     // Visual: Lebih besar
-    this.width = 60; 
+    this.width = 60;
     this.height = 60;
-    
+
     // Stats: Sangat tanky dan sakit
     this.health = this.health * 8; // Darah 8x lipat
     this.maxHealth = this.health;
     this.damage = this.damage * 1.5;
-    
+
     // Speed: Boss biasanya sedikit lebih lambat
-    this.speed = this.speed * 0.85; 
-    
+    this.speed = this.speed * 0.85;
+
     // AI: Jangkauan deteksi sangat luas
-    this.detectionRadius = 500; 
+    this.detectionRadius = 500;
 
     // Ability: Hit Counter untuk Stun
     this.attackCount = 0;
+
+    // Boss sprite
+    this.sprite = new ZombieSprite(true); // true = boss zombie
   }
 }

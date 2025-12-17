@@ -295,6 +295,12 @@ export class Renderer {
     // Cek apakah Boss
     const isBoss = zombie.constructor.name === "ZombieBoss";
 
+    // Update facing direction based on movement
+    if (zombie.x !== zombie.lastX) {
+      zombie.facingRight = zombie.x > zombie.lastX;
+      zombie.lastX = zombie.x;
+    }
+
     // Shadow
     ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.beginPath();
@@ -309,90 +315,39 @@ export class Renderer {
     );
     ctx.fill();
 
-    // Setup Warna
+    // Apply visual effects (hit flash, burning)
     if (zombie.hitFlash > 0) {
-      ctx.fillStyle = "#ff0000";
+      ctx.globalAlpha = 0.7;
+      ctx.filter = "brightness(2) saturate(0) hue-rotate(0deg)"; // Red flash
+      zombie.hitFlash--;
     } else if (zombie.burning) {
-      ctx.fillStyle = "#ff6600";
-    } else if (isBoss) {
-      // Warna Boss: Sedikit kebiruan/gelap untuk membedakan
-      ctx.fillStyle = "#1e3a8a";
-    } else {
-      ctx.fillStyle = "#22c55e";
+      ctx.filter = "hue-rotate(30deg) saturate(1.5)"; // Orange tint
     }
 
-    // === SCALE BOSS ===
-    ctx.save();
-    ctx.translate(screenX, screenY);
-    if (isBoss) {
-      ctx.scale(2.2, 2.2); // Boss 2.2x lebih besar
+    // Draw zombie sprite with animation
+    zombie.sprite.draw(ctx, screenX, screenY, zombie.facingRight);
+
+    // Reset filters
+    ctx.globalAlpha = 1;
+    ctx.filter = "none";
+
+    // Burning effect particles
+    if (zombie.burning) {
+      const time = Date.now() / 100;
+      for (let i = 0; i < 3; i++) {
+        const offsetX = Math.sin(time + i) * 5;
+        const offsetY = -10 - Math.cos(time + i * 2) * 8;
+        ctx.fillStyle = `rgba(255, ${100 + Math.sin(time) * 50}, 0, 0.6)`;
+        ctx.beginPath();
+        ctx.arc(screenX + offsetX, screenY + offsetY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
-
-    // Draw Body (Logic menggambar sama, hanya di-scale)
-    // Override warna jika bukan hit/burn (karena fillStyle diatas bisa tertimpa logic draw lama)
-    if (!isBoss)
-      ctx.fillStyle =
-        zombie.hitFlash > 0
-          ? "#ff0000"
-          : zombie.burning
-          ? "#ff6600"
-          : "#22c55e";
-    if (isBoss && zombie.hitFlash <= 0 && !zombie.burning)
-      ctx.fillStyle = "#064e3b"; // Dark green boss
-
-    ctx.beginPath();
-    ctx.arc(0, 0, 12.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Details (Rotten spots)
-    ctx.fillStyle = "#14532d";
-    ctx.beginPath();
-    ctx.arc(-12, -5, 4, 0, Math.PI * 2);
-    ctx.arc(10, 7, 3, 0, Math.PI * 2);
-    ctx.arc(0, 10, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Head
-    ctx.fillStyle = "#3b3b3b";
-    ctx.beginPath();
-    ctx.arc(0, -12.5 - 10, 8.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Eyes
-    ctx.fillStyle = isBoss ? "#ff0000" : "#ffffff"; // Boss mata merah
-    ctx.beginPath();
-    ctx.arc(-7, -12.5 - 15, 3, 0, Math.PI * 2);
-    ctx.arc(7, -12.5 - 15, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = isBoss ? "#ffff00" : "#000000"; // Boss pupil kuning
-    ctx.beginPath();
-    ctx.arc(-7, -12.5 - 15, 1, 0, Math.PI * 2);
-    ctx.arc(7, -12.5 - 15, 1, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Mouth
-    ctx.fillStyle = "#cc0000";
-    ctx.beginPath();
-    ctx.arc(0, -12.5 - 5, 6, 0, Math.PI);
-    ctx.fill();
-
-    // Blood
-    ctx.strokeStyle = "#8B0000";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-4, -12.5);
-    ctx.lineTo(-8, -12.5 + 10);
-    ctx.lineTo(0, -12.5 + 15);
-    ctx.lineTo(4, -12.5 + 10);
-    ctx.stroke();
-
-    ctx.restore(); // Restore scale
 
     // Health Bar (Tetap di posisi absolut)
-    const healthBarWidth = zombie.width; // Width boss sudah 60
+    const healthBarWidth = zombie.width;
     const healthPercent = zombie.health / zombie.maxHealth;
-    const barYOffset = isBoss ? 50 : 30; // Boss bar lebih tinggi
+    const barYOffset = isBoss ? 50 : 30;
 
     ctx.fillStyle = "#000";
     ctx.fillRect(
@@ -450,11 +405,62 @@ export class Renderer {
       ctx.translate(screenX, screenY);
       ctx.rotate(effect.angle);
       if (effect.weaponName === "Katana") {
-        ctx.strokeStyle = `rgba(255, 0, 0, ${alpha})`;
+        // Outer glow
+        ctx.strokeStyle = `rgba(255, 50, 50, ${alpha * 0.3})`;
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 45, -Math.PI / 3, Math.PI / 3);
+        ctx.stroke();
+
+        // Middle layer
+        ctx.strokeStyle = `rgba(255, 100, 100, ${alpha * 0.6})`;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 42, -Math.PI / 3, Math.PI / 3);
+        ctx.stroke();
+
+        // Main slash
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(0, 0, 40, -Math.PI / 3, Math.PI / 3);
         ctx.stroke();
+
+        // Inner edge
+        ctx.strokeStyle = `rgba(200, 230, 255, ${alpha})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 38, -Math.PI / 3, Math.PI / 3);
+        ctx.stroke();
+
+        // Speed lines
+        for (let i = 0; i < 5; i++) {
+          const angle = -Math.PI / 3 + (i / 5) * ((2 * Math.PI) / 3);
+          ctx.strokeStyle = `rgba(255, 200, 200, ${alpha * 0.4})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(angle) * 35, Math.sin(angle) * 35);
+          ctx.lineTo(Math.cos(angle) * 50, Math.sin(angle) * 50);
+          ctx.stroke();
+        }
+
+        // Sparkles
+        if (alpha > 0.5) {
+          for (let i = 0; i < 8; i++) {
+            const angle = -Math.PI / 3 + Math.random() * ((2 * Math.PI) / 3);
+            const dist = 35 + Math.random() * 10;
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha * Math.random()})`;
+            ctx.beginPath();
+            ctx.arc(
+              Math.cos(angle) * dist,
+              Math.sin(angle) * dist,
+              1.5,
+              0,
+              Math.PI * 2
+            );
+            ctx.fill();
+          }
+        }
       } else {
         ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.lineWidth = 2;

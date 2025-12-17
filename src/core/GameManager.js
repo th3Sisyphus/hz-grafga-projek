@@ -193,6 +193,11 @@ export class GameManager {
   update() {
     if (!this.context.running) return;
 
+    // Calculate delta time for animations
+    const now = Date.now();
+    const deltaTime = this.context.lastTime ? now - this.context.lastTime : 16;
+    this.context.lastTime = now;
+
     // FIX: Selalu update arah hadap player mengikuti mouse (Hover Aiming)
     if (this.context.player && !this.context.paused) {
       this.context.player.updateAim(this.context.mousePos, this.context.camera);
@@ -212,15 +217,15 @@ export class GameManager {
 
         // MELEE WEAPONS: Play miss sound first
         if (weapon.type === "melee") {
-            // Play "miss" sound dulu
-            this.context.soundManager.playWeaponSound(weapon.name, false);
+          // Play "miss" sound dulu
+          this.context.soundManager.playWeaponSound(weapon.name, false);
 
-            // Handle melee attack (akan trigger hit sound di CombatSystem jika hit)
-            this.combatSystem.handleMeleeAttack(this.context.player);
-        } 
+          // Handle melee attack (akan trigger hit sound di CombatSystem jika hit)
+          this.combatSystem.handleMeleeAttack(this.context.player);
+        }
         // RANGED WEAPONS: Play shoot sound immediately
         else if (weapon.type === "range") {
-            this.context.soundManager.playWeaponSound(weapon.name);
+          this.context.soundManager.playWeaponSound(weapon.name);
         }
       }
     }
@@ -230,13 +235,31 @@ export class GameManager {
     this.combatSystem.update();
     this.waveSystem.update();
 
-    // 2. Effect Update
+    // 2. Update zombie animations
+    for (let zombie of this.context.zombies) {
+      // Check if zombie is attacking (close to player)
+      if (this.context.player) {
+        const dist = Math.hypot(
+          this.context.player.x - zombie.x,
+          this.context.player.y - zombie.y
+        );
+        const now = Date.now();
+
+        // Set attack state if within attack range and cooldown ready
+        zombie.isAttacking = dist < 40 && now - zombie.lastAttack < 300;
+      }
+
+      // Update sprite animation
+      zombie.sprite.update(deltaTime, zombie.isAttacking);
+    }
+
+    // 3. Effect Update
     this.context.effects = this.context.effects.filter((e) => e.update());
 
-    // 3. Camera Update
+    // 4. Camera Update
     this.renderer.updateCamera();
 
-    // 4. UI Update
+    // 5. UI Update
     this.updateUI();
   }
 
