@@ -377,13 +377,84 @@ export class Renderer {
     const screenX = projectile.x - camera.x;
     const screenY = projectile.y - camera.y;
     if (projectile.weapon.name === "Wizard Book") {
-      ctx.fillStyle = "#f59e0b";
+      // Fire projectile effect
+      const time = Date.now() / 100;
+
+      // Outer flame glow
+      const outerGlow = ctx.createRadialGradient(
+        screenX,
+        screenY,
+        0,
+        screenX,
+        screenY,
+        12
+      );
+      outerGlow.addColorStop(0, "rgba(255, 100, 0, 0.8)");
+      outerGlow.addColorStop(0.5, "rgba(255, 50, 0, 0.4)");
+      outerGlow.addColorStop(1, "rgba(255, 0, 0, 0)");
+      ctx.fillStyle = outerGlow;
       ctx.beginPath();
-      ctx.arc(screenX, screenY, 6, 0, Math.PI * 2);
+      ctx.arc(screenX, screenY, 12, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "#ff6600";
-      ctx.lineWidth = 2;
-      ctx.stroke();
+
+      // Main fireball
+      const fireGradient = ctx.createRadialGradient(
+        screenX,
+        screenY,
+        0,
+        screenX,
+        screenY,
+        8
+      );
+      fireGradient.addColorStop(0, "#fff");
+      fireGradient.addColorStop(0.3, "#ffff00");
+      fireGradient.addColorStop(0.6, "#ff6600");
+      fireGradient.addColorStop(1, "#ff0000");
+      ctx.fillStyle = fireGradient;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flickering flame particles
+      for (let i = 0; i < 5; i++) {
+        const angle = (time + i * 1.2) % (Math.PI * 2);
+        const dist = 6 + Math.sin(time * 2 + i) * 2;
+        const px = screenX + Math.cos(angle) * dist;
+        const py = screenY + Math.sin(angle) * dist;
+        const size = 2 + Math.sin(time * 3 + i) * 1;
+
+        ctx.fillStyle = `rgba(255, ${150 + Math.sin(time + i) * 50}, 0, ${
+          0.6 + Math.sin(time * 2 + i) * 0.3
+        })`;
+        ctx.beginPath();
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Core glow (white hot center)
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Trailing smoke/embers
+      const dx = projectile.vx;
+      const dy = projectile.vy;
+      const speed = Math.hypot(dx, dy);
+      if (speed > 0) {
+        const trailAngle = Math.atan2(dy, dx) + Math.PI;
+        for (let i = 0; i < 3; i++) {
+          const trailDist = 10 + i * 5;
+          const tx = screenX + Math.cos(trailAngle) * trailDist;
+          const ty = screenY + Math.sin(trailAngle) * trailDist;
+          const trailSize = 3 - i;
+
+          ctx.fillStyle = `rgba(100, 100, 100, ${0.3 - i * 0.1})`;
+          ctx.beginPath();
+          ctx.arc(tx, ty, trailSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     } else {
       ctx.fillStyle = "#fbbf24";
       ctx.beginPath();

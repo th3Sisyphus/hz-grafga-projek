@@ -95,21 +95,83 @@ export function drawWeaponSprite(ctx, weaponName) {
       break;
 
     case "Wizard Book":
-      // Book cover
-      ctx.fillStyle = "#7c3aed";
-      ctx.fillRect(10, -12, 20, 24);
+      // Position book to the side (not above)
+      ctx.save();
+      ctx.translate(0, -15); // Slightly above center, to the side
 
-      // Spine
+      // Floating animation (subtle bob)
+      const floatOffset = Math.sin(Date.now() / 300) * 2;
+      ctx.translate(0, floatOffset);
+
+      // Magical aura glow
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = "#a78bfa";
+
+      // Book cover (purple/violet)
+      const bookGradient = ctx.createLinearGradient(0, -14, 0, 14);
+      bookGradient.addColorStop(0, "#9333ea");
+      bookGradient.addColorStop(0.5, "#7c3aed");
+      bookGradient.addColorStop(1, "#6b21a8");
+      ctx.fillStyle = bookGradient;
+      ctx.fillRect(0, -14, 22, 28);
+
+      // Book spine (left edge)
+      ctx.fillStyle = "#581c87";
+      ctx.fillRect(0, -14, 3, 28);
+
+      // Spine highlights
       ctx.fillStyle = "#a78bfa";
-      ctx.fillRect(10, -12, 4, 24);
+      ctx.fillRect(0.5, -12, 1.5, 24);
 
-      // Magical glow line
-      ctx.strokeStyle = "rgba(147, 197, 253, 0.9)";
-      ctx.lineWidth = 2;
+      // Pages (right edge)
+      ctx.fillStyle = "#fef3c7";
+      ctx.fillRect(21, -13, 2, 26);
+
+      // Page lines
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(21.5, -10 + i * 5);
+        ctx.lineTo(22.5, -10 + i * 5);
+        ctx.stroke();
+      }
+
+      // Magical runes on cover
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "bold 8px serif";
+      ctx.fillText("✦", 8, -2);
+      ctx.fillText("◈", 12, 6);
+
+      // Glowing orb/crystal on cover
+      const orbGradient = ctx.createRadialGradient(11, 0, 0, 11, 0, 4);
+      orbGradient.addColorStop(0, "#fbbf24");
+      orbGradient.addColorStop(0.5, "#f59e0b");
+      orbGradient.addColorStop(1, "rgba(245, 158, 11, 0)");
+      ctx.fillStyle = orbGradient;
       ctx.beginPath();
-      ctx.moveTo(28, -10);
-      ctx.lineTo(28, 10);
-      ctx.stroke();
+      ctx.arc(11, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Magical particles around book
+      ctx.shadowBlur = 8;
+      for (let i = 0; i < 3; i++) {
+        const angle =
+          (Date.now() / 500 + (i * Math.PI * 2) / 3) % (Math.PI * 2);
+        const radius = 18;
+        const px = 11 + Math.cos(angle) * radius;
+        const py = Math.sin(angle) * radius;
+
+        ctx.fillStyle = `rgba(168, 85, 247, ${
+          0.3 + Math.sin(Date.now() / 200 + i) * 0.2
+        })`;
+        ctx.beginPath();
+        ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.shadowBlur = 0;
+      ctx.restore();
       break;
   }
 
