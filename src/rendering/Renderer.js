@@ -567,7 +567,7 @@ export class Renderer {
       } else {
         // Bare Fist - Large transparent fist
         const fistSize = 35;
-        const fistAlpha = alpha * 0.6; // More transparent
+        const fistAlpha = alpha * 2; // More transparent
 
         // Fist base (palm)
         ctx.fillStyle = `rgba(255, 200, 150, ${fistAlpha})`;
