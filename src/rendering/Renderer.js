@@ -295,6 +295,12 @@ export class Renderer {
     // Cek apakah Boss
     const isBoss = zombie.constructor.name === "ZombieBoss";
 
+    // Update facing direction based on movement
+    if (zombie.x !== zombie.lastX) {
+      zombie.facingRight = zombie.x > zombie.lastX;
+      zombie.lastX = zombie.x;
+    }
+
     // Shadow
     ctx.fillStyle = "rgba(0,0,0,0.4)";
     ctx.beginPath();
@@ -309,90 +315,39 @@ export class Renderer {
     );
     ctx.fill();
 
-    // Setup Warna
+    // Apply visual effects (hit flash, burning)
     if (zombie.hitFlash > 0) {
-      ctx.fillStyle = "#ff0000";
+      ctx.globalAlpha = 0.7;
+      ctx.filter = "brightness(2) saturate(0) hue-rotate(0deg)"; // Red flash
+      zombie.hitFlash--;
     } else if (zombie.burning) {
-      ctx.fillStyle = "#ff6600";
-    } else if (isBoss) {
-      // Warna Boss: Sedikit kebiruan/gelap untuk membedakan
-      ctx.fillStyle = "#1e3a8a";
-    } else {
-      ctx.fillStyle = "#22c55e";
+      ctx.filter = "hue-rotate(30deg) saturate(1.5)"; // Orange tint
     }
 
-    // === SCALE BOSS ===
-    ctx.save();
-    ctx.translate(screenX, screenY);
-    if (isBoss) {
-      ctx.scale(2.2, 2.2); // Boss 2.2x lebih besar
+    // Draw zombie sprite with animation
+    zombie.sprite.draw(ctx, screenX, screenY, zombie.facingRight);
+
+    // Reset filters
+    ctx.globalAlpha = 1;
+    ctx.filter = "none";
+
+    // Burning effect particles
+    if (zombie.burning) {
+      const time = Date.now() / 100;
+      for (let i = 0; i < 3; i++) {
+        const offsetX = Math.sin(time + i) * 5;
+        const offsetY = -10 - Math.cos(time + i * 2) * 8;
+        ctx.fillStyle = `rgba(255, ${100 + Math.sin(time) * 50}, 0, 0.6)`;
+        ctx.beginPath();
+        ctx.arc(screenX + offsetX, screenY + offsetY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
-
-    // Draw Body (Logic menggambar sama, hanya di-scale)
-    // Override warna jika bukan hit/burn (karena fillStyle diatas bisa tertimpa logic draw lama)
-    if (!isBoss)
-      ctx.fillStyle =
-        zombie.hitFlash > 0
-          ? "#ff0000"
-          : zombie.burning
-          ? "#ff6600"
-          : "#22c55e";
-    if (isBoss && zombie.hitFlash <= 0 && !zombie.burning)
-      ctx.fillStyle = "#064e3b"; // Dark green boss
-
-    ctx.beginPath();
-    ctx.arc(0, 0, 12.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Details (Rotten spots)
-    ctx.fillStyle = "#14532d";
-    ctx.beginPath();
-    ctx.arc(-12, -5, 4, 0, Math.PI * 2);
-    ctx.arc(10, 7, 3, 0, Math.PI * 2);
-    ctx.arc(0, 10, 6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Head
-    ctx.fillStyle = "#3b3b3b";
-    ctx.beginPath();
-    ctx.arc(0, -12.5 - 10, 8.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Eyes
-    ctx.fillStyle = isBoss ? "#ff0000" : "#ffffff"; // Boss mata merah
-    ctx.beginPath();
-    ctx.arc(-7, -12.5 - 15, 3, 0, Math.PI * 2);
-    ctx.arc(7, -12.5 - 15, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = isBoss ? "#ffff00" : "#000000"; // Boss pupil kuning
-    ctx.beginPath();
-    ctx.arc(-7, -12.5 - 15, 1, 0, Math.PI * 2);
-    ctx.arc(7, -12.5 - 15, 1, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Mouth
-    ctx.fillStyle = "#cc0000";
-    ctx.beginPath();
-    ctx.arc(0, -12.5 - 5, 6, 0, Math.PI);
-    ctx.fill();
-
-    // Blood
-    ctx.strokeStyle = "#8B0000";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-4, -12.5);
-    ctx.lineTo(-8, -12.5 + 10);
-    ctx.lineTo(0, -12.5 + 15);
-    ctx.lineTo(4, -12.5 + 10);
-    ctx.stroke();
-
-    ctx.restore(); // Restore scale
 
     // Health Bar (Tetap di posisi absolut)
-    const healthBarWidth = zombie.width; // Width boss sudah 60
+    const healthBarWidth = zombie.width;
     const healthPercent = zombie.health / zombie.maxHealth;
-    const barYOffset = isBoss ? 50 : 30; // Boss bar lebih tinggi
+    const barYOffset = isBoss ? 50 : 30;
 
     ctx.fillStyle = "#000";
     ctx.fillRect(
@@ -422,23 +377,126 @@ export class Renderer {
     const screenX = projectile.x - camera.x;
     const screenY = projectile.y - camera.y;
     if (projectile.weapon.name === "Wizard Book") {
-      ctx.fillStyle = "#f59e0b";
+      // Fire projectile effect
+      const time = Date.now() / 100;
+
+      // Outer flame glow
+      const outerGlow = ctx.createRadialGradient(
+        screenX,
+        screenY,
+        0,
+        screenX,
+        screenY,
+        12
+      );
+      outerGlow.addColorStop(0, "rgba(255, 100, 0, 0.8)");
+      outerGlow.addColorStop(0.5, "rgba(255, 50, 0, 0.4)");
+      outerGlow.addColorStop(1, "rgba(255, 0, 0, 0)");
+      ctx.fillStyle = outerGlow;
       ctx.beginPath();
-      ctx.arc(screenX, screenY, 6, 0, Math.PI * 2);
+      ctx.arc(screenX, screenY, 12, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = "#ff6600";
-      ctx.lineWidth = 2;
-      ctx.stroke();
+
+      // Main fireball
+      const fireGradient = ctx.createRadialGradient(
+        screenX,
+        screenY,
+        0,
+        screenX,
+        screenY,
+        8
+      );
+      fireGradient.addColorStop(0, "#fff");
+      fireGradient.addColorStop(0.3, "#ffff00");
+      fireGradient.addColorStop(0.6, "#ff6600");
+      fireGradient.addColorStop(1, "#ff0000");
+      ctx.fillStyle = fireGradient;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flickering flame particles
+      for (let i = 0; i < 5; i++) {
+        const angle = (time + i * 1.2) % (Math.PI * 2);
+        const dist = 6 + Math.sin(time * 2 + i) * 2;
+        const px = screenX + Math.cos(angle) * dist;
+        const py = screenY + Math.sin(angle) * dist;
+        const size = 2 + Math.sin(time * 3 + i) * 1;
+
+        ctx.fillStyle = `rgba(255, ${150 + Math.sin(time + i) * 50}, 0, ${
+          0.6 + Math.sin(time * 2 + i) * 0.3
+        })`;
+        ctx.beginPath();
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Core glow (white hot center)
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Trailing smoke/embers
+      const dx = projectile.vx;
+      const dy = projectile.vy;
+      const speed = Math.hypot(dx, dy);
+      if (speed > 0) {
+        const trailAngle = Math.atan2(dy, dx) + Math.PI;
+        for (let i = 0; i < 3; i++) {
+          const trailDist = 10 + i * 5;
+          const tx = screenX + Math.cos(trailAngle) * trailDist;
+          const ty = screenY + Math.sin(trailAngle) * trailDist;
+          const trailSize = 3 - i;
+
+          ctx.fillStyle = `rgba(100, 100, 100, ${0.3 - i * 0.1})`;
+          ctx.beginPath();
+          ctx.arc(tx, ty, trailSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     } else {
-      ctx.fillStyle = "#fbbf24";
+      // Dual Gun - Realistic bullet
+      const angle = Math.atan2(projectile.vy, projectile.vx);
+
+      ctx.save();
+      ctx.translate(screenX, screenY);
+      ctx.rotate(angle);
+
+      // Bullet casing (metallic)
+      const bulletGradient = ctx.createLinearGradient(0, -2, 0, 2);
+      bulletGradient.addColorStop(0, "#d4af37"); // Gold
+      bulletGradient.addColorStop(0.5, "#ffd700");
+      bulletGradient.addColorStop(1, "#b8860b");
+      ctx.fillStyle = bulletGradient;
+      ctx.fillRect(-3, -1.5, 6, 3);
+
+      // Bullet tip (lead)
+      ctx.fillStyle = "#4a4a4a";
       ctx.beginPath();
-      ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+      ctx.moveTo(3, -1.5);
+      ctx.lineTo(5, 0);
+      ctx.lineTo(3, 1.5);
+      ctx.closePath();
       ctx.fill();
+
+      // Bullet highlight
+      ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      ctx.fillRect(-2, -1, 4, 0.8);
+
+      ctx.restore();
+
+      // Tracer trail
+      ctx.strokeStyle = "rgba(255, 200, 100, 0.4)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY);
+      ctx.lineTo(screenX - projectile.vx * 2, screenY - projectile.vy * 2);
+      ctx.stroke();
     }
   }
 
   drawEffect(effect, camera) {
-    /* ... Copy dari kode sebelumnya dan yang baru ... */
     const ctx = this.ctx;
     const screenX = effect.x - camera.x;
     const screenY = effect.y - camera.y;
@@ -450,17 +508,119 @@ export class Renderer {
       ctx.translate(screenX, screenY);
       ctx.rotate(effect.angle);
       if (effect.weaponName === "Katana") {
-        ctx.strokeStyle = `rgba(255, 0, 0, ${alpha})`;
+        // Outer glow
+        ctx.strokeStyle = `rgba(255, 50, 50, ${alpha * 0.3})`;
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 45, -Math.PI / 3, Math.PI / 3);
+        ctx.stroke();
+
+        // Middle layer
+        ctx.strokeStyle = `rgba(255, 100, 100, ${alpha * 0.6})`;
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 42, -Math.PI / 3, Math.PI / 3);
+        ctx.stroke();
+
+        // Main slash
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
         ctx.arc(0, 0, 40, -Math.PI / 3, Math.PI / 3);
         ctx.stroke();
-      } else {
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-        ctx.lineWidth = 2;
+
+        // Inner edge
+        ctx.strokeStyle = `rgba(200, 230, 255, ${alpha})`;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(0, 0, 30, -Math.PI / 4, Math.PI / 4);
+        ctx.arc(0, 0, 38, -Math.PI / 3, Math.PI / 3);
         ctx.stroke();
+
+        // Speed lines
+        for (let i = 0; i < 5; i++) {
+          const angle = -Math.PI / 3 + (i / 5) * ((2 * Math.PI) / 3);
+          ctx.strokeStyle = `rgba(255, 200, 200, ${alpha * 0.4})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(angle) * 35, Math.sin(angle) * 35);
+          ctx.lineTo(Math.cos(angle) * 50, Math.sin(angle) * 50);
+          ctx.stroke();
+        }
+
+        // Sparkles
+        if (alpha > 0.5) {
+          for (let i = 0; i < 8; i++) {
+            const angle = -Math.PI / 3 + Math.random() * ((2 * Math.PI) / 3);
+            const dist = 35 + Math.random() * 10;
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha * Math.random()})`;
+            ctx.beginPath();
+            ctx.arc(
+              Math.cos(angle) * dist,
+              Math.sin(angle) * dist,
+              1.5,
+              0,
+              Math.PI * 2
+            );
+            ctx.fill();
+          }
+        }
+      } else {
+        // Bare Fist - Large transparent fist
+        const fistSize = 35;
+        const fistAlpha = alpha * 0.6; // More transparent
+
+        // Fist base (palm)
+        ctx.fillStyle = `rgba(255, 200, 150, ${fistAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(fistSize, 0, 18, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Knuckles (4 fingers)
+        for (let i = 0; i < 4; i++) {
+          const knuckleY = -12 + i * 8;
+          ctx.fillStyle = `rgba(230, 180, 130, ${fistAlpha})`;
+          ctx.beginPath();
+          ctx.ellipse(fistSize + 15, knuckleY, 8, 6, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Knuckle highlights
+          ctx.fillStyle = `rgba(255, 220, 180, ${fistAlpha * 0.8})`;
+          ctx.beginPath();
+          ctx.ellipse(fistSize + 13, knuckleY - 2, 4, 3, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Thumb
+        ctx.fillStyle = `rgba(255, 200, 150, ${fistAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(fistSize - 5, -15, 7, 10, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wrist/forearm
+        ctx.fillStyle = `rgba(220, 170, 120, ${fistAlpha * 0.7})`;
+        ctx.fillRect(fistSize - 25, -8, 20, 16);
+
+        // Impact lines (motion blur)
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 3; i++) {
+          const offsetY = -10 + i * 10;
+          ctx.beginPath();
+          ctx.moveTo(fistSize + 20, offsetY);
+          ctx.lineTo(fistSize + 35, offsetY);
+          ctx.stroke();
+        }
+
+        // Impact waves (when alpha is high)
+        if (alpha > 0.7) {
+          ctx.strokeStyle = `rgba(255, 200, 100, ${alpha * 0.5})`;
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 2; i++) {
+            ctx.beginPath();
+            ctx.arc(fistSize + 25, 0, 20 + i * 10, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
       }
       ctx.restore();
     } else if (effect.constructor.name === "DamageNumber") {
@@ -489,16 +649,77 @@ export class Renderer {
       ctx.fill();
     } else if (effect.constructor.name === "ExplosionEffect") {
       const currentRadius = effect.radius * (1 - alpha);
-      ctx.strokeStyle = `rgba(255, 165, 0, ${alpha})`;
-      ctx.lineWidth = 3;
+      const progress = 1 - alpha;
+
+      // Outer shockwave (expanding ring)
+      ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, currentRadius * 1.2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Main explosion fire (orange)
+      const fireGradient = ctx.createRadialGradient(
+        screenX,
+        screenY,
+        0,
+        screenX,
+        screenY,
+        currentRadius
+      );
+      fireGradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+      fireGradient.addColorStop(0.3, `rgba(255, 200, 0, ${alpha * 0.8})`);
+      fireGradient.addColorStop(0.6, `rgba(255, 100, 0, ${alpha * 0.6})`);
+      fireGradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+      ctx.fillStyle = fireGradient;
       ctx.beginPath();
       ctx.arc(screenX, screenY, currentRadius, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.strokeStyle = `rgba(255, 69, 0, ${alpha * 0.5})`;
-      ctx.lineWidth = 2;
+      ctx.fill();
+
+      // Inner bright core
+      ctx.fillStyle = `rgba(255, 255, 200, ${alpha})`;
       ctx.beginPath();
-      ctx.arc(screenX, screenY, currentRadius * 0.7, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.arc(screenX, screenY, currentRadius * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Smoke clouds (expanding)
+      if (progress > 0.3) {
+        const smokeRadius = currentRadius * 1.5;
+        const smokeAlpha = alpha * 0.5;
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2;
+          const dist =
+            smokeRadius * (0.7 + Math.sin(progress * Math.PI + i) * 0.3);
+          const sx = screenX + Math.cos(angle) * dist;
+          const sy = screenY + Math.sin(angle) * dist;
+
+          ctx.fillStyle = `rgba(80, 80, 80, ${smokeAlpha})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, currentRadius * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Debris particles
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2 + progress * 0.5;
+        const dist = currentRadius * (0.8 + progress * 0.5);
+        const px = screenX + Math.cos(angle) * dist;
+        const py = screenY + Math.sin(angle) * dist;
+
+        ctx.fillStyle = `rgba(200, 100, 0, ${alpha * 0.7})`;
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Flash effect (early stage)
+      if (alpha > 0.7) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${(alpha - 0.7) * 2})`;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, currentRadius * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else if (effect.constructor.name === "DeathEffect") {
       for (let p of effect.particles) {
         ctx.beginPath();
