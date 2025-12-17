@@ -456,15 +456,47 @@ export class Renderer {
         }
       }
     } else {
-      ctx.fillStyle = "#fbbf24";
+      // Dual Gun - Realistic bullet
+      const angle = Math.atan2(projectile.vy, projectile.vx);
+
+      ctx.save();
+      ctx.translate(screenX, screenY);
+      ctx.rotate(angle);
+
+      // Bullet casing (metallic)
+      const bulletGradient = ctx.createLinearGradient(0, -2, 0, 2);
+      bulletGradient.addColorStop(0, "#d4af37"); // Gold
+      bulletGradient.addColorStop(0.5, "#ffd700");
+      bulletGradient.addColorStop(1, "#b8860b");
+      ctx.fillStyle = bulletGradient;
+      ctx.fillRect(-3, -1.5, 6, 3);
+
+      // Bullet tip (lead)
+      ctx.fillStyle = "#4a4a4a";
       ctx.beginPath();
-      ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+      ctx.moveTo(3, -1.5);
+      ctx.lineTo(5, 0);
+      ctx.lineTo(3, 1.5);
+      ctx.closePath();
       ctx.fill();
+
+      // Bullet highlight
+      ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      ctx.fillRect(-2, -1, 4, 0.8);
+
+      ctx.restore();
+
+      // Tracer trail
+      ctx.strokeStyle = "rgba(255, 200, 100, 0.4)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY);
+      ctx.lineTo(screenX - projectile.vx * 2, screenY - projectile.vy * 2);
+      ctx.stroke();
     }
   }
 
   drawEffect(effect, camera) {
-    /* ... Copy dari kode sebelumnya dan yang baru ... */
     const ctx = this.ctx;
     const screenX = effect.x - camera.x;
     const screenY = effect.y - camera.y;
@@ -617,16 +649,77 @@ export class Renderer {
       ctx.fill();
     } else if (effect.constructor.name === "ExplosionEffect") {
       const currentRadius = effect.radius * (1 - alpha);
-      ctx.strokeStyle = `rgba(255, 165, 0, ${alpha})`;
-      ctx.lineWidth = 3;
+      const progress = 1 - alpha;
+
+      // Outer shockwave (expanding ring)
+      ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, currentRadius * 1.2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Main explosion fire (orange)
+      const fireGradient = ctx.createRadialGradient(
+        screenX,
+        screenY,
+        0,
+        screenX,
+        screenY,
+        currentRadius
+      );
+      fireGradient.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+      fireGradient.addColorStop(0.3, `rgba(255, 200, 0, ${alpha * 0.8})`);
+      fireGradient.addColorStop(0.6, `rgba(255, 100, 0, ${alpha * 0.6})`);
+      fireGradient.addColorStop(1, `rgba(255, 0, 0, 0)`);
+      ctx.fillStyle = fireGradient;
       ctx.beginPath();
       ctx.arc(screenX, screenY, currentRadius, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.strokeStyle = `rgba(255, 69, 0, ${alpha * 0.5})`;
-      ctx.lineWidth = 2;
+      ctx.fill();
+
+      // Inner bright core
+      ctx.fillStyle = `rgba(255, 255, 200, ${alpha})`;
       ctx.beginPath();
-      ctx.arc(screenX, screenY, currentRadius * 0.7, 0, Math.PI * 2);
-      ctx.stroke();
+      ctx.arc(screenX, screenY, currentRadius * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Smoke clouds (expanding)
+      if (progress > 0.3) {
+        const smokeRadius = currentRadius * 1.5;
+        const smokeAlpha = alpha * 0.5;
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2;
+          const dist =
+            smokeRadius * (0.7 + Math.sin(progress * Math.PI + i) * 0.3);
+          const sx = screenX + Math.cos(angle) * dist;
+          const sy = screenY + Math.sin(angle) * dist;
+
+          ctx.fillStyle = `rgba(80, 80, 80, ${smokeAlpha})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, currentRadius * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Debris particles
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2 + progress * 0.5;
+        const dist = currentRadius * (0.8 + progress * 0.5);
+        const px = screenX + Math.cos(angle) * dist;
+        const py = screenY + Math.sin(angle) * dist;
+
+        ctx.fillStyle = `rgba(200, 100, 0, ${alpha * 0.7})`;
+        ctx.beginPath();
+        ctx.arc(px, py, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Flash effect (early stage)
+      if (alpha > 0.7) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${(alpha - 0.7) * 2})`;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, currentRadius * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else if (effect.constructor.name === "DeathEffect") {
       for (let p of effect.particles) {
         ctx.beginPath();
