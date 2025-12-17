@@ -4,203 +4,520 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="assets/icon/hz_icon.jpeg" type="image/jpeg" />
-    <title>Hunty Zombie - Zombie Survival</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <title>Hunty Zombie - Zombie Survival Game</title>
+    <meta
+      name="description"
+      content="Bertahan hidup melawan gelombang zombie yang tak ada habisnya. Pilih senjatamu dan buktikan kemampuanmu!"
+    />
+    <link rel="stylesheet" href="css/home.css" />
   </head>
   <body>
-    <div id="gameContainer">
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="home-container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <h1 class="game-title">🧟 HUNTY ZOMBIE 🧟</h1>
+        <p class="game-subtitle">Survive The Apocalypse</p>
 
-      <div id="ui">
-        <div>Wave: <span id="wave">1</span></div>
-        <div>Score: <span id="score">0</span></div>
-        <div>Zombies: <span id="zombieCount">0</span></div>
-        <div>Health: <span id="health">150</span></div>
-        <div class="health-bar">
-          <div class="health-fill" id="healthBar" style="width: 100%"></div>
+        <div class="hero-buttons">
+          <a href="menu.html" class="btn btn-primary">🎮 START GAME</a>
         </div>
-      </div>
+      </section>
 
-      <button id="pauseBtn" onclick="window.gameApp.togglePause()">⏸️</button>
-
-      <div id="mobileControls" class="hidden">
-        <div id="joystickZone">
-          <div id="joystickKnob"></div>
+      <!-- Feature Cards -->
+      <section class="features">
+        <div class="feature-card" onclick="openModal('storyModal')">
+          <span class="feature-icon">📖</span>
+          <h3 class="feature-title">Story</h3>
+          <p class="feature-desc">Pelajari latar belakang dan misi permainan</p>
         </div>
-        <button id="mobileAttackBtn">⚔️</button>
-      </div>
 
-      <div id="pauseMenu" class="hidden">
-        <h2>GAME PAUSED</h2>
-        <button class="btn" onclick="window.gameApp.togglePause()">
-          RESUME
+        <div class="feature-card" onclick="openModal('instructionsModal')">
+          <span class="feature-icon">🎮</span>
+          <h3 class="feature-title">Instructions</h3>
+          <p class="feature-desc">Panduan kontrol dan cara bermain</p>
+        </div>
+
+        <div class="feature-card" onclick="openModal('creditsModal')">
+          <span class="feature-icon">👥</span>
+          <h3 class="feature-title">Credits</h3>
+          <p class="feature-desc">Tim pembuat game ini</p>
+        </div>
+      </section>
+
+      <!-- Gallery Section -->
+      <section class="gallery">
+        <h2 class="gallery-title">📸 Game Screenshots</h2>
+        <div class="gallery-grid">
+          <div
+            class="gallery-item"
+            onclick="openLightbox('assets/screenshots/InGame.png')"
+          >
+            <img
+              src="assets/screenshots/InGame.png"
+              alt="Gameplay - Katana Battle"
+            />
+          </div>
+          <div
+            class="gallery-item"
+            onclick="openLightbox('assets/screenshots/weaponSelect.png')"
+          >
+            <img
+              src="assets/screenshots/weaponSelect.png"
+              alt="Weapon Selection"
+            />
+          </div>
+          <div
+            class="gallery-item"
+            onclick="openLightbox('assets/screenshots/Boss.png')"
+          >
+            <img src="assets/screenshots/Boss.png" alt="Boss Battle" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>&copy; 2024 Hunty Zombie. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <!-- Story Modal -->
+    <div id="storyModal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('storyModal')">
+          &times;
         </button>
-        <button class="btn" onclick="window.gameApp.backToMenu()">MENU</button>
-      </div>
-
-      <div id="menu">
-        <h1 style="font-size: 80px">🧟 HUNTY ZOMBIE 🧟</h1>
-        <p style="color: #888; margin-bottom: 40px; letter-spacing: 3px">
-          SURVIVE THE APOCALYPSE
-        </p>
-        <button class="btn" onclick="window.gameApp.showWeaponSelect()">
-          START GAME
-        </button>
-        <button class="btn" onclick="window.gameApp.showTutorial()">
-          TUTORIAL
-        </button>
-      </div>
-
-      <div id="tutorial" class="hidden">
-        <div class="tutorial-content">
-          <h2>TUTORIAL</h2>
-          <p style="color: #ffaa00; margin-bottom: 20px">
-            <strong>MISI:</strong> Bertahan hidup selama mungkin dan bunuh
-            sebanyak mungkin zombie!
-          </p>
-          <hr style="border-color: #333; margin-bottom: 20px" />
-
-          <p style="font-size: 18px; color: #fff"><strong>KONTROL:</strong></p>
-          <ul>
-            <li>[W, A, S, D] - Bergerak</li>
-            <li>[MOUSE] - Arahkan Senjata</li>
-            <li>[KLIK KIRI] - Serang / Tembak</li>
-            <li>[ESC] - Pause Game</li>
-          </ul>
-          <br />
-          <p style="font-size: 18px; color: #fff"><strong>MEKANIK:</strong></p>
-          <ul>
-            <li>Zombie bertambah kuat setiap wave.</li>
-            <li><strong>BOSS</strong> muncul setiap wave ke-3!</li>
-            <li>Hindari obstacle (Batu, Duri, Pohon).</li>
-            <li>
-              Boss bisa memberikan efek <strong>STUN</strong> jika memukulmu 4x.
-            </li>
-          </ul>
-          <div style="text-align: center; margin-top: 30px">
-            <button class="btn" onclick="window.gameApp.backToMenu()">
-              KEMBALI KE MENU
+        <h2 class="modal-title">📖 Story & Background</h2>
+        <div class="modal-body">
+          <div class="story-scroll" id="storyScroll">
+            <p class="story-line"><strong>🌍 Latar Belakang:</strong></p>
+            <p class="story-line">
+              Dunia telah jatuh ke dalam kekacauan. Virus misterius telah
+              mengubah sebagian besar populasi menjadi zombie yang haus darah.
+            </p>
+            <p class="story-line">
+              Kamu adalah salah satu dari sedikit penyintas yang masih bertahan
+              di tengah apocalypse ini.
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p class="story-line"><strong>🎯 Misi:</strong></p>
+            <p class="story-line">
+              Bertahan hidup selama mungkin dan bunuh sebanyak mungkin zombie!
+            </p>
+            <p class="story-line">
+              Setiap zombie yang kamu kalahkan akan menambah skor dan membawamu
+              lebih dekat untuk bertahan hidup.
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p class="story-line"><strong>🏆 Goal:</strong></p>
+            <p class="story-line">
+              • Bertahan melewati gelombang zombie yang semakin kuat
+            </p>
+            <p class="story-line">
+              • Kalahkan Boss Zombie yang muncul setiap wave ke-3
+            </p>
+            <p class="story-line">• Raih skor setinggi-tingginya</p>
+            <p class="story-line">
+              • Buktikan dirimu sebagai pemburu zombie terhebat!
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p class="story-line"><strong>📊 Level System:</strong></p>
+            <p class="story-line">
+              Game ini menggunakan sistem Wave (gelombang). Setiap wave, jumlah
+              dan kekuatan zombie akan meningkat.
+            </p>
+            <p class="story-line">
+              Wave 1-2: Zombie biasa dengan kecepatan dan damage rendah
+            </p>
+            <p class="story-line">
+              Wave 3, 6, 9...: Boss Zombie muncul! Mereka lebih besar, lebih
+              kuat, dan bisa memberikan efek STUN
+            </p>
+            <p class="story-line">
+              Wave 4+: Zombie semakin cepat dan lebih berbahaya
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p class="story-line"><strong>⚔️ Cara Bermain:</strong></p>
+            <p class="story-line">
+              1. Pilih senjata favoritmu (Katana, Tangan Kosong, Wizard Book,
+              atau Dual Gun)
+            </p>
+            <p class="story-line">
+              2. Gunakan WASD untuk bergerak menghindari zombie
+            </p>
+            <p class="story-line">
+              3. Arahkan mouse ke zombie dan klik untuk menyerang
+            </p>
+            <p class="story-line">
+              4. Hindari obstacle (Batu, Duri, Pohon) yang bisa menghalangi
+              gerakanmu
+            </p>
+            <p class="story-line">
+              5. Perhatikan health bar-mu dan jangan sampai habis!
+            </p>
+            <p class="story-line">
+              6. Kalahkan semua zombie di wave untuk melanjutkan ke wave
+              berikutnya
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p class="story-line"><strong>💀 Musuh:</strong></p>
+            <p class="story-line">
+              • Zombie Biasa (Hijau): Musuh standar dengan kecepatan sedang
+            </p>
+            <p class="story-line">
+              • Boss Zombie (Merah): Muncul setiap wave ke-3, sangat kuat dan
+              bisa memberikan efek STUN setelah 4x pukulan
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p class="story-line"><strong>🎮 Tips:</strong></p>
+            <p class="story-line">
+              • Manfaatkan lifesteal dari senjata melee untuk bertahan lebih
+              lama
+            </p>
+            <p class="story-line">
+              • Gunakan obstacle sebagai penghalang antara kamu dan zombie
+            </p>
+            <p class="story-line">
+              • Jaga jarak saat melawan Boss Zombie untuk menghindari efek STUN
+            </p>
+            <p class="story-line">
+              • Pilih senjata yang sesuai dengan gaya bermainmu!
+            </p>
+            <p class="story-line">&nbsp;</p>
+            <p
+              class="story-line"
+              style="
+                text-align: center;
+                color: #ff3333;
+                font-weight: bold;
+                font-size: 18px;
+              "
+            >
+              Selamat Berburu Zombie! 🧟‍♂️⚔️
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px">
+            <button class="btn" onclick="toggleAutoScroll()">
+              ▶️ Auto Scroll
+            </button>
+            <button class="btn btn-secondary" onclick="resetScroll()">
+              🔄 Reset
             </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <div id="weaponSelect" class="hidden">
-        <h2 style="color: #ff3333; margin-bottom: 20px">PILIH SENJATA</h2>
-        <div class="weapon-grid">
-          <div
-            class="weapon-card"
-            data-weapon="katana"
-            onclick="window.gameApp.selectWeapon('katana')"
-          >
-            <h3>🗡️ KATANA</h3>
-            <div class="weapon-stats">
-              <div>Type: Melee</div>
-              <div>Damage: 40</div>
-              <div>Critical: 2.5x</div>
-              <div>Speed: +0.1</div>
-              <div>Range: 40</div>
-              <div>Special: Critical slash, Lifesteal</div>
-            </div>
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('instructionsModal')">
+          &times;
+        </button>
+        <h2 class="modal-title">🎮 Instructions</h2>
+        <div class="modal-body">
+          <h3>⌨️ Kontrol Keyboard (Desktop)</h3>
+          <div class="control-group">
+            <ul>
+              <li>
+                <strong>[W, A, S, D]</strong> - Bergerak ke atas, kiri, bawah,
+                kanan
+              </li>
+              <li><strong>[MOUSE]</strong> - Arahkan senjata ke arah kursor</li>
+              <li><strong>[KLIK KIRI]</strong> - Serang / Tembak</li>
+              <li><strong>[ESC]</strong> - Pause Game</li>
+            </ul>
           </div>
-          <div
-            class="weapon-card"
-            data-weapon="fist"
-            onclick="window.gameApp.selectWeapon('fist')"
-          >
-            <h3>👊 TANGAN KOSONG</h3>
-            <div class="weapon-stats">
-              <div>Type: Melee</div>
-              <div>Damage: 50</div>
-              <div>Critical: 1x</div>
-              <div>Speed: +0.3</div>
-              <div>Range: 35</div>
-              <div>Special: Fastest speed, Lifesteal</div>
-            </div>
+
+          <h3>📱 Kontrol Mobile (Touch Device)</h3>
+          <div class="control-group">
+            <ul>
+              <li>
+                <strong>🕹️ Joystick (Kiri Bawah)</strong> - Gerakkan karakter
+                dengan menyeret joystick virtual
+              </li>
+              <li>
+                <strong>⚔️ Attack Button (Kanan Bawah)</strong> - Tekan tombol
+                attack untuk menyerang zombie terdekat
+              </li>
+              <li>
+                <strong>Touch & Drag</strong> - Joystick akan muncul otomatis
+                saat kamu menyentuh area kiri bawah layar
+              </li>
+            </ul>
           </div>
-          <div
-            class="weapon-card"
-            data-weapon="wizard"
-            onclick="window.gameApp.selectWeapon('wizard')"
-          >
-            <h3>🧙 WIZARD BOOK</h3>
-            <div class="weapon-stats">
-              <div>Type: Range</div>
-              <div>Damage: 35</div>
-              <div>DOT: 5/sec (3s)</div>
-              <div>Speed: +0.2</div>
-              <div>Range: 150</div>
-              <div>Special: Burn effect</div>
-            </div>
+
+          <h3>🎯 Navigasi Menu</h3>
+          <div class="control-group">
+            <ul>
+              <li><strong>START GAME</strong> - Mulai permainan baru</li>
+              <li><strong>TUTORIAL</strong> - Lihat panduan bermain</li>
+              <li>
+                <strong>PILIH SENJATA</strong> - Pilih senjata sebelum memulai
+                game
+              </li>
+              <li>
+                <strong>PAUSE</strong> - Jeda permainan (tombol ⏸️ di pojok
+                kanan atas)
+              </li>
+              <li><strong>RESUME</strong> - Lanjutkan permainan dari pause</li>
+              <li><strong>MENU</strong> - Kembali ke menu utama</li>
+            </ul>
           </div>
-          <div
-            class="weapon-card"
-            data-weapon="dualgun"
-            onclick="window.gameApp.selectWeapon('dualgun')"
-          >
-            <h3>🔫 DUAL GUN</h3>
-            <div class="weapon-stats">
-              <div>Type: Range</div>
-              <div>Damage: 30</div>
-              <div>AOE: 80 radius</div>
-              <div>Speed: +0.15</div>
-              <div>Range: 200</div>
-              <div>Special: Explosive chain</div>
-            </div>
+
+          <h3>🎮 Fitur Mobile</h3>
+          <div class="control-group">
+            <p><strong>Virtual Joystick:</strong></p>
+            <ul>
+              <li>
+                Joystick virtual akan muncul di kiri bawah layar saat game
+                dimulai
+              </li>
+              <li>Seret joystick untuk menggerakkan karakter ke segala arah</li>
+              <li>Joystick akan kembali ke posisi tengah saat dilepas</li>
+            </ul>
+            <p><strong>Attack Button:</strong></p>
+            <ul>
+              <li>Tombol attack berada di kanan bawah layar</li>
+              <li>Tekan dan tahan untuk menyerang secara otomatis</li>
+              <li>Karakter akan menyerang zombie terdekat</li>
+            </ul>
+          </div>
+
+          <h3>⚠️ Tips Kontrol</h3>
+          <div class="control-group">
+            <ul>
+              <li>Gunakan gerakan cepat untuk menghindari serangan zombie</li>
+              <li>
+                Kombinasikan gerakan dan serangan untuk efektivitas maksimal
+              </li>
+              <li>
+                Pada mobile, posisikan jari dengan nyaman untuk kontrol yang
+                lebih baik
+              </li>
+              <li>Latih timing seranganmu untuk memaksimalkan damage</li>
+            </ul>
           </div>
         </div>
-        <button
-          class="btn"
-          id="confirmWeapon"
-          onclick="window.gameApp.startGame()"
-          disabled
-        >
-          PILIH SENJATA
-        </button>
-        <button class="btn" onclick="window.gameApp.backToMenu()">
-          KEMBALI
-        </button>
-      </div>
-
-      <div id="gameOver" class="hidden">
-        <h2>GAME OVER</h2>
-        <p style="font-size: 20px; margin: 20px 0">
-          Final Score: <span id="finalScore">0</span>
-        </p>
-        <p style="font-size: 18px; margin: 20px 0">
-          Wave Reached: <span id="finalWave">0</span>
-        </p>
-        <button class="btn" onclick="window.gameApp.restartGame()">
-          MAIN LAGI
-        </button>
-        <button class="btn" onclick="window.gameApp.backToMenu()">MENU</button>
       </div>
     </div>
 
-    <script type="module">
-      import { GameManager } from "./src/core/GameManager.js";
+    <!-- Credits Modal -->
+    <div id="creditsModal" class="modal">
+      <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('creditsModal')">
+          &times;
+        </button>
+        <h2 class="modal-title">👥 Credits</h2>
+        <div class="modal-body">
+          <p
+            style="
+              text-align: center;
+              margin-bottom: 30px;
+              font-size: 18px;
+              color: #aaa;
+            "
+          >
+            Dibuat dengan ❤️ oleh tim pengembang
+          </p>
+          <div class="credits-list">
+            <div class="credit-item">
+              <div class="credit-name">🎮 Nicolas Krisna Prawirajati</div>
+              <div class="credit-role">71231019</div>
+            </div>
+            <div class="credit-item">
+              <div class="credit-name">💻 Yehezkiel Darren Putra Wardoyo</div>
+              <div class="credit-role">71231023</div>
+            </div>
+            <div class="credit-item">
+              <div class="credit-name">🎨 Kenya Syalwa Arifia</div>
+              <div class="credit-role">71231025</div>
+            </div>
+            <div class="credit-item">
+              <div class="credit-name">🔊 Hansel Ivano Supratman</div>
+              <div class="credit-role">71231039</div>
+            </div>
+            <div class="credit-item">
+              <div class="credit-name">🧪 Gabriel Sachio Atmadjaja</div>
+              <div class="credit-role">71231052</div>
+            </div>
+          </div>
+          <p
+            style="
+              text-align: center;
+              margin-top: 40px;
+              color: #666;
+              font-size: 14px;
+            "
+          >
+            Special thanks to all players and supporters!
+          </p>
+          <p
+            style="
+              text-align: center;
+              margin-top: 10px;
+              color: #ff3333;
+              font-weight: bold;
+            "
+          >
+            🧟 Stay alive and keep hunting! 🧟
+          </p>
+        </div>
+      </div>
+    </div>
 
-      const canvas = document.getElementById("gameCanvas");
-      const uiElements = {
-        menu: document.getElementById("menu"),
-        tutorial: document.getElementById("tutorial"),
-        weaponSelect: document.getElementById("weaponSelect"),
-        gameOver: document.getElementById("gameOver"),
-        confirmWeapon: document.getElementById("confirmWeapon"),
-        pauseMenu: document.getElementById("pauseMenu"),
-        // Mobile controls (elements)
-        mobileControls: document.getElementById("mobileControls"),
-        joystickZone: document.getElementById("joystickZone"),
-        joystickKnob: document.getElementById("joystickKnob"),
-        attackBtn: document.getElementById("mobileAttackBtn"),
-      };
+    <!-- Lightbox for Gallery -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+      <div class="lightbox-content" onclick="event.stopPropagation()">
+        <button class="lightbox-close" onclick="closeLightbox()">
+          &times;
+        </button>
+        <img id="lightboxImg" src="" alt="Full size screenshot" />
+      </div>
+    </div>
 
-      // Inisialisasi Game Manager dan pasang ke window
-      // sehingga dapat diakses oleh fungsi onclick="" di HTML
-      window.gameApp = new GameManager(canvas, uiElements);
+    <script>
+      // Modal Functions
+      function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
 
-      // Setup initial menu state
-      window.gameApp.backToMenu();
+      function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove("active");
+        document.body.style.overflow = "auto";
+
+        // Stop auto scroll if story modal is closed
+        if (modalId === "storyModal" && autoScrollInterval) {
+          clearInterval(autoScrollInterval);
+          autoScrollInterval = null;
+          const storyScroll = document.getElementById("storyScroll");
+          storyScroll.classList.remove("auto-scrolling");
+        }
+      }
+
+      // Close modal when clicking outside
+      document.querySelectorAll(".modal").forEach((modal) => {
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) {
+            closeModal(modal.id);
+          }
+        });
+      });
+
+      // Lightbox Functions
+      function openLightbox(imageSrc) {
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImg = document.getElementById("lightboxImg");
+        lightboxImg.src = imageSrc;
+        lightbox.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeLightbox() {
+        const lightbox = document.getElementById("lightbox");
+        lightbox.classList.remove("active");
+        document.body.style.overflow = "auto";
+      }
+
+      // Story Auto Scroll with Fade Out Effect
+      let autoScrollInterval = null;
+      let scrollSpeed = 1; // pixels per frame
+
+      function toggleAutoScroll() {
+        const storyScroll = document.getElementById("storyScroll");
+
+        if (autoScrollInterval) {
+          // Stop scrolling
+          clearInterval(autoScrollInterval);
+          autoScrollInterval = null;
+          storyScroll.classList.remove("auto-scrolling");
+        } else {
+          // Start scrolling
+          storyScroll.classList.add("auto-scrolling");
+          autoScrollInterval = setInterval(() => {
+            storyScroll.scrollTop += scrollSpeed;
+
+            // Apply fade out effect to lines that pass threshold
+            const lines = storyScroll.querySelectorAll(".story-line");
+            const containerRect = storyScroll.getBoundingClientRect();
+            const fadeThreshold = containerRect.top + 80; // Fade starts 80px from top
+
+            lines.forEach((line) => {
+              const rect = line.getBoundingClientRect();
+
+              if (rect.top < fadeThreshold) {
+                // Calculate opacity based on distance from threshold
+                const distance = fadeThreshold - rect.top;
+                const maxDistance = 80;
+                const opacity = Math.max(0, 1 - distance / maxDistance);
+                line.style.opacity = opacity;
+              } else {
+                line.style.opacity = 1;
+              }
+            });
+
+            // Stop at bottom
+            if (
+              storyScroll.scrollTop >=
+              storyScroll.scrollHeight - storyScroll.clientHeight
+            ) {
+              clearInterval(autoScrollInterval);
+              autoScrollInterval = null;
+              storyScroll.classList.remove("auto-scrolling");
+            }
+          }, 30); // ~33fps
+        }
+      }
+
+      function resetScroll() {
+        const storyScroll = document.getElementById("storyScroll");
+        storyScroll.scrollTop = 0;
+
+        // Reset all line opacities
+        const lines = storyScroll.querySelectorAll(".story-line");
+        lines.forEach((line) => {
+          line.style.opacity = 1;
+        });
+
+        // Stop auto scroll if running
+        if (autoScrollInterval) {
+          clearInterval(autoScrollInterval);
+          autoScrollInterval = null;
+          storyScroll.classList.remove("auto-scrolling");
+        }
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        // ESC to close modals
+        if (e.key === "Escape") {
+          document.querySelectorAll(".modal.active").forEach((modal) => {
+            closeModal(modal.id);
+          });
+          if (
+            document.getElementById("lightbox").classList.contains("active")
+          ) {
+            closeLightbox();
+          }
+        }
+      });
+
+      // Add smooth scroll behavior
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        });
+      });
     </script>
   </body>
 </html>

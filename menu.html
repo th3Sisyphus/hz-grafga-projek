@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="assets/icon/hz_icon.jpeg" type="image/jpeg" />
+    <title>Hunty Zombie - Zombie Survival</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div id="gameContainer">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+      <div id="ui">
+        <div>Wave: <span id="wave">1</span></div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Zombies: <span id="zombieCount">0</span></div>
+        <div>Health: <span id="health">150</span></div>
+        <div class="health-bar">
+          <div class="health-fill" id="healthBar" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <button id="pauseBtn" onclick="window.gameApp.togglePause()">⏸️</button>
+
+      <div id="mobileControls" class="hidden">
+        <div id="joystickZone">
+          <div id="joystickKnob"></div>
+        </div>
+        <button id="mobileAttackBtn">⚔️</button>
+      </div>
+
+      <div id="pauseMenu" class="hidden">
+        <h2>GAME PAUSED</h2>
+        <button class="btn" onclick="window.gameApp.togglePause()">
+          RESUME
+        </button>
+        <button class="btn" onclick="window.gameApp.backToMenu()">MENU</button>
+      </div>
+
+      <div id="menu" class="hidden">
+        <h1 style="font-size: 80px">🧟 HUNTY ZOMBIE 🧟</h1>
+        <p style="color: #888; margin-bottom: 40px; letter-spacing: 3px">
+          SURVIVE THE APOCALYPSE
+        </p>
+        <button class="btn" onclick="window.gameApp.showWeaponSelect()">
+          START GAME
+        </button>
+        <button class="btn" onclick="window.gameApp.showTutorial()">
+          TUTORIAL
+        </button>
+        <a
+          href="index.html"
+          class="btn"
+          style="display: inline-block; text-decoration: none"
+        >
+          ← BACK TO HOME
+        </a>
+      </div>
+
+      <div id="tutorial" class="hidden">
+        <div class="tutorial-content">
+          <h2>TUTORIAL</h2>
+          <p style="color: #ffaa00; margin-bottom: 20px">
+            <strong>MISI:</strong> Bertahan hidup selama mungkin dan bunuh
+            sebanyak mungkin zombie!
+          </p>
+          <hr style="border-color: #333; margin-bottom: 20px" />
+
+          <p style="font-size: 18px; color: #fff"><strong>KONTROL:</strong></p>
+          <ul>
+            <li>[W, A, S, D] - Bergerak</li>
+            <li>[MOUSE] - Arahkan Senjata</li>
+            <li>[KLIK KIRI] - Serang / Tembak</li>
+            <li>[ESC] - Pause Game</li>
+          </ul>
+          <br />
+          <p style="font-size: 18px; color: #fff"><strong>MEKANIK:</strong></p>
+          <ul>
+            <li>Zombie bertambah kuat setiap wave.</li>
+            <li><strong>BOSS</strong> muncul setiap wave ke-3!</li>
+            <li>Hindari obstacle (Batu, Duri, Pohon).</li>
+            <li>
+              Boss bisa memberikan efek <strong>STUN</strong> jika memukulmu 4x.
+            </li>
+          </ul>
+          <div style="text-align: center; margin-top: 30px">
+            <button class="btn" onclick="window.gameApp.backToMenu()">
+              KEMBALI KE MENU
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="weaponSelect">
+        <h2
+          style="
+            color: #ff3333;
+            margin-bottom: 10px;
+            margin-top: 0;
+            font-size: 28px;
+            text-align: center;
+          "
+        >
+          ⚔️ PILIH SENJATAMU ⚔️
+        </h2>
+        <p
+          style="
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 15px;
+            font-size: 12px;
+          "
+        >
+          Pilih senjata yang sesuai dengan gaya bermainmu!
+        </p>
+        <div class="weapon-grid">
+          <div
+            class="weapon-card"
+            data-weapon="katana"
+            onclick="window.gameApp.selectWeapon('katana')"
+          >
+            <div class="weapon-icon">⚔</div>
+            <h3>KATANA</h3>
+            <div class="weapon-type melee">MELEE</div>
+            <div class="weapon-stats">
+              <div>
+                <span class="stat-label">Damage:</span>
+                <span class="stat-value">40</span>
+              </div>
+              <div>
+                <span class="stat-label">Critical:</span>
+                <span class="stat-value">2.5x</span>
+              </div>
+              <div>
+                <span class="stat-label">Speed:</span>
+                <span class="stat-value">+0.1</span>
+              </div>
+              <div>
+                <span class="stat-label">Range:</span>
+                <span class="stat-value">40</span>
+              </div>
+              <div class="weapon-special">⚡ Critical Slash + Lifesteal</div>
+            </div>
+          </div>
+          <div
+            class="weapon-card"
+            data-weapon="fist"
+            onclick="window.gameApp.selectWeapon('fist')"
+          >
+            <div class="weapon-icon">✊</div>
+            <h3>BARE FIST</h3>
+            <div class="weapon-type melee">MELEE</div>
+            <div class="weapon-stats">
+              <div>
+                <span class="stat-label">Damage:</span>
+                <span class="stat-value">50</span>
+              </div>
+              <div>
+                <span class="stat-label">Critical:</span>
+                <span class="stat-value">1x</span>
+              </div>
+              <div>
+                <span class="stat-label">Speed:</span>
+                <span class="stat-value">+0.3</span>
+              </div>
+              <div>
+                <span class="stat-label">Range:</span>
+                <span class="stat-value">35</span>
+              </div>
+              <div class="weapon-special">⚡ Fastest Speed + Lifesteal</div>
+            </div>
+          </div>
+          <div
+            class="weapon-card"
+            data-weapon="wizard"
+            onclick="window.gameApp.selectWeapon('wizard')"
+          >
+            <div class="weapon-icon">📖</div>
+            <h3>SPELL BOOK</h3>
+            <div class="weapon-type range">RANGE</div>
+            <div class="weapon-stats">
+              <div>
+                <span class="stat-label">Damage:</span>
+                <span class="stat-value">35</span>
+              </div>
+              <div>
+                <span class="stat-label">DOT:</span>
+                <span class="stat-value">5/sec (3s)</span>
+              </div>
+              <div>
+                <span class="stat-label">Speed:</span>
+                <span class="stat-value">+0.2</span>
+              </div>
+              <div>
+                <span class="stat-label">Range:</span>
+                <span class="stat-value">150</span>
+              </div>
+              <div class="weapon-special">🔥 Burn Effect</div>
+            </div>
+          </div>
+          <div
+            class="weapon-card"
+            data-weapon="dualgun"
+            onclick="window.gameApp.selectWeapon('dualgun')"
+          >
+            <div class="weapon-icon">🔫</div>
+            <h3>DUAL PISTOL</h3>
+            <div class="weapon-type range">RANGE</div>
+            <div class="weapon-stats">
+              <div>
+                <span class="stat-label">Damage:</span>
+                <span class="stat-value">30</span>
+              </div>
+              <div>
+                <span class="stat-label">AOE:</span>
+                <span class="stat-value">80 radius</span>
+              </div>
+              <div>
+                <span class="stat-label">Speed:</span>
+                <span class="stat-value">+0.15</span>
+              </div>
+              <div>
+                <span class="stat-label">Range:</span>
+                <span class="stat-value">200</span>
+              </div>
+              <div class="weapon-special">💥 Explosive Chain</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 15px; margin-bottom: 10px">
+          <button
+            class="btn btn-confirm"
+            id="confirmWeapon"
+            onclick="window.gameApp.startGame()"
+            disabled
+          >
+            ✓ MULAI PERMAINAN
+          </button>
+          <a
+            href="index.html"
+            class="btn btn-back"
+            style="
+              display: inline-block;
+              text-decoration: none;
+              margin-left: 15px;
+            "
+          >
+            ← KEMBALI KE HOME
+          </a>
+        </div>
+      </div>
+
+      <div id="gameOver" class="hidden">
+        <h2>GAME OVER</h2>
+        <p style="font-size: 20px; margin: 20px 0">
+          Final Score: <span id="finalScore">0</span>
+        </p>
+        <p style="font-size: 18px; margin: 20px 0">
+          Wave Reached: <span id="finalWave">0</span>
+        </p>
+        <button class="btn" onclick="window.gameApp.restartGame()">
+          MAIN LAGI
+        </button>
+        <button class="btn" onclick="window.gameApp.backToMenu()">MENU</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { GameManager } from "./src/core/GameManager.js";
+
+      const canvas = document.getElementById("gameCanvas");
+      const uiElements = {
+        menu: document.getElementById("menu"),
+        tutorial: document.getElementById("tutorial"),
+        weaponSelect: document.getElementById("weaponSelect"),
+        gameOver: document.getElementById("gameOver"),
+        confirmWeapon: document.getElementById("confirmWeapon"),
+        pauseMenu: document.getElementById("pauseMenu"),
+        // Mobile controls (elements)
+        mobileControls: document.getElementById("mobileControls"),
+        joystickZone: document.getElementById("joystickZone"),
+        joystickKnob: document.getElementById("joystickKnob"),
+        attackBtn: document.getElementById("mobileAttackBtn"),
+      };
+
+      // Inisialisasi Game Manager dan pasang ke window
+      // sehingga dapat diakses oleh fungsi onclick="" di HTML
+      window.gameApp = new GameManager(canvas, uiElements);
+
+      // Setup initial state - langsung ke weapon select
+      window.gameApp.showWeaponSelect();
+    </script>
+  </body>
+</html>
