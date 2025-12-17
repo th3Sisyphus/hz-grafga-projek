@@ -462,11 +462,62 @@ export class Renderer {
           }
         }
       } else {
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-        ctx.lineWidth = 2;
+        // Bare Fist - Large transparent fist
+        const fistSize = 35;
+        const fistAlpha = alpha * 0.6; // More transparent
+
+        // Fist base (palm)
+        ctx.fillStyle = `rgba(255, 200, 150, ${fistAlpha})`;
         ctx.beginPath();
-        ctx.arc(0, 0, 30, -Math.PI / 4, Math.PI / 4);
-        ctx.stroke();
+        ctx.ellipse(fistSize, 0, 18, 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Knuckles (4 fingers)
+        for (let i = 0; i < 4; i++) {
+          const knuckleY = -12 + i * 8;
+          ctx.fillStyle = `rgba(230, 180, 130, ${fistAlpha})`;
+          ctx.beginPath();
+          ctx.ellipse(fistSize + 15, knuckleY, 8, 6, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Knuckle highlights
+          ctx.fillStyle = `rgba(255, 220, 180, ${fistAlpha * 0.8})`;
+          ctx.beginPath();
+          ctx.ellipse(fistSize + 13, knuckleY - 2, 4, 3, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Thumb
+        ctx.fillStyle = `rgba(255, 200, 150, ${fistAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(fistSize - 5, -15, 7, 10, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Wrist/forearm
+        ctx.fillStyle = `rgba(220, 170, 120, ${fistAlpha * 0.7})`;
+        ctx.fillRect(fistSize - 25, -8, 20, 16);
+
+        // Impact lines (motion blur)
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.4})`;
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 3; i++) {
+          const offsetY = -10 + i * 10;
+          ctx.beginPath();
+          ctx.moveTo(fistSize + 20, offsetY);
+          ctx.lineTo(fistSize + 35, offsetY);
+          ctx.stroke();
+        }
+
+        // Impact waves (when alpha is high)
+        if (alpha > 0.7) {
+          ctx.strokeStyle = `rgba(255, 200, 100, ${alpha * 0.5})`;
+          ctx.lineWidth = 2;
+          for (let i = 0; i < 2; i++) {
+            ctx.beginPath();
+            ctx.arc(fistSize + 25, 0, 20 + i * 10, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
       }
       ctx.restore();
     } else if (effect.constructor.name === "DamageNumber") {
