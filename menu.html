@@ -334,64 +334,17 @@
         </div>
       </div>
 
-      <!-- DEMO OVERLAY 1: Wave Upgrade Modal (#waveUpgradeModal) -->
+      <!-- Wave Upgrade Modal (#waveUpgradeModal) -->
       <div id="waveUpgradeModal" class="app-overlay hidden">
         <div class="overlay-panel" style="max-width: 720px">
           <div class="overlay-header">
-            <div style="display: flex; justify-content: space-between; align-items: center">
-              <span class="overlay-badge">Peningkatan Taktis</span>
-              <span class="sample-tag">[DATA SAMPEL SIMULASI]</span>
-            </div>
+            <span class="overlay-badge">Peningkatan Taktis</span>
             <h2 class="overlay-title">Pilih Modifikasi Operatif</h2>
             <p class="overlay-desc">Sektor berhasil diamankan sementara. Tentukan satu modifikasi persenjataan untuk menghadapi gelombang berikutnya.</p>
           </div>
 
-          <div class="upgrade-grid">
-            <div class="upgrade-card" onclick="selectUpgradeDemo('damage')">
-              <div class="upgrade-icon-wrap">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 2L1 21H23L12 2ZM12 6L19.5 19H4.5L12 6ZM11 10V14H13V10H11ZM11 16V18H13V16H11Z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class="upgrade-name">Kaliber Berat</h4>
-                <span class="upgrade-effect">+25% Kerusakan Serangan</span>
-                <p class="upgrade-desc">Meningkatkan dampak penetrasi semua tipe serangan.</p>
-              </div>
-              <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px">Pilih Modifikasi</button>
-            </div>
-
-            <div class="upgrade-card" onclick="selectUpgradeDemo('speed')">
-              <div class="upgrade-icon-wrap">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M13.5 5.5C14.6 5.5 15.5 4.6 15.5 3.5C15.5 2.4 14.6 1.5 13.5 1.5C12.4 1.5 11.5 2.4 11.5 3.5C11.5 4.6 12.4 5.5 13.5 5.5ZM9.8 8.9L7 23H9.1L10.6 16.5L13.1 19V23H15.1V17.5L12.9 15L13.6 11.5C15 13.2 17.2 14.5 19.5 14.5V12.5C17.6 12.5 15.8 11.3 14.8 9.8L13.8 8.2C13.4 7.6 12.8 7.2 12.1 7.2C11.8 7.2 11.5 7.3 11.2 7.4L6 9.6V14.5H8V11L9.8 8.9Z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class="upgrade-name">Pendorong Adrenalin</h4>
-                <span class="upgrade-effect">+18% Kecepatan Lari</span>
-                <p class="upgrade-desc">Mempercepat manuver kiting menjauh dari kawanan.</p>
-              </div>
-              <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px">Pilih Modifikasi</button>
-            </div>
-
-            <div class="upgrade-card" onclick="selectUpgradeDemo('lifesteal')">
-              <div class="upgrade-icon-wrap">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" />
-                </svg>
-              </div>
-              <div>
-                <h4 class="upgrade-name">Tebasan Siphon</h4>
-                <span class="upgrade-effect">+8% Pemulihan Darah</span>
-                <p class="upgrade-desc">Setiap eliminasi mengembalikan sebagian health bar.</p>
-              </div>
-              <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px">Pilih Modifikasi</button>
-            </div>
-          </div>
-
-          <div class="btn-action-group">
-            <button class="btn btn-primary" onclick="closeOverlay('waveUpgradeModal')">Lanjutkan Pertempuran</button>
+          <div class="upgrade-grid" id="waveUpgradeCards">
+            <!-- Pilihan upgrade diisi secara dinamis dari UPGRADES -->
           </div>
         </div>
       </div>
@@ -635,6 +588,7 @@
     <!-- Application Script Logic -->
     <script type="module">
       import { GameManager } from "./src/core/GameManager.js";
+      import { drawRandomUpgrades, UPGRADES, RARITIES } from "./src/core/data/upgrades.js";
 
       // Bind canvas & primary interactive UI elements
       const canvas = document.getElementById("gameCanvas");
@@ -742,8 +696,63 @@
         badge.textContent = current === "Katana" ? "Dual Pistol" : "Katana";
       };
 
-      window.selectUpgradeDemo = function(type) {
-        window.closeOverlay('waveUpgradeModal');
+      // Logika Pemilihan Upgrade Nyata Antar Gelombang
+      window.currentWaveUpgrades = [];
+      window.showWaveUpgradeModal = function (customOptions = null) {
+        const options = customOptions || drawRandomUpgrades(3);
+        window.currentWaveUpgrades = options;
+
+        const container = document.getElementById("waveUpgradeCards");
+        if (container) {
+          container.innerHTML = options
+            .map((u) => {
+              const rarity = RARITIES[u.rarity] || {
+                name: "Umum",
+                color: "var(--ink-secondary)",
+              };
+              return `
+                <div class="upgrade-card" onclick="window.selectWaveUpgrade('${u.id}')">
+                  <div class="upgrade-icon-wrap" style="color: ${rarity.color}">
+                    ${u.icon}
+                  </div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                      <h4 class="upgrade-name">${u.name}</h4>
+                      <span class="sample-tag" style="color: ${rarity.color}; margin-bottom: 0;">${rarity.name}</span>
+                    </div>
+                    <span class="upgrade-effect">${u.effectLabel}</span>
+                    <p class="upgrade-desc">${u.desc}</p>
+                  </div>
+                  <button class="btn btn-outline" style="padding: 6px 12px; font-size: 13px">Pilih Modifikasi</button>
+                </div>
+              `;
+            })
+            .join("");
+        }
+
+        window.openOverlay("waveUpgradeModal");
+      };
+
+      window.selectWaveUpgrade = function (upgradeId) {
+        const upgrade =
+          window.currentWaveUpgrades.find((u) => u.id === upgradeId) ||
+          UPGRADES.find((u) => u.id === upgradeId);
+
+        if (upgrade && window.gameApp && window.gameApp.context.player) {
+          window.gameApp.context.player.addModifier(upgrade);
+          window.gameApp.context.waveUpgradeActive = false;
+          window.gameApp.context.wave++;
+
+          // Lanjutkan pertempuran ke WAVE_DELAY dan spawn wave berikutnya
+          window.gameApp.context.addTimer(3000, () => {
+            if (window.gameApp.context.running) {
+              window.gameApp.context.waveDelay = false;
+              window.gameApp.waveSystem.spawnZombies();
+            }
+          });
+        }
+
+        window.closeOverlay("waveUpgradeModal");
       };
 
       window.buyItemDemo = function(name) {
@@ -823,7 +832,7 @@
             document.getElementById("gameOver").classList.remove("hidden");
             break;
           case "upgrade":
-            document.getElementById("waveUpgradeModal").classList.remove("hidden");
+            window.showWaveUpgradeModal();
             break;
           case "shop":
             document.getElementById("shopModal").classList.remove("hidden");

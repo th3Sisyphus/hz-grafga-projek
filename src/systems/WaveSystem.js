@@ -5,6 +5,7 @@ import {
   MAP_HEIGHT,
   WAVE_DELAY,
 } from "../core/Constants.js";
+import { HealEffect } from "../domain/Effect.js";
 
 export class WaveSystem {
   constructor(context) {
@@ -51,18 +52,27 @@ export class WaveSystem {
     if (
       this.context.zombies.length === 0 &&
       !this.context.waveDelay &&
-      this.context.running
+      this.context.running &&
+      !this.context.waveUpgradeActive
     ) {
       this.context.waveDelay = true;
-      this.context.wave++;
+      this.context.waveUpgradeActive = true;
 
-      // Timer wave delay menggunakan Game Clock (terjeda saat game paused)
-      this.context.addTimer(WAVE_DELAY, () => {
-        if (this.context.running) {
-          this.context.waveDelay = false;
-          this.spawnZombies();
+      // 1. Regen 20% max HP antar wave (+ bonus modifier jika ada)
+      const p = this.context.player;
+      if (p) {
+        const regenPct = p.waveRegenPercent || 0.20;
+        const healAmt = Math.round(p.maxHealth * regenPct);
+        p.heal(healAmt);
+        if (this.context.effects.length < 300) {
+          this.context.effects.push(new HealEffect(p.x, p.y - 30, healAmt));
         }
-      });
+      }
+
+      // 2. Buka modal upgrade dengan 3 pilihan acak
+      if (typeof window.showWaveUpgradeModal === "function") {
+        window.showWaveUpgradeModal();
+      }
     }
   }
 

@@ -89,3 +89,25 @@ Fase 0 telah diselesaikan dengan fondasi logika permainan yang bersih dan teruku
 9. **Statistik Riil & High Score**: Layar Debriefing Gugur menampilkan metrik nyata dari `context.stats` (`kills`, `shotsFired`, `hits`, `damageDealt`, `damageTaken`), menghapus angka hardcode 84% dan 1.420. Rekor skor dan wave tertinggi disimpan di localStorage dengan key `hz_record_v1`.
 10. **Ambang HP Relatif**: Ambang vignette merah HP kritis (<= 25%) dan status bar bahaya (<= 30%) dihitung berdasarkan persentase `maxHealth`, bukan angka tetap.
 11. **Optimasi Performa**: Batas partikel/efek maksimal 300 serta Spatial Hash grid cell 60px untuk kalkulasi separasi zombie O(n).
+
+---
+
+## 6. Log Pengembangan: Fase 1 — Upgrade Antar Wave
+
+Fase 1 telah mengimplementasikan sistem modifikasi persenjataan antar gelombang:
+1. **Sentralisasi Data Upgrade (`src/core/data/upgrades.js`)**:
+   - Berisi 15 upgrade unik yang mencakup seluruh statistik tempur: `damage %`, `attack speed`, `move speed`, `max HP`, `lifesteal`, `crit chance`, `crit multiplier`, `pierce`, `multi-shot (+1 projectile)`, `knockback`, `aoe radius`, dan `wave regen`.
+   - Klasifikasi Tiga Tingkat Rarity: **Common** (bobot 60), **Rare** (bobot 30), dan **Epic** (bobot 10).
+   - Pengundian 3 kartu acak tanpa duplikat (`drawRandomUpgrades(3)`) berdasarkan bobot peluang rarity.
+2. **Sistem Modifier Stack Reaktif (`Player.js`)**:
+   - Player mengakumulasi tumpukan modifier dan secara instan merekalkulasi statistik efektif (`effectiveDamage`, `effectiveCooldown`, `maxHealth`, `speed`, `effectiveLifesteal`, `effectiveCritChance`, `effectiveCritMult`, `pierce`, `extraProjectiles`, `knockbackMultiplier`, `waveRegenPercent`).
+   - Peningkatan `maxHealth` secara otomatis menambah HP saat ini dengan proporsi yang adil.
+3. **Mekanika Pemulihan & Jeda Game Clock (`WaveSystem.js`)**:
+   - Saat seluruh zombie dalam wave tereliminasi, game clock berhenti dan pemain memulihkan 20% max HP secara otomatis (ditambah bonus modifier ransum).
+   - Modal upgrade (#waveUpgradeModal) terbuka dengan 3 pilihan terundi secara dinamis.
+4. **Pembersihan Komponen Demo**:
+   - Menghapus fungsi demo `selectUpgradeDemo`.
+   - Menggantikan kartu statis dan tag sampel pada modal upgrade dengan rendering dinamis data nyata.
+   - Mengintegrasikan aksi `window.selectWaveUpgrade(upgradeId)` yang menerapkan modifier ke operatif, memajukan wave, dan menjadwalkan timer `WAVE_DELAY` sebelum gelombang musuh berikutnya diterjunkan.
+   - Parameter debug `menu.html?ui=upgrade` tetap berfungsi penuh menampilkan 3 kartu acak dari sumber data.
+

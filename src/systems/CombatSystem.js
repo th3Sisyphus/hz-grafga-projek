@@ -127,7 +127,7 @@ export class CombatSystem {
 
   updateProjectiles(dtNormal = 1) {
     const activeProjectiles = [];
-    const { zombies, projectiles, effects } = this.context;
+    const { zombies, projectiles, effects, player } = this.context;
 
     for (let i = 0; i < projectiles.length; i++) {
       const p = projectiles[i];
@@ -147,18 +147,43 @@ export class CombatSystem {
 
       if (hitZombie) {
         this.context.stats.hits++;
-        const isCritical = Math.random() < (p.weapon.critChance || 0.1);
-        const damage =
-          p.weapon.damage * (isCritical ? (p.weapon.criticalMultiplier || 1.5) : 1);
+        const critChance =
+          player?.effectiveCritChance ?? p.weapon.critChance ?? 0.1;
+        const isCritical = Math.random() < critChance;
+        const critMult =
+          player?.effectiveCritMult ?? p.weapon.criticalMultiplier ?? 1.5;
+        const baseDmg = p.damage || p.weapon.damage;
+        const damage = baseDmg * (isCritical ? critMult : 1);
+
         this.applyDamage(hitZombie, damage, isCritical);
 
+        // Knockback dari proyektil
+        const kbMult = player?.knockbackMultiplier || 1.0;
+        const kbDist = 10 * kbMult;
+        hitZombie.x += Math.cos(p.angle) * kbDist;
+        hitZombie.y += Math.sin(p.angle) * kbDist;
+
         if (p.weapon.name === "Wizard Book") {
-          hitZombie.applyBurn(p.weapon.dotDamage, p.weapon.dotDuration, this.context.time);
+          hitZombie.applyBurn(
+            p.weapon.dotDamage,
+            p.weapon.dotDuration,
+            this.context.time
+          );
           if (effects.length < 300) {
             effects.push(new BurnEffect(hitZombie.x, hitZombie.y));
           }
         } else if (p.weapon.name === "Dual Gun") {
-          this.handleExplosion(hitZombie, p.weapon);
+          const aoeRad = p.aoeRadius || p.weapon.aoeRadius;
+          this.handleExplosion(hitZombie, damage, aoeRad);
+        }
+
+        // Penetrasi (Pierce)
+        p.pierceCount = (p.pierceCount || 0) + 1;
+        if (p.pierceCount <= (p.pierce || 0)) {
+          // Masih bisa menembus zombie berikutnya
+          activeProjectiles.push(p);
+        } else {
+          p.hit = true;
         }
       } else {
         activeProjectiles.push(p);
@@ -167,10 +192,10 @@ export class CombatSystem {
     this.context.projectiles = activeProjectiles;
   }
 
-  handleExplosion(centerZombie, weapon) {
+  handleExplosion(centerZombie, baseDamage, aoeRadius) {
     if (this.context.effects.length < 300) {
       this.context.effects.push(
-        new ExplosionEffect(centerZombie.x, centerZombie.y, weapon.aoeRadius)
+        new ExplosionEffect(centerZombie.x, centerZombie.y, aoeRadius)
       );
     }
     for (let i = 0; i < this.context.zombies.length; i++) {
@@ -179,8 +204,8 @@ export class CombatSystem {
         otherZombie.x - centerZombie.x,
         otherZombie.y - centerZombie.y
       );
-      if (aoeDist < weapon.aoeRadius) {
-        this.applyDamage(otherZombie, weapon.damage * 0.7);
+      if (aoeDist < aoeRadius) {
+        this.applyDamage(otherZombie, baseDamage * 0.7);
       }
     }
   }
@@ -206,20 +231,37 @@ export class CombatSystem {
         while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
         while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
 
-        // Validasi kerucut melee memakai field arc dari data senjata!
         if (Math.abs(angleDiff) <= arc) {
           this.context.stats.hits++;
-          const critChance = weapon.critChance || 0.2;
+          const critChance =
+            player.effectiveCritChance !== undefined
+              ? player.effectiveCritChance
+              : weapon.critChance || 0.2;
           const isCritical = Math.random() < critChance;
-          const damage =
-            weapon.damage * (isCritical ? weapon.criticalMultiplier : 1);
+          const critMult =
+            player.effectiveCritMult !== undefined
+              ? player.effectiveCritMult
+              : weapon.criticalMultiplier || 1.5;
+          const baseDmg = player.effectiveDamage || weapon.damage;
+          const damage = baseDmg * (isCritical ? critMult : 1);
 
           this.applyDamage(zombie, damage, isCritical);
           hitAnyZombie = true;
 
+          // Knockback
+          const kbMult = player.knockbackMultiplier || 1.0;
+          const kbDist = 14 * kbMult;
+          const kbAngle = Math.atan2(zombie.y - player.y, zombie.x - player.x);
+          zombie.x += Math.cos(kbAngle) * kbDist;
+          zombie.y += Math.sin(kbAngle) * kbDist;
+
           // Lifesteal
-          if (weapon.lifesteal && weapon.lifesteal > 0) {
-            const healAmount = Math.floor(damage * weapon.lifesteal);
+          const lifestealRate =
+            player.effectiveLifesteal !== undefined
+              ? player.effectiveLifesteal
+              : weapon.lifesteal || 0;
+          if (lifestealRate > 0) {
+            const healAmount = Math.floor(damage * lifestealRate);
             if (healAmount >= 1) {
               player.heal(healAmount);
               if (this.context.effects.length < 300) {
