@@ -3,21 +3,76 @@
 // Semua logika visual (draw) ditangani oleh Renderer.js
 
 export class MeleeEffect {
-  constructor(x, y, angle, weaponName, arc = 1.0) {
+  constructor(x, y, angle, weaponName, arc = 1.0, range = 80, isCritical = false) {
     this.type = "melee";
     this.x = x;
     this.y = y;
     this.angle = angle;
     this.weaponName = weaponName;
     this.arc = arc; // Setengah sudut kerucut (radian)
+    this.range = range; // Jangkauan jangkauan visual senjata
+    this.isCritical = isCritical;
+    this.life = 14; // ~240 ms pada 60 FPS
+    this.maxLife = 14;
+    this.frame = 0;
+  }
+  update(dt = 1) {
+    this.life -= dt;
+    const progress = 1 - Math.max(0, this.life / this.maxLife);
+    this.frame = Math.min(3, Math.floor(progress * 4));
+    return this.life > 0;
+  }
+}
+
+export class IchorSplashEffect {
+  constructor(x, y) {
+    this.type = "ichor_splash";
+    this.x = x;
+    this.y = y;
     this.life = 10;
     this.maxLife = 10;
+    this.frame = 0;
+  }
+  update(dt = 1) {
+    this.life -= dt;
+    const progress = 1 - Math.max(0, this.life / this.maxLife);
+    this.frame = Math.min(2, Math.floor(progress * 3));
+    return this.life > 0;
+  }
+}
+
+export class ZombieClawEffect {
+  constructor(x, y) {
+    this.type = "zombie_claw";
+    this.x = x;
+    this.y = y;
+    this.life = 12;
+    this.maxLife = 12;
+    this.frame = 0;
+  }
+  update(dt = 1) {
+    this.life -= dt;
+    const progress = 1 - Math.max(0, this.life / this.maxLife);
+    this.frame = Math.min(2, Math.floor(progress * 3));
+    return this.life > 0;
+  }
+}
+
+export class GroundSlamEffect {
+  constructor(x, y, radius = 95) {
+    this.type = "ground_slam";
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.life = 18;
+    this.maxLife = 18;
   }
   update(dt = 1) {
     this.life -= dt;
     return this.life > 0;
   }
 }
+
 
 export class DamageNumber {
   constructor(x, y, damage, isCritical = false) {

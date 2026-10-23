@@ -4,6 +4,8 @@ import {
   DeathEffect,
   DamageNumber,
   HealEffect,
+  IchorSplashEffect,
+  ZombieClawEffect,
 } from "../domain/Effect.js";
 import {
   TILE_SIZE,
@@ -105,6 +107,18 @@ export class CombatSystem {
           this.applyDamage(player, zombie.damage);
           zombie.lastAttack = time;
 
+          // Feedback serangan zombie: cakar 3 frame di tubuh player, getaran layar, dan directional indicator
+          if (!zombie.isBoss) {
+            if (this.context.effects.length < 300) {
+              this.context.effects.push(new ZombieClawEffect(player.x, player.y));
+            }
+            this.context.fx?.addDirectionalDamage(zombie.x, zombie.y);
+            this.context.fx?.shake(3);
+          } else {
+            this.context.fx?.addDirectionalDamage(zombie.x, zombie.y);
+            this.context.fx?.shake(6);
+          }
+
           // Ability Boss: Stun setiap 4 pukulan di Fase 1
           if (zombie.isBoss && zombie.phase === 1) {
             zombie.attackCount = (zombie.attackCount || 0) + 1;
@@ -129,6 +143,17 @@ export class CombatSystem {
     const index = this.context.zombies.indexOf(zombie);
     if (index > -1) {
       this.context.zombies.splice(index, 1);
+
+      // Tinggalkan mayat sebagai decal tanah selama 2-3 detik
+      if (this.context.renderer) {
+        this.context.renderer.addCorpse(
+          zombie.x,
+          zombie.y,
+          zombie.isBoss,
+          zombie.facingRight,
+          zombie.sprite?.paletteSwap || 0
+        );
+      }
 
       // Hitung reward skor dengan combo multiplier
       this.context.addCombo();
@@ -308,6 +333,7 @@ export class CombatSystem {
     const arc = weapon.arc !== undefined ? weapon.arc : 1.0;
 
     let hitAnyZombie = false;
+    let hasCrit = false;
 
     for (let i = 0; i < zombies.length; i++) {
       const zombie = zombies[i];
@@ -329,6 +355,7 @@ export class CombatSystem {
               ? player.effectiveCritChance
               : weapon.critChance || 0.2;
           const isCritical = Math.random() < critChance;
+          if (isCritical) hasCrit = true;
           const critMult =
             player.effectiveCritMult !== undefined
               ? player.effectiveCritMult
@@ -342,7 +369,12 @@ export class CombatSystem {
           this.applyDamage(zombie, damage, isCritical);
           hitAnyZombie = true;
 
-          // Knockback
+          // Dampak muncul di posisi SETIAP ZOMBIE yang terkena (percikan piksel ichor, bukan di pemain)
+          if (this.context.effects.length < 300) {
+            this.context.effects.push(new IchorSplashEffect(zombie.x, zombie.y));
+          }
+
+          // Knockback visual kecil
           const kbMult = player.knockbackMultiplier || 1.0;
           const kbDist = 14 * kbMult;
           const kbAngle = Math.atan2(zombie.y - player.y, zombie.x - player.x);
@@ -367,6 +399,12 @@ export class CombatSystem {
           }
         }
       }
+    }
+
+    if (hitAnyZombie) {
+      // Hit-stop 40-60 ms & hentakan layar (screen punch)
+      this.context.fx?.hitStop(50);
+      this.context.fx?.shake(hasCrit ? 6 : 3);
     }
 
     if (hitAnyZombie) {

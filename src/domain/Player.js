@@ -368,7 +368,9 @@ export class Player {
           this.y,
           this.direction,
           this.weapon.name,
-          this.weapon.arc || 1.0
+          this.weapon.arc !== undefined ? this.weapon.arc : 1.0,
+          this.weapon.range || 80,
+          false
         )
       );
     } else {

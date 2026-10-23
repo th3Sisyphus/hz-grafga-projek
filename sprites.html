@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hunty Zombie — Galeri Review Seluruh Aset Visual In-Game (Gerbang 2)</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      body {
+        background-color: var(--ground);
+        color: var(--ink);
+        padding: 24px;
+        font-family: var(--font-family);
+        overflow-y: auto;
+      }
+      .gallery-container {
+        max-width: 1320px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .gallery-header {
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 16px;
+      }
+      .gallery-title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .gallery-badge {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+      }
+      .gallery-desc {
+        color: var(--ink-secondary);
+        font-size: 14px;
+        margin-top: 6px;
+      }
+
+      /* Control Toolbar */
+      .toolbar-card {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        padding: 16px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        position: sticky;
+        top: 12px;
+        z-index: 100;
+        backdrop-filter: blur(8px);
+      }
+      .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .btn-toggle {
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid var(--rule);
+        background: var(--surface-dim);
+        color: var(--ink-secondary);
+        cursor: pointer;
+        transition: all 150ms var(--ease-out);
+      }
+      .btn-toggle:hover {
+        background: var(--surface-hover);
+        color: var(--ink);
+      }
+      .btn-toggle.active {
+        background: var(--accent);
+        color: var(--surface-dim);
+        border-color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* Palette Swatches Section */
+      .palette-section {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        padding: 16px 20px;
+      }
+      .palette-title {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+      }
+      .palette-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: 8px;
+      }
+      .swatch-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface-dim);
+        border: 1px solid var(--rule);
+        padding: 4px 6px;
+      }
+      .swatch-color {
+        width: 22px;
+        height: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        flex-shrink: 0;
+      }
+      .swatch-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .swatch-hex {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .swatch-name {
+        font-size: 10px;
+        color: var(--ink-secondary);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      /* Sections & Cards */
+      .section-card {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 8px;
+      }
+      .asset-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+      }
+      .asset-box {
+        background: var(--surface-dim);
+        border: 1px solid var(--rule);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .asset-box-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ink);
+        text-transform: uppercase;
+        text-align: center;
+      }
+      .canvas-viewport {
+        background: #000000;
+        border: 1px solid var(--rule);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        min-height: 80px;
+        width: 100%;
+      }
+      .canvas-viewport canvas {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+      .asset-meta {
+        font-size: 11px;
+        color: var(--ink-secondary);
+        font-family: var(--font-mono);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gallery-container">
+      <!-- Header -->
+      <div class="gallery-header">
+        <div class="gallery-title">
+          Hunty Zombie — Galeri Seluruh Aset Visual
+          <span class="gallery-badge">Arah A: Chunky Pixel Art (1:2)</span>
+        </div>
+        <div class="gallery-desc">
+          Seluruh aset visual game mematuhi The 32-Color Quarantine Palette, shading 3-nada, pencahayaan Kiri-Atas (45°),
+          dan di-bake ke offscreen canvas via SpriteAtlas (0 filter, 0 shadowBlur, 0 gradient).
+        </div>
+      </div>
+
+      <!-- Toolbar Interaktif -->
+      <div class="toolbar-card">
+        <div class="toolbar-group">
+          <button id="btnPlayPause" class="btn-toggle active">Jeda (Pause)</button>
+          <button id="btnStep" class="btn-toggle">Maju 1 Frame (+60ms)</button>
+          <span style="font-size: 12px; color: var(--muted); margin-left: 8px">Kecepatan:</span>
+          <select id="selSpeed" style="background: var(--surface-dim); color: var(--ink); border: 1px solid var(--rule); padding: 6px 10px; font-size: 12px;">
+            <option value="0.5">0.5x (Slow-Mo)</option>
+            <option value="1.0" selected>1.0x (Normal)</option>
+            <option value="1.5">1.5x (Cepat)</option>
+            <option value="2.0">2.0x (Turbo)</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size: 12px; color: var(--muted)">Perbesaran:</span>
+          <button id="btnZoom1x" class="btn-toggle">1x</button>
+          <button id="btnZoom2x" class="btn-toggle">2x</button>
+          <button id="btnZoom4x" class="btn-toggle active">4x (Jelas)</button>
+        </div>
+      </div>
+
+      <!-- 32 Palette Swatches -->
+      <div class="palette-section">
+        <div class="palette-title">Palet Baku 32 Warna (The Quarantine Palette)</div>
+        <div id="paletteGrid" class="palette-grid"></div>
+      </div>
+
+      <!-- 1. Lingkungan & Tile -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>1. Lingkungan & Tile (20x20 Piksel Seni — TILE_SIZE 40)</span>
+          <span style="font-size: 12px; color: var(--muted);">Rumput, Autotile Tanah, Batu, Pohon Sway, Spikes, Dekorasi</span>
+        </div>
+        <div class="asset-grid" id="gridEnvironment"></div>
+      </div>
+
+      <!-- 2. Senjata & Ikon HUD -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>2. Desain Senjata & Ikon HUD (16x16 / 20x16)</span>
+          <span style="font-size: 12px; color: var(--muted);">Katana, Tangan Kosong, Wizard Book, Dual Gun, Shotgun</span>
+        </div>
+        <div class="asset-grid" id="gridWeapons"></div>
+      </div>
+
+      <!-- 3. Efek Serangan Tempur -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>3. Efek Serangan Senjata & Dampak Tempur</span>
+          <span style="font-size: 12px; color: var(--muted);">Sabit Tebasan Katana, Crit Amber, Shockwave Pukulan, Ichor Splash, Asam</span>
+        </div>
+        <div class="asset-grid" id="gridCombatFx"></div>
+      </div>
+
+      <!-- 4. Zombie Biasa & Arketipe -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>4. Zombie Biasa & Palette-Swaps (16x16 Seni — Tampil 32x32 px)</span>
+          <span style="font-size: 12px; color: var(--muted);">Walk (4f), Attack (4f), Spawn (3f), Death (4f), Hit Flash, 4 Swaps + 5 Arketipe</span>
+        </div>
+        <div class="asset-grid" id="gridZombies"></div>
+      </div>
+
+      <!-- 5. Zombie Boss Kolosal -->
+      <div class="section-card">
+        <div class="section-title">
+          <span>5. Zombie Boss Kolosal & Enraged Phase (32x32 Seni — Tampil 64x64 px)</span>
+          <span style="font-size: 12px; color: var(--muted);">Walk Berat (4f), Attack Slam (5f), Death (6f), Fase 3 Enraged Merah-Ambar</span>
+        </div>
+        <div class="asset-grid" id="gridBoss"></div>
+      </div>
+
+      <!-- Navigasi Balik -->
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="menu.html" class="btn-toggle active" style="text-decoration: none; display: inline-block; padding: 12px 28px; font-size: 15px;">
+          Kembali ke Permainan Utama
+        </a>
+      </div>
+    </div>
+
+    <!-- Script Review Gallery -->
+    <script type="module">
+      import { PALETTE } from "./src/rendering/sprites/palette.js";
+      import { getSpriteAtlas } from "./src/rendering/sprites/SpriteAtlas.js";
+
+      const atlas = getSpriteAtlas(2);
+
+      // Palet Nama Label
+      const PALETTE_NAMES = [
+        "00: void-black", "01: night-abyss", "02: slate-shadow", "03: slate-mid",
+        "04: slate-light", "05: dirt-shadow", "06: dirt-mid", "07: dirt-light",
+        "08: swamp-shadow", "09: swamp-mid", "10: swamp-light", "11: bark-shadow",
+        "12: bark-mid", "13: bark-light", "14: canopy-shadow", "15: canopy-mid",
+        "16: canopy-light", "17: zombie-shadow", "18: zombie-mid", "19: zombie-light",
+        "20: ichor-dark", "21: ichor-mid", "22: rag-shadow", "23: rag-mid",
+        "24: steel-shadow", "25: steel-mid", "26: steel-light", "27: steel-gleam",
+        "28: hazard-deep", "29: safety-orange", "30: amber-spark", "31: vital-green"
+      ];
+
+      // Render Swatches
+      const palContainer = document.getElementById("paletteGrid");
+      PALETTE.forEach((hex, idx) => {
+        const item = document.createElement("div");
+        item.className = "swatch-item";
+        item.innerHTML = `
+          <div class="swatch-color" style="background-color: ${hex}"></div>
+          <div class="swatch-info">
+            <span class="swatch-hex">${hex}</span>
+            <span class="swatch-name">${PALETTE_NAMES[idx] || ""}</span>
+          </div>
+        `;
+        palContainer.appendChild(item);
+      });
+
+      // Kontrol Animasi
+      let isPlaying = true;
+      let animTime = 0;
+      let speed = 1.0;
+      let currentZoom = 2; // Default 2x di atlas * zoom = 4x total tampilan
+
+      const btnPlayPause = document.getElementById("btnPlayPause");
+      const btnStep = document.getElementById("btnStep");
+      const selSpeed = document.getElementById("selSpeed");
+      const btnZoom1x = document.getElementById("btnZoom1x");
+      const btnZoom2x = document.getElementById("btnZoom2x");
+      const btnZoom4x = document.getElementById("btnZoom4x");
+
+      btnPlayPause.addEventListener("click", () => {
+        isPlaying = !isPlaying;
+        btnPlayPause.textContent = isPlaying ? "Jeda (Pause)" : "Putar (Play)";
+        btnPlayPause.classList.toggle("active", isPlaying);
+      });
+
+      btnStep.addEventListener("click", () => {
+        animTime += 60;
+        renderAllCanvases();
+      });
+
+      selSpeed.addEventListener("change", (e) => {
+        speed = parseFloat(e.target.value);
+      });
+
+      function setZoom(scale) {
+        currentZoom = scale;
+        btnZoom1x.classList.toggle("active", scale === 0.5);
+        btnZoom2x.classList.toggle("active", scale === 1);
+        btnZoom4x.classList.toggle("active", scale === 2);
+        renderAllCanvases();
+      }
+
+      btnZoom1x.addEventListener("click", () => setZoom(0.5));
+      btnZoom2x.addEventListener("click", () => setZoom(1));
+      btnZoom4x.addEventListener("click", () => setZoom(2));
+
+      // Registry Animasi Dinamis
+      const dynamicItems = [];
+
+      function createAssetCard(containerId, title, drawFn, metaText = "") {
+        const container = document.getElementById(containerId);
+        const box = document.createElement("div");
+        box.className = "asset-box";
+        box.innerHTML = `
+          <div class="asset-box-title">${title}</div>
+          <div class="canvas-viewport"><canvas></canvas></div>
+          <div class="asset-meta">${metaText}</div>
+        `;
+        container.appendChild(box);
+        const canvas = box.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+
+        dynamicItems.push({ canvas, ctx, drawFn });
+      }
+
+      // ==========================================
+      // POPULASI ITEM GALERI
+      // ==========================================
+
+      // 1. Lingkungan
+      createAssetCard("gridEnvironment", "Rumput Rawa (6 Varian)", (ctx, t) => {
+        const varIdx = Math.floor(t / 800) % 6;
+        const c = atlas.get(`grass_${varIdx}`);
+        if (c) {
+          ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+        }
+      }, "Tile 20x20 | Varian Siklus 0-5");
+
+      createAssetCard("gridEnvironment", "Jalan Tanah (Dirt)", (ctx, t) => {
+        const varIdx = Math.floor(t / 800) % 3;
+        const c = atlas.get(`dirt_${varIdx}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Tile 20x20 | Kerikil & Lumpur");
+
+      createAssetCard("gridEnvironment", "Autotile Tepi Tanah (N, S, W, E)", (ctx, t) => {
+        const edges = ["N", "S", "W", "E"];
+        const edge = edges[Math.floor(t / 800) % 4];
+        const c = atlas.get(`dirt_edge_${edge}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Mask Organik Bergerigi");
+
+      createAssetCard("gridEnvironment", "Lantai Batu Bermotif (Stone)", (ctx, t) => {
+        const varIdx = Math.floor(t / 800) % 3;
+        const c = atlas.get(`stone_${varIdx}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Bata Flagstone Interlocking");
+
+      createAssetCard("gridEnvironment", "Pohon Cemara (Sway 2f)", (ctx, t) => {
+        const f = Math.floor(t / 600) % 2;
+        const c = atlas.get(`tree_0_${f}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "24x36 Seni | Bayangan di-Bake");
+
+      createAssetCard("gridEnvironment", "Batu Karang (3 Varian)", (ctx, t) => {
+        const varIdx = Math.floor(t / 800) % 3;
+        const c = atlas.get(`rock_${varIdx}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Slate Shadow/Mid/Light");
+
+      createAssetCard("gridEnvironment", "Jebakan Spike (2 State)", (ctx, t) => {
+        const isExtended = Math.floor(t / 1000) % 2 === 1;
+        const c = atlas.get(isExtended ? "spike_extended" : "spike_retracted");
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Retracted / Extended Tajam");
+
+      createAssetCard("gridEnvironment", "Dekorasi Tanah (~8% Kepadatan)", (ctx, t) => {
+        const varIdx = Math.floor(t / 600) % 6;
+        const c = atlas.get(`decor_${varIdx}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Tengkorak, Retakan, Ichor, Kayu");
+
+      // 2. Senjata
+      createAssetCard("gridWeapons", "Katana (Idle & Strike)", (ctx, t) => {
+        const pose = Math.floor(t / 400) % 3 === 0 ? "strike" : "idle";
+        const c = atlas.get(`weapon_katana_${pose}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Bilah Lengkung & Tsuba Emas");
+
+      createAssetCard("gridWeapons", "Tangan Kosong / Perban", (ctx, t) => {
+        const pose = Math.floor(t / 300) % 2 === 0 ? "strike" : "idle";
+        const c = atlas.get(`weapon_fist_${pose}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Kepalan Balutan Perban");
+
+      createAssetCard("gridWeapons", "Wizard Book (Flutter 3f)", (ctx, t) => {
+        const f = Math.floor(t / 300) % 3;
+        const pose = f === 0 ? "idle" : f === 1 ? "flutter1" : "flutter2";
+        const c = atlas.get(`weapon_wizard_${pose}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Rune Mistis & Halaman Berkibar");
+
+      createAssetCard("gridWeapons", "Dual Gun (Muzzle & Eject)", (ctx, t) => {
+        const f = Math.floor(t / 200) % 3;
+        const pose = f === 0 ? "idle" : f === 1 ? "fire1" : "fire2";
+        const c = atlas.get(`weapon_dualgun_${pose}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Moncong Api & Selongsong Eject");
+
+      createAssetCard("gridWeapons", "Shotgun Penumpas", (ctx, t) => {
+        const f = Math.floor(t / 300) % 3;
+        const pose = f === 0 ? "idle" : f === 1 ? "fire1" : "fire2";
+        const c = atlas.get(`weapon_shotgun_${pose}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Laras Ganda & Selongsong Merah");
+
+      createAssetCard("gridWeapons", "Ikon HUD Senjata", (ctx, t) => {
+        const weapons = ["katana", "fist", "wizard", "dualgun", "shotgun"];
+        const w = weapons[Math.floor(t / 800) % 5];
+        const c = atlas.get(`weapon_${w}_icon`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Satu Sumber dengan Sprite");
+
+      // 3. Efek Tempur
+      createAssetCard("gridCombatFx", "Katana Slash Arc (4f)", (ctx, t) => {
+        const f = Math.floor(t / 60) % 4;
+        const c = atlas.get(`slash_katana_${f}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Sabit Putih + Safety Orange (60ms/f)");
+
+      createAssetCard("gridCombatFx", "Critical Amber Slash (4f)", (ctx, t) => {
+        const f = Math.floor(t / 60) % 4;
+        const c = atlas.get(`slash_crit_${f}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Api Amber 28x28 + Hentakan Layar");
+
+      createAssetCard("gridCombatFx", "Fist Shockwave Ring (3f)", (ctx, t) => {
+        const f = Math.floor(t / 70) % 3;
+        const c = atlas.get(`fist_shockwave_${f}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Cincin Kejut Pukulan Piksel");
+
+      createAssetCard("gridCombatFx", "Zombie Claw Slash (3f)", (ctx, t) => {
+        const f = Math.floor(t / 70) % 3;
+        const c = atlas.get(`zombie_claw_${f}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Sabetan Cakar di Tubuh Player");
+
+      createAssetCard("gridCombatFx", "Ichor Dark Splash (3f)", (ctx, t) => {
+        const f = Math.floor(t / 70) % 3;
+        const c = atlas.get(`ichor_splash_${f}`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Percikan di Posisi Zombie Kena Hit");
+
+      createAssetCard("gridCombatFx", "Ludah Asam & Stun Stars", (ctx, t) => {
+        const f = Math.floor(t / 100) % 3;
+        const star = atlas.get(`stun_star_${f}`);
+        const acid = atlas.get(`acid_spit_${f % 2}`);
+        if (star) ctx.drawImage(star, 10, 10, star.width * currentZoom, star.height * currentZoom);
+        if (acid) ctx.drawImage(acid, 60, 10, acid.width * currentZoom, acid.height * currentZoom);
+      }, "Proyektil Asam + Bintang Berputar");
+
+      // 4. Zombie Biasa & Swaps
+      createAssetCard("gridZombies", "Zombie Walk (4f Bobbing)", (ctx, t) => {
+        const f = Math.floor(t / 150) % 4;
+        const c = atlas.get(`zombie_normal_walk_${f}_s0_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "16x16 Seni | 150 ms/f");
+
+      createAssetCard("gridZombies", "Zombie Attack (4f Windup/Strike)", (ctx, t) => {
+        const f = Math.floor(t / 100) % 4;
+        const c = atlas.get(`zombie_normal_attack_${f}_s0_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Condong Belakang & Hantam");
+
+      createAssetCard("gridZombies", "Spawn (3f) & Death (4f)", (ctx, t) => {
+        const isDeath = Math.floor(t / 1200) % 2 === 1;
+        if (isDeath) {
+          const f = Math.min(3, Math.floor((t % 1200) / 150));
+          const c = atlas.get(`zombie_normal_death_${f}_s0_right`);
+          if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+        } else {
+          const f = Math.min(2, Math.floor((t % 1200) / 200));
+          const c = atlas.get(`zombie_normal_spawn_${f}_s0_right`);
+          if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+        }
+      }, "Bangkit dari Tanah / Rubuh Decal");
+
+      createAssetCard("gridZombies", "Hit Flash Siluet Putih (Atlas)", (ctx, t) => {
+        const f = Math.floor(t / 150) % 4;
+        const isHit = Math.floor(t / 200) % 2 === 1;
+        const key = isHit
+          ? `zombie_normal_walk_${f}_s0_right_hit`
+          : `zombie_normal_walk_${f}_s0_right`;
+        const c = atlas.get(key);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "0 ctx.filter | 100% Pre-Baked");
+
+      createAssetCard("gridZombies", "4 Palette-Swaps Warga/Militer", (ctx, t) => {
+        const s = Math.floor(t / 800) % 4;
+        const f = Math.floor(t / 150) % 4;
+        const c = atlas.get(`zombie_normal_walk_${f}_s${s}_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Civilian / Soldier / Hazmat / Ghoul");
+
+      createAssetCard("gridZombies", "5 Arketipe (Runner, Brute, Spitter, Exploder, Necro)", (ctx, t) => {
+        const archetypes = ["runner", "brute", "spitter", "exploder", "necromancer"];
+        const arch = archetypes[Math.floor(t / 800) % 5];
+        const f = Math.floor(t / 150) % 4;
+        const c = atlas.get(`zombie_${arch}_walk_${f}_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Slot Palette & Siluet Khusus");
+
+      // 5. Zombie Boss
+      createAssetCard("gridBoss", "Boss Walk Berat (4f Menghentak)", (ctx, t) => {
+        const f = Math.floor(t / 180) % 4;
+        const c = atlas.get(`boss_walk_${f}_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "32x32 Seni | Lengan Mutan & Rantai");
+
+      createAssetCard("gridBoss", "Boss Attack Overhead Slam (5f)", (ctx, t) => {
+        const f = Math.floor(t / 120) % 5;
+        const c = atlas.get(`boss_attack_${f}_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Windup Atas & Hantaman Gempa");
+
+      createAssetCard("gridBoss", "Boss Death Kolosal (6f)", (ctx, t) => {
+        const f = Math.floor(t / 140) % 6;
+        const c = atlas.get(`boss_death_${f}_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Keruntuhan Monster ke Tanah");
+
+      createAssetCard("gridBoss", "Boss Enraged Fase 3 (Merah-Ambar)", (ctx, t) => {
+        const f = Math.floor(t / 140) % 4;
+        const c = atlas.get(`boss_enraged_walk_${f}_right`);
+        if (c) ctx.drawImage(c, 0, 0, c.width * currentZoom, c.height * currentZoom);
+      }, "Pre-baked Merah-Panas (+30% Kecepatan)");
+
+      // Render Loop Galeri
+      function renderAllCanvases() {
+        for (const item of dynamicItems) {
+          const { canvas, ctx, drawFn } = item;
+          // Set dimensi canvas sesuai zoom
+          if (canvas.width !== 160 || canvas.height !== 120) {
+            canvas.width = 160;
+            canvas.height = 120;
+          }
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.imageSmoothingEnabled = false;
+
+          ctx.save();
+          drawFn(ctx, animTime);
+          ctx.restore();
+        }
+      }
+
+      let lastRaf = performance.now();
+      function loop(now) {
+        const dt = now - lastRaf;
+        lastRaf = now;
+
+        if (isPlaying) {
+          animTime += dt * speed;
+          renderAllCanvases();
+        }
+
+        requestAnimationFrame(loop);
+      }
+
+      // Initial Render
+      renderAllCanvases();
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>

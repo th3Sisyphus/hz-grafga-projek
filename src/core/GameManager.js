@@ -9,6 +9,7 @@ export class GameManager {
   constructor(canvas, uiElements) {
     this.context = new GameContext(canvas);
     this.renderer = new Renderer(this.context);
+    this.context.renderer = this.renderer;
     this.uiElements = uiElements;
 
     this.movementSystem = new MovementSystem(this.context);
@@ -307,10 +308,17 @@ export class GameManager {
       }
     }
 
-    // 1. Systems Update with dtNormal
-    this.movementSystem.update(dtNormal);
-    this.combatSystem.update(dtNormal);
-    this.waveSystem.update();
+    // 0. Update Fx Context
+    this.context.fx?.update(dtNormal);
+    const isHitStopped = this.context.fx?.isHitStopped();
+    const effectiveDt = isHitStopped ? 0 : dtNormal;
+
+    // 1. Systems Update with effectiveDt
+    this.movementSystem.update(effectiveDt);
+    this.combatSystem.update(effectiveDt);
+    if (!isHitStopped) {
+      this.waveSystem.update();
+    }
 
     // 2. Update zombie animations
     for (let i = 0; i < this.context.zombies.length; i++) {

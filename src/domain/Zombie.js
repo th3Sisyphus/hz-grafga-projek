@@ -47,7 +47,8 @@ export class Zombie {
     this.skillTelegraph = null; // { type, start, duration, ... }
 
     // Sprite & Animasi
-    this.sprite = new ZombieSprite(false);
+    const seed = Math.abs(((x * 374761393 + y * 668265263) ^ wave) | 0);
+    this.sprite = new ZombieSprite(false, enemyType, seed);
     this.facingRight = true;
     this.isAttacking = false;
     this.lastX = x;
@@ -210,7 +211,7 @@ export class ZombieBoss extends Zombie {
     // TODO-art: data bentuk dan radius telegraf dipakai tugas art berikutnya
     this.activeTelegraph = null;
 
-    this.sprite = new ZombieSprite(true);
+    this.sprite = new ZombieSprite(true, "boss", 0);
   }
 
   updatePhase() {

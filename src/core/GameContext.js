@@ -10,6 +10,7 @@ import { Player } from "../domain/Player.js";
 import { SoundManager } from "./SoundManager.js";
 import { AchievementTracker } from "./data/achievements.js";
 import { MODES } from "./data/modes.js";
+import { FxContext } from "../rendering/FxContext.js";
 
 /**
  * World Generation dengan jaminan:
@@ -224,6 +225,7 @@ export class GameContext {
 
     this.soundManager = new SoundManager();
     this.soundManager.loadSounds();
+    this.fx = new FxContext(this);
 
     this.init();
   }
