@@ -306,6 +306,11 @@ export class GameManager {
       const el = document.getElementById("zombieCount");
       if (el) el.textContent = zCount;
     }
+    if (this._lastCoins !== this.context.coins) {
+      this._lastCoins = this.context.coins;
+      const el = document.getElementById("coinCount");
+      if (el) el.textContent = this.context.coins !== undefined ? this.context.coins : 0;
+    }
     const curHp = Math.max(0, Math.floor(player.health));
     if (this._lastHp !== curHp) {
       this._lastHp = curHp;

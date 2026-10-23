@@ -349,54 +349,24 @@
         </div>
       </div>
 
-      <!-- DEMO OVERLAY 2: Merchant Shop (#shopModal) -->
+      <!-- OVERLAY 2: Merchant Shop (#shopModal) -->
       <div id="shopModal" class="app-overlay hidden">
         <div class="overlay-panel" style="max-width: 640px">
           <div class="overlay-header">
             <div style="display: flex; justify-content: space-between; align-items: center">
               <span class="overlay-badge">Pedagang Karantina</span>
-              <span class="sample-tag">[DATA SAMPEL SIMULASI]</span>
+              <span id="shopPlayerCoins" class="overlay-badge" style="color: var(--accent); border-color: var(--accent)">Koin: 0</span>
             </div>
             <h2 class="overlay-title">Pos Logistik Perbekalan</h2>
-            <p class="overlay-desc">Tukarkan Koin Pemburu hasil eliminasi dengan perbekalan darurat.</p>
+            <p class="overlay-desc">Tukarkan Koin Pemburu hasil eliminasi dengan perbekalan darurat sebelum wave berikutnya.</p>
           </div>
 
-          <div class="shop-inventory-grid">
-            <div class="shop-item-card">
-              <div class="shop-item-info">
-                <span class="shop-item-name">Kotak P3K Lapangan</span>
-                <span class="shop-item-cost">50 Koin</span>
-              </div>
-              <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px" onclick="buyItemDemo('P3K')">Beli</button>
-            </div>
-
-            <div class="shop-item-card">
-              <div class="shop-item-info">
-                <span class="shop-item-name">Kantong Munisi Penuh</span>
-                <span class="shop-item-cost">40 Koin</span>
-              </div>
-              <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px" onclick="buyItemDemo('Munisi')">Beli</button>
-            </div>
-
-            <div class="shop-item-card">
-              <div class="shop-item-info">
-                <span class="shop-item-name">Rompi Balistik Ringan</span>
-                <span class="shop-item-cost">90 Koin</span>
-              </div>
-              <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px" onclick="buyItemDemo('Rompi')">Beli</button>
-            </div>
-
-            <div class="shop-item-card">
-              <div class="shop-item-info">
-                <span class="shop-item-name">Injektor Serum Adrenalin</span>
-                <span class="shop-item-cost">75 Koin</span>
-              </div>
-              <button class="btn btn-primary" style="padding: 8px 16px; font-size: 13px" onclick="buyItemDemo('Serum')">Beli</button>
-            </div>
+          <div class="shop-inventory-grid" id="shopItemsContainer">
+            <!-- Diisi secara dinamis dari src/core/data/items.js -->
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-outline" onclick="closeOverlay('shopModal')">Tutup Toko</button>
+            <button class="btn btn-outline" onclick="window.closeShopModal()">Lanjut ke Wave Berikutnya</button>
           </div>
         </div>
       </div>
@@ -589,6 +559,7 @@
     <script type="module">
       import { GameManager } from "./src/core/GameManager.js";
       import { drawRandomUpgrades, UPGRADES, RARITIES } from "./src/core/data/upgrades.js";
+      import { SHOP_ITEMS } from "./src/core/data/items.js";
 
       // Bind canvas & primary interactive UI elements
       const canvas = document.getElementById("gameCanvas");
@@ -632,6 +603,12 @@
             this.cachedValues.zombies = zCount;
             const z = document.getElementById("zombieCount");
             if (z) z.textContent = zCount;
+          }
+
+          if (this.cachedValues.coins !== context.coins) {
+            this.cachedValues.coins = context.coins;
+            const c = document.getElementById("coinCount");
+            if (c) c.textContent = context.coins !== undefined ? context.coins : 0;
           }
           
           const currentHp = Math.max(0, Math.floor(p.health));
@@ -735,15 +712,103 @@
 
       window.selectWaveUpgrade = function (upgradeId) {
         const upgrade =
-          window.currentWaveUpgrades.find((u) => u.id === upgradeId) ||
+          window.currentWaveUpgrades?.find((u) => u.id === upgradeId) ||
           UPGRADES.find((u) => u.id === upgradeId);
 
         if (upgrade && window.gameApp && window.gameApp.context.player) {
           window.gameApp.context.player.addModifier(upgrade);
           window.gameApp.context.waveUpgradeActive = false;
+        }
+
+        window.closeOverlay("waveUpgradeModal");
+
+        // Buka Toko (Shop) nyata sesudah fase upgrade
+        window.showShopModal();
+      };
+
+      window.renderShopItems = function () {
+        const container = document.getElementById("shopItemsContainer");
+        const coinsEl = document.getElementById("shopPlayerCoins");
+        const playerCoins = window.gameApp?.context?.coins ?? 120;
+        if (coinsEl) coinsEl.textContent = `Koin Tersedia: ${playerCoins}`;
+
+        if (!container) return;
+        container.innerHTML = SHOP_ITEMS.map((item) => {
+          const canAfford = playerCoins >= item.cost;
+          return `
+            <div class="shop-item-card" id="shop-card-${item.id}">
+              <div class="shop-item-info">
+                <span class="shop-item-name">${item.name}</span>
+                <span class="shop-item-cost">${item.cost} Koin</span>
+                <span style="font-size: 11px; color: var(--ink-secondary); margin-top: 2px;">${item.desc}</span>
+              </div>
+              <button class="btn ${canAfford ? 'btn-primary' : 'btn-outline'}" 
+                      style="padding: 8px 16px; font-size: 13px" 
+                      onclick="window.buyShopItem('${item.id}')"
+                      ${!canAfford ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                Beli
+              </button>
+            </div>
+          `;
+        }).join("");
+      };
+
+      window.showShopModal = function () {
+        if (window.gameApp && window.gameApp.context) {
+          window.gameApp.context.shopActive = true;
+        }
+        window.renderShopItems();
+        window.openOverlay("shopModal");
+      };
+
+      window.buyShopItem = function (itemId) {
+        const item = SHOP_ITEMS.find((i) => i.id === itemId);
+        if (!item) return;
+
+        const ctx = window.gameApp?.context;
+        const player = ctx?.player;
+        const currentCoins = ctx ? ctx.coins : 120;
+
+        if (currentCoins < item.cost) {
+          return;
+        }
+
+        if (ctx) {
+          ctx.coins -= item.cost;
+          if (player) {
+            switch (item.effect.type) {
+              case "heal":
+                player.heal(item.effect.amount);
+                break;
+              case "ammo":
+                player.addAmmo(item.effect.amount);
+                break;
+              case "armor":
+                player.armorReduction = Math.min(
+                  0.60,
+                  (player.armorReduction || 0) + item.effect.reduction
+                );
+                break;
+              case "weapon_damage":
+                player.weaponTuningBonus =
+                  (player.weaponTuningBonus || 0) + item.effect.bonus;
+                player.recalculateStats();
+                break;
+            }
+          }
+          window.uiManager?.updateHUD(ctx);
+        }
+
+        window.renderShopItems();
+      };
+
+      window.closeShopModal = function () {
+        window.closeOverlay("shopModal");
+        if (window.gameApp && window.gameApp.context) {
+          window.gameApp.context.shopActive = false;
           window.gameApp.context.wave++;
 
-          // Lanjutkan pertempuran ke WAVE_DELAY dan spawn wave berikutnya
+          // Lanjutkan pertempuran ke WAVE_DELAY (3 detik) dan spawn wave berikutnya
           window.gameApp.context.addTimer(3000, () => {
             if (window.gameApp.context.running) {
               window.gameApp.context.waveDelay = false;
@@ -751,17 +816,6 @@
             }
           });
         }
-
-        window.closeOverlay("waveUpgradeModal");
-      };
-
-      window.buyItemDemo = function(name) {
-        const coins = document.getElementById("coinCount");
-        if (coins) {
-          const val = parseInt(coins.textContent, 10) || 120;
-          if (val >= 40) coins.textContent = Math.max(0, val - 40);
-        }
-        window.closeOverlay('shopModal');
       };
 
       window.selectCharDemo = function(card) {
@@ -835,7 +889,7 @@
             window.showWaveUpgradeModal();
             break;
           case "shop":
-            document.getElementById("shopModal").classList.remove("hidden");
+            window.showShopModal();
             break;
           case "settings":
             document.getElementById("settingsModal").classList.remove("hidden");

@@ -749,6 +749,93 @@ export class Renderer {
       ctx.fill();
     }
   }
+  drawPickup(pickup, camera) {
+    const screenX = pickup.x - camera.x;
+    const screenY = pickup.y - camera.y;
+
+    if (
+      screenX < -30 ||
+      screenX > this.canvas.width + 30 ||
+      screenY < -30 ||
+      screenY > this.canvas.height + 30
+    ) {
+      return;
+    }
+
+    const time = this.context.time || 0;
+
+    // Kedip jika sisa waktu tinggal < 3 detik
+    const remainingTime = pickup.duration - (time - pickup.spawnTime);
+    if (remainingTime < 3000) {
+      if (Math.floor(time / 150) % 2 === 0) return;
+    }
+
+    const bob = Math.sin(time / 200) * 2;
+    const drawY = screenY + bob;
+    const ctx = this.ctx;
+
+    // Bayangan tanah
+    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+    ctx.beginPath();
+    ctx.ellipse(screenX, screenY + 8, 7, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (pickup.pickupType === "coin") {
+      // Koin emas retro
+      ctx.fillStyle = "#eab308";
+      ctx.beginPath();
+      ctx.arc(screenX, drawY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#854d0e";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = "#fef08a";
+      ctx.fillRect(screenX - 1, drawY - 1, 2, 2);
+    } else if (pickup.pickupType === "medkit") {
+      // Medkit retro
+      ctx.fillStyle = "#f3f4f6";
+      ctx.fillRect(screenX - 7, drawY - 7, 14, 14);
+      ctx.strokeStyle = "#1f2937";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(screenX - 7, drawY - 7, 14, 14);
+      ctx.fillStyle = "#22c55e";
+      ctx.fillRect(screenX - 2, drawY - 5, 4, 10);
+      ctx.fillRect(screenX - 5, drawY - 2, 10, 4);
+    } else if (pickup.pickupType === "ammo") {
+      // Amunisi retro
+      ctx.fillStyle = "#b45309";
+      ctx.fillRect(screenX - 6, drawY - 5, 12, 10);
+      ctx.strokeStyle = "#451a03";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(screenX - 6, drawY - 5, 12, 10);
+      ctx.fillStyle = "#fde047";
+      ctx.fillRect(screenX - 4, drawY - 3, 3, 6);
+      ctx.fillRect(screenX + 1, drawY - 3, 3, 6);
+    } else if (pickup.pickupType === "powerup") {
+      // Power-up diamond
+      const colors = {
+        double_damage: "#ff4a1f",
+        speed_boost: "#f0b429",
+        magnet: "#a855f7",
+        freeze: "#22d3ee",
+      };
+      const col = colors[pickup.powerupId] || "#ffffff";
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(screenX, drawY - 8);
+      ctx.lineTo(screenX + 8, drawY);
+      ctx.lineTo(screenX, drawY + 8);
+      ctx.lineTo(screenX - 8, drawY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(screenX - 1.5, drawY - 1.5, 3, 3);
+    }
+  }
+
   drawWaveDelayBanner(waveNumber) {
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -767,9 +854,9 @@ export class Renderer {
       this.canvas.height / 2 + 40
     );
   }
-  // ... (render loop sama)
+  // ... (render loop)
   render() {
-    const { tilemap, camera, zombies, player, projectiles, effects } =
+    const { tilemap, camera, zombies, player, projectiles, effects, pickups } =
       this.context;
     const ctx = this.ctx;
     ctx.fillStyle = "#000";
@@ -789,6 +876,11 @@ export class Renderer {
         const screenX = x * TILE_SIZE - camera.x;
         const screenY = y * TILE_SIZE - camera.y;
         this.drawTile(x, y, tilemap[y][x], screenX, screenY);
+      }
+    }
+    if (pickups) {
+      for (let pickup of pickups) {
+        this.drawPickup(pickup, camera);
       }
     }
     for (let zombie of zombies) {

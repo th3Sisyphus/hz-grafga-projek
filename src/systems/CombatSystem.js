@@ -11,6 +11,8 @@ import {
   SPIKE_DAMAGE,
   SPIKE_TICK_INTERVAL,
 } from "../core/Constants.js";
+import { Pickup } from "../domain/Pickup.js";
+import { DROP_RATES } from "../core/data/items.js";
 
 export class CombatSystem {
   constructor(context) {
@@ -122,6 +124,44 @@ export class CombatSystem {
       this.context.score += scoreReward;
       this.context.zombiesKilled++;
       this.context.stats.kills++;
+
+      // Drop koin, medkit, ammo, power-up
+      this.spawnDrops(zombie);
+    }
+  }
+
+  spawnDrops(zombie) {
+    const { time, pickups } = this.context;
+    if (!pickups) return;
+
+    // 1. Koin (nilai menurut tipe zombie)
+    if (zombie.isBoss) {
+      for (let i = 0; i < 3; i++) {
+        pickups.push(new Pickup(zombie.x, zombie.y, "coin", 10, time));
+      }
+    } else {
+      const coinVal = Math.floor(Math.random() * 4) + 2; // 2-5 koin
+      pickups.push(new Pickup(zombie.x, zombie.y, "coin", coinVal, time));
+    }
+
+    // 2. Medkit (~8%)
+    if (Math.random() < DROP_RATES.medkitChance) {
+      pickups.push(new Pickup(zombie.x, zombie.y, "medkit", 40, time));
+    }
+
+    // 3. Ammo (~15%)
+    if (Math.random() < DROP_RATES.ammoChance) {
+      pickups.push(new Pickup(zombie.x, zombie.y, "ammo", 30, time));
+    }
+
+    // 4. Power-up sementara (~3%): damage x2, speed, magnet, freeze
+    if (
+      Math.random() < DROP_RATES.powerupChance ||
+      (zombie.isBoss && Math.random() < 0.5)
+    ) {
+      const keys = ["double_damage", "speed_boost", "magnet", "freeze"];
+      const chosen = keys[Math.floor(Math.random() * keys.length)];
+      pickups.push(new Pickup(zombie.x, zombie.y, "powerup", 0, time, chosen));
     }
   }
 
@@ -152,7 +192,10 @@ export class CombatSystem {
         const isCritical = Math.random() < critChance;
         const critMult =
           player?.effectiveCritMult ?? p.weapon.criticalMultiplier ?? 1.5;
-        const baseDmg = p.damage || p.weapon.damage;
+        let baseDmg = p.damage || p.weapon.damage;
+        if (this.context.activePowerups?.double_damage > this.context.time) {
+          baseDmg *= 2;
+        }
         const damage = baseDmg * (isCritical ? critMult : 1);
 
         this.applyDamage(hitZombie, damage, isCritical);
@@ -242,7 +285,10 @@ export class CombatSystem {
             player.effectiveCritMult !== undefined
               ? player.effectiveCritMult
               : weapon.criticalMultiplier || 1.5;
-          const baseDmg = player.effectiveDamage || weapon.damage;
+          let baseDmg = player.effectiveDamage || weapon.damage;
+          if (this.context.activePowerups?.double_damage > this.context.time) {
+            baseDmg *= 2;
+          }
           const damage = baseDmg * (isCritical ? critMult : 1);
 
           this.applyDamage(zombie, damage, isCritical);
@@ -280,9 +326,17 @@ export class CombatSystem {
     }
   }
 
+  updatePickups(dtNormal = 1) {
+    if (!this.context.pickups) return;
+    this.context.pickups = this.context.pickups.filter((p) =>
+      p.update(this.context, dtNormal)
+    );
+  }
+
   update(dtNormal = 1) {
     this.updateProjectiles(dtNormal);
     this.checkZombieAttack();
     this.checkSpikeHazards();
+    this.updatePickups(dtNormal);
   }
 }

@@ -39,6 +39,12 @@ export class Player {
     this.knockbackMultiplier = 1.0;
     this.waveRegenPercent = 0.20; // 20% default pemulihan antar wave
 
+    // Logistik Toko & Pertahanan
+    this.armorReduction = 0; // Maksimal 0.60 (60%)
+    this.ammo = 60;
+    this.maxAmmo = 200;
+    this.weaponTuningBonus = 0; // +15% per upgrade tuning
+
     this.lastAttack = -99999;
     this.hitFlash = 0;
     this.direction = 0;
@@ -133,7 +139,9 @@ export class Player {
     const baseWeaponSpeed = BASE_PLAYER_SPEED + (this.weapon.speedBonus || 0);
     this.speed = baseWeaponSpeed * speedMult;
 
-    this.effectiveDamage = Math.round(this.weapon.damage * damageMult);
+    this.effectiveDamage = Math.round(
+      this.weapon.damage * damageMult * (1 + (this.weaponTuningBonus || 0))
+    );
     this.effectiveCooldown = Math.max(
       120,
       Math.round(this.weapon.cooldown * (1 / (1 + attackSpeedMult)))
@@ -152,7 +160,10 @@ export class Player {
   }
 
   takeDamage(damage) {
-    this.health -= damage;
+    // Reduksi kerusakan dari Rompi Balistik (maksimal 60%)
+    const reduction = Math.min(0.60, this.armorReduction || 0);
+    const actualDamage = Math.max(1, Math.round(damage * (1 - reduction)));
+    this.health -= actualDamage;
     this.hitFlash = 10;
     return this.health <= 0;
   }
@@ -162,6 +173,10 @@ export class Player {
     if (this.health > this.maxHealth) {
       this.health = this.maxHealth;
     }
+  }
+
+  addAmmo(amount) {
+    this.ammo = Math.min(this.maxAmmo, (this.ammo || 0) + amount);
   }
 
   update(gameTime) {

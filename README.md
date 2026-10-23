@@ -111,3 +111,26 @@ Fase 1 telah mengimplementasikan sistem modifikasi persenjataan antar gelombang:
    - Mengintegrasikan aksi `window.selectWaveUpgrade(upgradeId)` yang menerapkan modifier ke operatif, memajukan wave, dan menjadwalkan timer `WAVE_DELAY` sebelum gelombang musuh berikutnya diterjunkan.
    - Parameter debug `menu.html?ui=upgrade` tetap berfungsi penuh menampilkan 3 kartu acak dari sumber data.
 
+---
+
+## 7. Log Pengembangan: Fase 2 — Drop, Koin, dan Toko Pedagang
+
+Fase 2 mengintegrasikan sistem ekonomi, jarahan musuh, dan pos perbekalan taktis:
+1. **Data Sumber Kebenaran (`src/core/data/items.js`)**:
+   - Menentukan inventaris toko `SHOP_ITEMS`: Kotak P3K Lapangan (50 koin, heal 80 HP), Kantong Munisi Penuh (40 koin, +50 munisi), Rompi Balistik Ringan (90 koin, reduksi damage 15% hingga batas max 60%), dan Penyetelan Senjata Tempur (75 koin, +15% damage permanen).
+   - Peluang drop jarahan musuh: Medkit (~8%), Munisi (~15%), Power-Up Temporer (~3%).
+   - 4 Arketipe Power-Up Temporer: Kerusakan Ganda (x2 damage, 10s), Akselerasi Cepat (+50% speed, 10s), Magnet Logistik (radius tarik 600px, 10s), dan Pembekuan Kawanan (-80% zombie speed, 6s).
+2. **Domain Entitas Pickup & Magnetik (`src/domain/Pickup.js`)**:
+   - Entitas jarahan dengan durasi eksistensi 12 detik (berkedip visual saat tersisa < 3 detik).
+   - Radius tarikan magnetik 75px (meningkat drastis menjadi 600px saat power-up magnet aktif) dengan pergerakan lerp halus.
+3. **Rendering Jarahan Retro (`Renderer.js`)**:
+   - Ikon koin emas bulat (#eab308) bergaris luar tajam dan bayangan lantai.
+   - Ikon P3K kotak putih dengan salib hijau medis (#22c55e).
+   - Ikon amunisi tembaga kotak dengan peluru kuning ganda (#fde047).
+   - Ikon power-up wajik (*diamond*) berdenyut vertikal dengan kode warna taktis OLED.
+4. **Integrasi Combat & Toko Nyata (`CombatSystem.js`, `menu.html`)**:
+   - Setiap zombie gugur menjatuhkan koin (2-5 koin untuk zombie biasa, 30 koin untuk Boss).
+   - HUD koin (`coinCount`) disinkronkan secara riil dengan `context.coins`.
+   - Alur transisi otomatis: Gelombang Selesai -> Pemulihan 20% HP -> Modal Upgrade -> Modal Toko Pedagang Karantina -> Lanjut ke Gelombang Berikutnya -> Jeda 3 detik -> Musuh Diterjunkan.
+   - Menghapus fungsi demo `buyItemDemo` dan tag simulasi hardcode. State `menu.html?ui=shop` terhubung penuh dengan katalog data nyata.
+

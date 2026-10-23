@@ -39,10 +39,15 @@ export class MovementSystem {
     let dx = 0;
     let dy = 0;
 
+    const isSpeedBoost =
+      this.context.activePowerups &&
+      this.context.activePowerups.speed_boost > this.context.time;
+    const playerDt = dtNormal * (isSpeedBoost ? 1.5 : 1.0);
+
     if (joystickInput && joystickInput.active) {
       dx = joystickInput.x;
       dy = joystickInput.y;
-      this.moveEntity(player, dx, dy, dtNormal);
+      this.moveEntity(player, dx, dy, playerDt);
       return;
     }
 
@@ -55,7 +60,7 @@ export class MovementSystem {
       const len = Math.hypot(dx, dy);
       dx /= len;
       dy /= len;
-      this.moveEntity(player, dx, dy, dtNormal);
+      this.moveEntity(player, dx, dy, playerDt);
 
       // Play footstep sound menggunakan game clock
       const now = this.context.time;
@@ -86,6 +91,12 @@ export class MovementSystem {
       let dx = 0;
       let dy = 0;
       let currentSpeedMultiplier = 1;
+      if (
+        this.context.activePowerups &&
+        this.context.activePowerups.freeze > this.context.time
+      ) {
+        currentSpeedMultiplier *= 0.2; // Slow 80% (Pembekuan Kawanan)
+      }
 
       const distToPlayer = Math.hypot(player.x - zombie.x, player.y - zombie.y);
 

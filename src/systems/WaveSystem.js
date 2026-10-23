@@ -53,7 +53,8 @@ export class WaveSystem {
       this.context.zombies.length === 0 &&
       !this.context.waveDelay &&
       this.context.running &&
-      !this.context.waveUpgradeActive
+      !this.context.waveUpgradeActive &&
+      !this.context.shopActive
     ) {
       this.context.waveDelay = true;
       this.context.waveUpgradeActive = true;

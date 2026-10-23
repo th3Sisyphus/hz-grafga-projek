@@ -263,6 +263,18 @@ export class GameContext {
     this.zombies = [];
     this.projectiles = [];
     this.effects = [];
+    this.pickups = [];
+
+    // Koin & Power-Up Temporer
+    this.coins = 0;
+    this.activePowerups = {
+      double_damage: 0,
+      speed_boost: 0,
+      magnet: 0,
+      freeze: 0,
+    };
+    this.waveUpgradeActive = false;
+    this.shopActive = false;
 
     // Flow Field Pathfinding State
     this.flowField = null;
@@ -272,6 +284,28 @@ export class GameContext {
 
     // Spatial Hash untuk optimasi separasi
     this.spatialHash = new SpatialHash(60);
+  }
+
+  activatePowerup(powerupId) {
+    const duration = powerupId === "freeze" ? 6000 : 10000;
+    this.activePowerups[powerupId] = this.time + duration;
+
+    // Tampilkan notifikasi banner taktis jika ada di DOM
+    const banner = document.getElementById("waveBanner");
+    const title = document.getElementById("bannerWaveTitle");
+    const sub = document.getElementById("bannerWaveSub");
+    if (banner && title && sub) {
+      const names = {
+        double_damage: "POWER-UP: KERUSAKAN GANDA (x2)",
+        speed_boost: "POWER-UP: AKSELERASI CEPAT (+50%)",
+        magnet: "POWER-UP: MAGNET LOGISTIK AKTIF",
+        freeze: "POWER-UP: PEMBEKUAN KAWANAN (-80%)",
+      };
+      title.textContent = names[powerupId] || "POWER-UP DIAKTIFKAN";
+      sub.textContent = `Durasi aktif: ${duration / 1000} detik`;
+      banner.classList.add("active");
+      this.addTimer(2000, () => banner.classList.remove("active"));
+    }
   }
 
   /**
