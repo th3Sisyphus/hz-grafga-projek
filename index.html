@@ -4,520 +4,932 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="assets/icon/hz_icon.jpeg" type="image/jpeg" />
-    <title>Hunty Zombie - Zombie Survival Game</title>
+    <title>Hunty Zombie - Survival Apocalypse</title>
     <meta
       name="description"
-      content="Bertahan hidup melawan gelombang zombie yang tak ada habisnya. Pilih senjatamu dan buktikan kemampuanmu!"
+      content="Bertahan hidup dari gelombang mutasi zombie tak terbatas dalam pertempuran arena retro 2D. Uji persenjataan taktikal dan kalahkan mutasi boss."
     />
     <link rel="stylesheet" href="css/home.css" />
   </head>
   <body>
-    <div class="home-container">
+    <!-- System Bar -->
+    <header class="sys-bar">
+      <div class="sys-bar-inner">
+        <div class="brand-docket">
+          <span class="brand-badge">Log Operasi</span>
+          <span class="brand-title">Hunty Zombie</span>
+        </div>
+        <nav class="sys-nav" aria-label="Navigasi Utama">
+          <a href="#arsenal">Persenjataan</a>
+          <a href="#threats">Klasifikasi Ancaman</a>
+          <a href="#protocol">Protokol</a>
+          <a href="#archive">Arsip Karantina</a>
+          <a href="#gallery">Galeri</a>
+          <a href="#credits">Unit Pengembang</a>
+        </nav>
+        <a href="menu.html" class="btn-nav-action">Masuk Arena</a>
+      </div>
+    </header>
+
+    <main class="page-wrapper">
       <!-- Hero Section -->
-      <section class="hero">
-        <h1 class="game-title">🧟 HUNTY ZOMBIE 🧟</h1>
-        <p class="game-subtitle">Survive The Apocalypse</p>
+      <section class="section-block hero-section" id="dispatch">
+        <div class="hero-grid">
+          <div class="hero-dispatch motion-enter">
+            <h1 class="hero-headline">HUNTY ZOMBIE</h1>
+            <p class="hero-subline">
+              Bertahan hidup dari gelombang mutasi zombie tanpa henti di Sektor Karantina-04 dalam pertempuran arena retro 2D.
+            </p>
 
-        <div class="hero-buttons">
-          <a href="menu.html" class="btn btn-primary">🎮 START GAME</a>
+            <div class="hero-meta-strip">
+              <div class="hero-meta-item">Sektor: <span>Karantina-04</span></div>
+              <div class="hero-meta-item">Status: <span>Darurat Gelombang</span></div>
+              <div class="hero-meta-item">Radar: <span>Sinyal Aktif</span></div>
+            </div>
+
+            <div class="hero-actions">
+              <a href="menu.html" class="btn-primary">Masuk Arena</a>
+              <a href="#arsenal" class="btn-secondary">Periksa Persenjataan</a>
+            </div>
+          </div>
+
+          <div class="hero-surveillance motion-enter">
+            <div class="surveillance-header">
+              <span>Pantauan radar zona perimeter</span>
+              <span class="radar-live-indicator">Sinyal Langsung</span>
+            </div>
+            <div class="surveillance-frame">
+              <video
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                poster="assets/gpm-presentation-resources-ground-radar-coverage-poster.jpg"
+                width="1280"
+                height="720"
+                aria-hidden="true"
+              >
+                <source
+                  src="assets/gpm-presentation-resources-ground-radar-coverage.mp4"
+                  type="video/mp4"
+                />
+              </video>
+            </div>
+            <div class="surveillance-telemetry">
+              <div class="telemetry-cell">
+                <span class="telemetry-label">Gelombang boss</span>
+                <span class="telemetry-val">Setiap Wave 3</span>
+              </div>
+              <div class="telemetry-cell">
+                <span class="telemetry-label">Ambang stun</span>
+                <span class="telemetry-val">4 Pukulan Beruntun</span>
+              </div>
+              <div class="telemetry-cell">
+                <span class="telemetry-label">Pilihan arsenal</span>
+                <span class="telemetry-val">4 Spesifikasi</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Feature Cards -->
-      <section class="features">
-        <div class="feature-card" onclick="openModal('storyModal')">
-          <span class="feature-icon">📖</span>
-          <h3 class="feature-title">Story</h3>
-          <p class="feature-desc">Pelajari latar belakang dan misi permainan</p>
+      <!-- Live Thing: Weapon Arsenal & Interactive Simulator -->
+      <section class="section-block" id="arsenal">
+        <div class="section-header motion-enter">
+          <h2 class="section-title">Persenjataan Pemburu</h2>
+          <p class="section-desc">
+            Setiap senjata memiliki karakteristik jarak, pengali kritis, dan efek khusus untuk gaya bertahan hidup yang berbeda. Uji simulasi serangannya secara langsung.
+          </p>
         </div>
 
-        <div class="feature-card" onclick="openModal('instructionsModal')">
-          <span class="feature-icon">🎮</span>
-          <h3 class="feature-title">Instructions</h3>
-          <p class="feature-desc">Panduan kontrol dan cara bermain</p>
-        </div>
+        <div class="live-arsenal-card motion-enter">
+          <div class="arsenal-selector-column" role="tablist" aria-label="Daftar Senjata">
+            <button
+              class="weapon-select-btn active"
+              role="tab"
+              aria-selected="true"
+              data-weapon="katana"
+              onclick="selectLiveWeapon('katana')"
+            >
+              <div class="weapon-btn-header">
+                <span class="weapon-btn-name">Katana</span>
+                <span class="weapon-btn-type">Melee</span>
+              </div>
+              <span class="weapon-btn-summary">Tebasan kritis cepat dengan lifesteal pemulih HP</span>
+            </button>
 
-        <div class="feature-card" onclick="openModal('creditsModal')">
-          <span class="feature-icon">👥</span>
-          <h3 class="feature-title">Credits</h3>
-          <p class="feature-desc">Tim pembuat game ini</p>
+            <button
+              class="weapon-select-btn"
+              role="tab"
+              aria-selected="false"
+              data-weapon="fist"
+              onclick="selectLiveWeapon('fist')"
+            >
+              <div class="weapon-btn-header">
+                <span class="weapon-btn-name">Tangan Kosong</span>
+                <span class="weapon-btn-type">Melee</span>
+              </div>
+              <span class="weapon-btn-summary">Damage tertinggi dan mobilitas lari tercepat</span>
+            </button>
+
+            <button
+              class="weapon-select-btn"
+              role="tab"
+              aria-selected="false"
+              data-weapon="wizard"
+              onclick="selectLiveWeapon('wizard')"
+            >
+              <div class="weapon-btn-header">
+                <span class="weapon-btn-name">Wizard Book</span>
+                <span class="weapon-btn-type">Range</span>
+              </div>
+              <span class="weapon-btn-summary">Bola api jarak jauh dengan pembakaran berkelanjutan</span>
+            </button>
+
+            <button
+              class="weapon-select-btn"
+              role="tab"
+              aria-selected="false"
+              data-weapon="dualgun"
+              onclick="selectLiveWeapon('dualgun')"
+            >
+              <div class="weapon-btn-header">
+                <span class="weapon-btn-name">Dual Gun</span>
+                <span class="weapon-btn-type">Range</span>
+              </div>
+              <span class="weapon-btn-summary">Tembakan proyektil ganda berdaya ledak area luas</span>
+            </button>
+          </div>
+
+          <div class="arsenal-detail-column">
+            <div class="arsenal-header-row">
+              <div>
+                <h3 class="arsenal-active-name" id="liveWeaponName">Katana</h3>
+                <span class="section-desc" id="liveWeaponDesc" style="margin-top: 4px;">
+                  Senjata tajam jarak dekat untuk manuver cepat membelah formasi zombie.
+                </span>
+              </div>
+              <span class="arsenal-active-badge" id="liveWeaponType">Tipe Melee</span>
+            </div>
+
+            <div class="arsenal-stage" id="liveStageContainer">
+              <canvas id="weaponDemoCanvas" width="560" height="200" aria-label="Simulasi Serangan Senjata"></canvas>
+              <span class="arsenal-stage-hint">Simulasi Serangan Sprite Aktif</span>
+            </div>
+
+            <div class="arsenal-stats-grid">
+              <div class="stat-cell">
+                <span class="stat-label">Damage Dasar</span>
+                <span class="stat-value" id="statDamage">40</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-label">Pengali Kritis</span>
+                <span class="stat-value" id="statCritical">2.5x</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-label">Bonus Kecepatan</span>
+                <span class="stat-value" id="statSpeed">+0.5</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-label">Jangkauan Taktis</span>
+                <span class="stat-value" id="statRange">65 px</span>
+              </div>
+              <div class="stat-special-row" id="statSpecial">
+                Efek Khusus: Lifesteal 5% pemulih HP per tebasan telak
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- Gallery Section -->
-      <section class="gallery">
-        <h2 class="gallery-title">📸 Game Screenshots</h2>
-        <div class="gallery-grid">
-          <div
-            class="gallery-item"
-            onclick="openLightbox('assets/screenshots/InGame.png')"
-          >
+      <!-- Threat Classification -->
+      <section class="section-block" id="threats">
+        <div class="section-header motion-enter">
+          <h2 class="section-title">Klasifikasi Ancaman</h2>
+          <p class="section-desc">
+            Peta musuh di area karantina mencakup zombie infeksi standar hingga mutasi boss raksasa berkekuatan stun.
+          </p>
+        </div>
+
+        <div class="threat-layout">
+          <!-- Featured Boss Threat Panel -->
+          <div class="threat-featured-boss motion-enter">
+            <div class="threat-featured-header">
+              <h3 class="threat-featured-name">Boss Zombie (Merah)</h3>
+              <div class="threat-meta">
+                <span class="threat-badge-danger">Mutasi besar tingkat tinggi</span>
+                <span class="threat-wave">Kemunculan: Wave 3, 6, 9...</span>
+              </div>
+              <p class="threat-desc">
+                Spesimen raksasa dengan resistensi tinggi. Menimbulkan efek stun melumpuhkan bila berhasil memukul pemburu 4 kali beruntun.
+              </p>
+            </div>
+            <div class="threat-featured-stats">
+              <div class="threat-stat-card">
+                <span class="threat-stat-label">Ambang stun</span>
+                <span class="threat-stat-val">4 Pukulan Beruntun</span>
+              </div>
+              <div class="threat-stat-card">
+                <span class="threat-stat-label">Ketahanan</span>
+                <span class="threat-stat-val">Skala Wave Tinggi</span>
+              </div>
+              <div class="threat-stat-card">
+                <span class="threat-stat-label">Arahan taktis</span>
+                <span class="threat-stat-val">Kiting & Sekat Batu</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secondary Threats: 2 columns -->
+          <div class="threat-sub-grid">
+            <div class="threat-sub-card motion-enter">
+              <h3 class="threat-name">Zombie Biasa (Hijau)</h3>
+              <div class="threat-meta">
+                <span class="threat-badge-standard">Infeksi primer</span>
+                <span class="threat-wave">Wave 1+</span>
+              </div>
+              <p class="threat-desc">
+                Populasi terinfeksi tahap awal. Bergerak berombongan dengan kecepatan bertahap dan daya tahan meningkat di tiap wave.
+              </p>
+              <ul class="threat-spec-list">
+                <li>HP Dasar: <strong>85 HP</strong></li>
+                <li>Kecepatan: <strong>0.9 baseline</strong></li>
+                <li>Taktik: <strong>Tebas lifesteal atau tembakan area</strong></li>
+              </ul>
+            </div>
+
+            <div class="threat-sub-card motion-enter">
+              <h3 class="threat-name">Rintangan & Duri Lingkungan</h3>
+              <div class="threat-meta">
+                <span class="threat-badge-hazard">Bahaya medan</span>
+                <span class="threat-wave">Semua Sektor</span>
+              </div>
+              <p class="threat-desc">
+                Medan pertempuran dipenuhi batu, pepohonan tebal, dan tile duri berduri yang membatasi mobilitas pelarian pemburu.
+              </p>
+              <ul class="threat-spec-list">
+                <li>Tile Duri: <strong>Mengurangi mobilitas bila terinjak</strong></li>
+                <li>Pohon & Batu: <strong>Penyekat fisik pemisah kawanan</strong></li>
+                <li>Taktik: <strong>Giring zombie mengitari rintangan</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Survival Protocol & Map -->
+      <section class="section-block" id="protocol">
+        <div class="section-header motion-enter">
+          <h2 class="section-title">Protokol Bertahan Hidup</h2>
+          <p class="section-desc">
+            Panduan kontrol fisik untuk unit tempur keyboard-mouse di desktop dan layar sentuh di perangkat bergerak.
+          </p>
+        </div>
+
+        <div class="protocol-split">
+          <div class="protocol-box motion-enter">
+            <h3 class="protocol-box-header">Kontrol Desktop</h3>
+            <ul class="protocol-list">
+              <li class="protocol-item">
+                <span class="protocol-key">W, A, S, D</span>
+                <span class="protocol-explanation">Manuver gerak omnidirectional menghindar dari kepungan.</span>
+              </li>
+              <li class="protocol-item">
+                <span class="protocol-key">KURSOR</span>
+                <span class="protocol-explanation">Mengarahkan poros senjata dan orientasi pandangan hadap.</span>
+              </li>
+              <li class="protocol-item">
+                <span class="protocol-key">KLIK KIRI</span>
+                <span class="protocol-explanation">Mengeksekusi tebasan melee atau menembakkan proyektil ranged.</span>
+              </li>
+              <li class="protocol-item">
+                <span class="protocol-key">ESC</span>
+                <span class="protocol-explanation">Menjeda jalannya simulasi untuk meninjau status operasi.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="protocol-box motion-enter">
+            <h3 class="protocol-box-header">Kontrol Sentuh Mobile</h3>
+            <ul class="protocol-list">
+              <li class="protocol-item">
+                <span class="protocol-key">JOYSTICK</span>
+                <span class="protocol-explanation">Virtual thumbpad dinamis di area kiri bawah layar untuk navigasi lincah.</span>
+              </li>
+              <li class="protocol-item">
+                <span class="protocol-key">ATTACK BTN</span>
+                <span class="protocol-explanation">Tombol serang berlabel di kanan bawah untuk mengunci target terdekat.</span>
+              </li>
+              <li class="protocol-item">
+                <span class="protocol-key">AUTO AIM</span>
+                <span class="protocol-explanation">Sistem membidik otomatis sasaran zombie paling kritis dalam jangkauan.</span>
+              </li>
+              <li class="protocol-item">
+                <span class="protocol-key">PAUSE BTN</span>
+                <span class="protocol-explanation">Tombol jeda di sudut kanan atas aman dari safe-area inset.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="sector-map-card motion-enter">
             <img
-              src="assets/screenshots/InGame.png"
-              alt="Gameplay - Katana Battle"
+              src="assets/plate-80-from-the-plan-of-chicago.jpg"
+              alt="Diagram tata letak sektor evakuasi dan rencana tata kota 1909"
+              class="sector-map-img"
+              loading="lazy"
+              decoding="async"
+            />
+            <div class="sector-map-info">
+              <h3>Perencanaan Sektor Karantina</h3>
+              <p>
+                Rencana tata letak zona terbuka karantina disusun dalam matriks grid taktikal. Setiap zona memiliki choke-point terencana untuk memecah gerombolan musuh yang masuk dari perimeter luar.
+              </p>
+              <div class="hero-actions">
+                <button class="btn-secondary" onclick="openModal('instructionsModal')">
+                  Buka Manual Lengkap
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Story & Archive Dossier -->
+      <section class="section-block" id="archive">
+        <div class="section-header motion-enter">
+          <h2 class="section-title">Arsip Lapangan Karantina</h2>
+          <p class="section-desc">
+            Catatan autentik insiden penyebaran wabah dan instruksi evakuasi bertahan hidup bagi para pemburu garis depan.
+          </p>
+        </div>
+
+        <div class="archive-dossier motion-enter">
+          <div class="archive-notice-frame">
+            <img
+              src="assets/quarantine-notice-and-city-ordinance-restricting-landings.jpg"
+              alt="Ordinansi pemberitahuan karantina resmi 1878"
+              loading="lazy"
+              decoding="async"
             />
           </div>
-          <div
-            class="gallery-item"
-            onclick="openLightbox('assets/screenshots/weaponSelect.png')"
-          >
-            <img
-              src="assets/screenshots/weaponSelect.png"
-              alt="Weapon Selection"
-            />
-          </div>
-          <div
-            class="gallery-item"
-            onclick="openLightbox('assets/screenshots/Boss.png')"
-          >
-            <img src="assets/screenshots/Boss.png" alt="Boss Battle" />
+
+          <div class="archive-reader">
+            <div class="archive-reader-header">
+              <span class="brand-badge">Telemetri Rekaman</span>
+              <span class="hero-meta-item">Dokumen arsip: <span>ORD-1878-HZ</span></span>
+            </div>
+
+            <div class="archive-scroll-window" id="storyScroll">
+              <p class="story-line">
+                <strong>Latar Belakang:</strong>
+                Dunia telah jatuh ke dalam kekacauan. Virus misterius telah mengubah sebagian besar populasi menjadi zombie yang haus darah. Kamu adalah salah satu dari sedikit penyintas yang masih bertahan di tengah apocalypse ini.
+              </p>
+              <p class="story-line">
+                <strong>Misi Pertahanan:</strong>
+                Bertahan hidup selama mungkin dan eliminasi sebanyak mungkin zombie. Setiap zombie yang kamu kalahkan menambah skor dan membawamu lebih dekat untuk bertahan hidup di zona merah.
+              </p>
+              <p class="story-line">
+                <strong>Sasaran Operasi:</strong>
+                Bertahan melewati gelombang zombie yang semakin kuat. Kalahkan Boss Zombie yang muncul setiap wave ke-3. Raih skor setinggi-tingginya dan buktikan dirimu sebagai pemburu terhebat.
+              </p>
+              <p class="story-line">
+                <strong>Sistem Gelombang (Wave):</strong>
+                Wave 1-2: Zombie biasa dengan kecepatan dan damage sedang. Wave 3, 6, 9...: Boss Zombie muncul dengan ukuran besar, pukulan berat, dan efek STUN setelah 4 pukulan beruntun. Wave 4+: Intensitas kecepatan musuh meningkat tajam.
+              </p>
+              <p class="story-line">
+                <strong>Taktik Lapangan:</strong>
+                Manfaatkan lifesteal dari senjata melee untuk memulihkan health bar. Gunakan obstacle batu dan pepohonan sebagai peredam serbuan massa. Jaga jarak aman saat menghadapi Boss untuk mencegah status stun melumpuhkanmu.
+              </p>
+            </div>
+
+            <div class="archive-controls">
+              <button class="btn-ctrl" id="btnAutoScroll" onclick="toggleAutoScroll()">
+                Auto Scroll
+              </button>
+              <button class="btn-ctrl" onclick="resetScroll()">
+                Reset
+              </button>
+              <button class="btn-ctrl" onclick="openModal('storyModal')">
+                Buka Layar Penuh
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- Footer -->
-      <footer class="footer">
-        <p>&copy; 2024 Hunty Zombie. All rights reserved.</p>
-      </footer>
-    </div>
+      <!-- Reconnaissance Gallery -->
+      <section class="section-block" id="gallery">
+        <div class="section-header motion-enter">
+          <h2 class="section-title">Rekaman Lapangan</h2>
+          <p class="section-desc">
+            Tangkapan visual langsung dari operasi pertempuran pemburu, pemilihan arsenal, dan pertempuran boss.
+          </p>
+        </div>
+
+        <div class="gallery-layout">
+          <div class="gallery-featured motion-enter" onclick="openLightbox('assets/screenshots/InGame.png')">
+            <div class="gallery-thumb-wrapper gallery-thumb-large">
+              <img
+                src="assets/screenshots/InGame.png"
+                alt="Operasi tempur lapangan dengan Katana di tengah arena rumput"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="gallery-caption">
+              <span>Pertempuran Katana Lapangan</span>
+            </div>
+          </div>
+
+          <div class="gallery-side-stack">
+            <div class="gallery-item motion-enter" onclick="openLightbox('assets/screenshots/weaponSelect.png')">
+              <div class="gallery-thumb-wrapper">
+                <img
+                  src="assets/screenshots/weaponSelect.png"
+                  alt="Layar seleksi persenjataan taktikal"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="gallery-caption">
+                <span>Pilihan Persenjataan</span>
+              </div>
+            </div>
+
+            <div class="gallery-item motion-enter" onclick="openLightbox('assets/screenshots/Boss.png')">
+              <div class="gallery-thumb-wrapper">
+                <img
+                  src="assets/screenshots/Boss.png"
+                  alt="Pertarungan sengit menghadapi mutasi Boss Zombie merah"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div class="gallery-caption">
+                <span>Konfrontasi Boss Mutasi</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Unit Developers & Credits -->
+      <section class="section-block" id="credits">
+        <div class="section-header motion-enter">
+          <h2 class="section-title">Unit Pengembang</h2>
+          <p class="section-desc">
+            Tim pengembang di balik pengembangan mesin permainan, sistem tempur, dan tata suara Hunty Zombie.
+          </p>
+        </div>
+
+        <div class="credits-dossier motion-enter">
+          <div class="credits-roster-table">
+            <div class="credits-roster-row">
+              <span class="credits-role">Pengembangan Inti & Grafika</span>
+              <span class="credits-name">Nicolas Krisna Prawirajati</span>
+              <span class="credits-nim">71231019</span>
+            </div>
+            <div class="credits-roster-row">
+              <span class="credits-role">Logika Permainan & Fisika</span>
+              <span class="credits-name">Yehezkiel Darren Putra Wardoyo</span>
+              <span class="credits-nim">71231023</span>
+            </div>
+            <div class="credits-roster-row">
+              <span class="credits-role">Desain Antarmuka & Visual</span>
+              <span class="credits-name">Kenya Syalwa Arifia</span>
+              <span class="credits-nim">71231025</span>
+            </div>
+            <div class="credits-roster-row">
+              <span class="credits-role">Tata Suara & Interaksi</span>
+              <span class="credits-name">Hansel Ivano Supratman</span>
+              <span class="credits-nim">71231039</span>
+            </div>
+            <div class="credits-roster-row">
+              <span class="credits-role">Pengujian & Performa</span>
+              <span class="credits-name">Gabriel Sachio Atmadjaja</span>
+              <span class="credits-nim">71231052</span>
+            </div>
+          </div>
+
+          <p class="credits-closing">
+            Dibuat dengan dedikasi untuk eksplorasi grafika komputer dan pengembangan game web 2D interaktif. Tetap waspada dan terus bertahan hidup.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+      <div class="footer-inner">
+        <div class="footer-brand-banner">HUNTY ZOMBIE</div>
+
+        <div class="footer-links-row">
+          <nav class="footer-nav" aria-label="Navigasi Footer">
+            <a href="menu.html">Mulai Bermain</a>
+            <a href="#arsenal">Senjata</a>
+            <a href="#threats">Ancaman</a>
+            <a href="#protocol">Protokol</a>
+            <a href="#archive">Arsip</a>
+            <a href="#credits">Unit Pengembang</a>
+          </nav>
+          <a href="menu.html" class="btn-nav-action">Luncurkan Game</a>
+        </div>
+
+        <p class="credits-attribution">
+          Pictures and footage: <a href="https://commons.wikimedia.org/wiki/File:Quarantine_notice_and_city_ordinance_restricting_landings_of_steamboats_or_other_water_craft_at_or_near_Cape_Girardeau,_October_8,_1878.jpg">“Quarantine notice and city ordinance restricting landings of steamboats or other water cr…”</a>, <a href="https://creativecommons.org/publicdomain/mark/1.0/">public domain</a>, via Wikimedia Commons; <a href="https://www.artic.edu/artworks/196346">“Plate 80 from The Plan of Chicago, 1909: Chicago. Diagram of City Center, Showing the Pro…”</a> by Daniel Hudson Burnham, 1909, <a href="https://creativecommons.org/publicdomain/zero/1.0/">public domain (CC0)</a>, via Art Institute of Chicago; <a href="https://images.nasa.gov/details/GSFC_20121221_GPM_m11165_Ground_Radar">“GPM Presentation Resources: Ground Radar Coverage”</a> by Ryan Fitzgibbons, Dalia B. Kirschbaum, <a href="https://www.nasa.gov/nasa-brand-center/images-and-media/">public domain (NASA)</a>, via NASA Image and Video Library.
+        </p>
+
+        <div class="footer-copy-row">
+          <span>&copy; 2024 Hunty Zombie Team. Hak cipta dilindungi.</span>
+          <span>Protokol Operasi Karantina 2D</span>
+        </div>
+      </div>
+    </footer>
 
     <!-- Story Modal -->
-    <div id="storyModal" class="modal">
+    <div id="storyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalStoryTitle">
       <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('storyModal')">
-          &times;
-        </button>
-        <h2 class="modal-title">📖 Story & Background</h2>
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalStoryTitle">Dokumentasi Lengkap Cerita</h2>
+          <button class="modal-close" onclick="closeModal('storyModal')" aria-label="Tutup modal">&times;</button>
+        </div>
         <div class="modal-body">
-          <div class="story-scroll" id="storyScroll">
-            <p class="story-line"><strong>🌍 Latar Belakang:</strong></p>
+          <div id="modalStoryScroll" class="archive-scroll-window">
             <p class="story-line">
-              Dunia telah jatuh ke dalam kekacauan. Virus misterius telah
-              mengubah sebagian besar populasi menjadi zombie yang haus darah.
-            </p>
-            <p class="story-line">
-              Kamu adalah salah satu dari sedikit penyintas yang masih bertahan
-              di tengah apocalypse ini.
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p class="story-line"><strong>🎯 Misi:</strong></p>
-            <p class="story-line">
-              Bertahan hidup selama mungkin dan bunuh sebanyak mungkin zombie!
+              <strong>Latar Belakang:</strong>
+              Dunia telah jatuh ke dalam kekacauan. Virus misterius telah mengubah sebagian besar populasi menjadi zombie yang haus darah. Kamu adalah salah satu dari sedikit penyintas yang masih bertahan di tengah apocalypse ini.
             </p>
             <p class="story-line">
-              Setiap zombie yang kamu kalahkan akan menambah skor dan membawamu
-              lebih dekat untuk bertahan hidup.
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p class="story-line"><strong>🏆 Goal:</strong></p>
-            <p class="story-line">
-              • Bertahan melewati gelombang zombie yang semakin kuat
+              <strong>Misi Pertahanan:</strong>
+              Bertahan hidup selama mungkin dan eliminasi sebanyak mungkin zombie. Setiap zombie yang kamu kalahkan akan menambah skor dan membawamu lebih dekat untuk bertahan hidup.
             </p>
             <p class="story-line">
-              • Kalahkan Boss Zombie yang muncul setiap wave ke-3
-            </p>
-            <p class="story-line">• Raih skor setinggi-tingginya</p>
-            <p class="story-line">
-              • Buktikan dirimu sebagai pemburu zombie terhebat!
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p class="story-line"><strong>📊 Level System:</strong></p>
-            <p class="story-line">
-              Game ini menggunakan sistem Wave (gelombang). Setiap wave, jumlah
-              dan kekuatan zombie akan meningkat.
+              <strong>Sasaran Pertarungan:</strong>
+              Bertahan melewati gelombang zombie yang semakin kuat. Kalahkan Boss Zombie yang muncul setiap wave ke-3. Raih skor setinggi-tingginya dan buktikan dirimu sebagai pemburu terhebat.
             </p>
             <p class="story-line">
-              Wave 1-2: Zombie biasa dengan kecepatan dan damage rendah
+              <strong>Level System:</strong>
+              Game ini menggunakan sistem Wave. Wave 1-2: zombie biasa dengan kecepatan dan damage rendah. Wave 3, 6, 9...: Boss Zombie muncul dengan ukuran besar, lebih kuat, dan menimbulkan efek STUN setelah 4x pukulan. Wave 4+: zombie semakin cepat dan berbahaya.
             </p>
             <p class="story-line">
-              Wave 3, 6, 9...: Boss Zombie muncul! Mereka lebih besar, lebih
-              kuat, dan bisa memberikan efek STUN
+              <strong>Taktik Bertahan Hidup:</strong>
+              Pilih senjata yang sesuai dengan gaya bermainmu. Manfaatkan lifesteal dari senjata melee untuk bertahan lebih lama. Gunakan obstacle batu dan pohon sebagai penghalang taktis. Jaga jarak aman dari serangan Boss.
             </p>
-            <p class="story-line">
-              Wave 4+: Zombie semakin cepat dan lebih berbahaya
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p class="story-line"><strong>⚔️ Cara Bermain:</strong></p>
-            <p class="story-line">
-              1. Pilih senjata favoritmu (Katana, Tangan Kosong, Wizard Book,
-              atau Dual Gun)
-            </p>
-            <p class="story-line">
-              2. Gunakan WASD untuk bergerak menghindari zombie
-            </p>
-            <p class="story-line">
-              3. Arahkan mouse ke zombie dan klik untuk menyerang
-            </p>
-            <p class="story-line">
-              4. Hindari obstacle (Batu, Duri, Pohon) yang bisa menghalangi
-              gerakanmu
-            </p>
-            <p class="story-line">
-              5. Perhatikan health bar-mu dan jangan sampai habis!
-            </p>
-            <p class="story-line">
-              6. Kalahkan semua zombie di wave untuk melanjutkan ke wave
-              berikutnya
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p class="story-line"><strong>💀 Musuh:</strong></p>
-            <p class="story-line">
-              • Zombie Biasa (Hijau): Musuh standar dengan kecepatan sedang
-            </p>
-            <p class="story-line">
-              • Boss Zombie (Merah): Muncul setiap wave ke-3, sangat kuat dan
-              bisa memberikan efek STUN setelah 4x pukulan
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p class="story-line"><strong>🎮 Tips:</strong></p>
-            <p class="story-line">
-              • Manfaatkan lifesteal dari senjata melee untuk bertahan lebih
-              lama
-            </p>
-            <p class="story-line">
-              • Gunakan obstacle sebagai penghalang antara kamu dan zombie
-            </p>
-            <p class="story-line">
-              • Jaga jarak saat melawan Boss Zombie untuk menghindari efek STUN
-            </p>
-            <p class="story-line">
-              • Pilih senjata yang sesuai dengan gaya bermainmu!
-            </p>
-            <p class="story-line">&nbsp;</p>
-            <p
-              class="story-line"
-              style="
-                text-align: center;
-                color: #ff3333;
-                font-weight: bold;
-                font-size: 18px;
-              "
-            >
-              Selamat Berburu Zombie! 🧟‍♂️⚔️
-            </p>
-          </div>
-          <div style="text-align: center; margin-top: 20px">
-            <button class="btn" onclick="toggleAutoScroll()">
-              ▶️ Auto Scroll
-            </button>
-            <button class="btn btn-secondary" onclick="resetScroll()">
-              🔄 Reset
-            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Instructions Modal -->
-    <div id="instructionsModal" class="modal">
+    <div id="instructionsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalInstTitle">
       <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('instructionsModal')">
-          &times;
-        </button>
-        <h2 class="modal-title">🎮 Instructions</h2>
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalInstTitle">Panduan Instruksi Permainan</h2>
+          <button class="modal-close" onclick="closeModal('instructionsModal')" aria-label="Tutup modal">&times;</button>
+        </div>
         <div class="modal-body">
-          <h3>⌨️ Kontrol Keyboard (Desktop)</h3>
-          <div class="control-group">
-            <ul>
-              <li>
-                <strong>[W, A, S, D]</strong> - Bergerak ke atas, kiri, bawah,
-                kanan
-              </li>
-              <li><strong>[MOUSE]</strong> - Arahkan senjata ke arah kursor</li>
-              <li><strong>[KLIK KIRI]</strong> - Serang / Tembak</li>
-              <li><strong>[ESC]</strong> - Pause Game</li>
-            </ul>
-          </div>
-
-          <h3>📱 Kontrol Mobile (Touch Device)</h3>
-          <div class="control-group">
-            <ul>
-              <li>
-                <strong>🕹️ Joystick (Kiri Bawah)</strong> - Gerakkan karakter
-                dengan menyeret joystick virtual
-              </li>
-              <li>
-                <strong>⚔️ Attack Button (Kanan Bawah)</strong> - Tekan tombol
-                attack untuk menyerang zombie terdekat
-              </li>
-              <li>
-                <strong>Touch & Drag</strong> - Joystick akan muncul otomatis
-                saat kamu menyentuh area kiri bawah layar
-              </li>
-            </ul>
-          </div>
-
-          <h3>🎯 Navigasi Menu</h3>
-          <div class="control-group">
-            <ul>
-              <li><strong>START GAME</strong> - Mulai permainan baru</li>
-              <li><strong>TUTORIAL</strong> - Lihat panduan bermain</li>
-              <li>
-                <strong>PILIH SENJATA</strong> - Pilih senjata sebelum memulai
-                game
-              </li>
-              <li>
-                <strong>PAUSE</strong> - Jeda permainan (tombol ⏸️ di pojok
-                kanan atas)
-              </li>
-              <li><strong>RESUME</strong> - Lanjutkan permainan dari pause</li>
-              <li><strong>MENU</strong> - Kembali ke menu utama</li>
-            </ul>
-          </div>
-
-          <h3>🎮 Fitur Mobile</h3>
-          <div class="control-group">
-            <p><strong>Virtual Joystick:</strong></p>
-            <ul>
-              <li>
-                Joystick virtual akan muncul di kiri bawah layar saat game
-                dimulai
-              </li>
-              <li>Seret joystick untuk menggerakkan karakter ke segala arah</li>
-              <li>Joystick akan kembali ke posisi tengah saat dilepas</li>
-            </ul>
-            <p><strong>Attack Button:</strong></p>
-            <ul>
-              <li>Tombol attack berada di kanan bawah layar</li>
-              <li>Tekan dan tahan untuk menyerang secara otomatis</li>
-              <li>Karakter akan menyerang zombie terdekat</li>
-            </ul>
-          </div>
-
-          <h3>⚠️ Tips Kontrol</h3>
-          <div class="control-group">
-            <ul>
-              <li>Gunakan gerakan cepat untuk menghindari serangan zombie</li>
-              <li>
-                Kombinasikan gerakan dan serangan untuk efektivitas maksimal
-              </li>
-              <li>
-                Pada mobile, posisikan jari dengan nyaman untuk kontrol yang
-                lebih baik
-              </li>
-              <li>Latih timing seranganmu untuk memaksimalkan damage</li>
-            </ul>
-          </div>
+          <p class="story-line">
+            <strong>Kontrol Desktop:</strong>
+            Tombol [W, A, S, D] untuk bergerak. Gerakkan mouse untuk mengarahkan bidikan senjata. Klik kiri untuk melancarkan serangan. Tombol [ESC] untuk menjeda permainan.
+          </p>
+          <p class="story-line">
+            <strong>Kontrol Mobile:</strong>
+            Gunakan virtual joystick di bagian kiri bawah layar untuk bergerak ke segala arah. Tekan tombol attack di bagian kanan bawah untuk melancarkan serangan.
+          </p>
+          <p class="story-line">
+            <strong>Navigasi Menu:</strong>
+            START GAME untuk memulai permainan baru. PILIH SENJATA untuk menentukan arsenal pilihanmu. PAUSE / RESUME untuk mengatur jeda waktu permainan.
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Credits Modal -->
-    <div id="creditsModal" class="modal">
+    <div id="creditsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalCreditsTitle">
       <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('creditsModal')">
-          &times;
-        </button>
-        <h2 class="modal-title">👥 Credits</h2>
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalCreditsTitle">Unit Pengembang Permainan</h2>
+          <button class="modal-close" onclick="closeModal('creditsModal')" aria-label="Tutup modal">&times;</button>
+        </div>
         <div class="modal-body">
-          <p
-            style="
-              text-align: center;
-              margin-bottom: 30px;
-              font-size: 18px;
-              color: #aaa;
-            "
-          >
-            Dibuat dengan ❤️ oleh tim pengembang
-          </p>
-          <div class="credits-list">
-            <div class="credit-item">
-              <div class="credit-name">🎮 Nicolas Krisna Prawirajati</div>
-              <div class="credit-role">71231019</div>
+          <div class="credits-grid" style="margin-top: 0;">
+            <div class="credit-unit-card">
+              <div class="credit-name">Nicolas Krisna Prawirajati</div>
+              <div class="credit-id">71231019</div>
             </div>
-            <div class="credit-item">
-              <div class="credit-name">💻 Yehezkiel Darren Putra Wardoyo</div>
-              <div class="credit-role">71231023</div>
+            <div class="credit-unit-card">
+              <div class="credit-name">Yehezkiel Darren Putra Wardoyo</div>
+              <div class="credit-id">71231023</div>
             </div>
-            <div class="credit-item">
-              <div class="credit-name">🎨 Kenya Syalwa Arifia</div>
-              <div class="credit-role">71231025</div>
+            <div class="credit-unit-card">
+              <div class="credit-name">Kenya Syalwa Arifia</div>
+              <div class="credit-id">71231025</div>
             </div>
-            <div class="credit-item">
-              <div class="credit-name">🔊 Hansel Ivano Supratman</div>
-              <div class="credit-role">71231039</div>
+            <div class="credit-unit-card">
+              <div class="credit-name">Hansel Ivano Supratman</div>
+              <div class="credit-id">71231039</div>
             </div>
-            <div class="credit-item">
-              <div class="credit-name">🧪 Gabriel Sachio Atmadjaja</div>
-              <div class="credit-role">71231052</div>
+            <div class="credit-unit-card">
+              <div class="credit-name">Gabriel Sachio Atmadjaja</div>
+              <div class="credit-id">71231052</div>
             </div>
           </div>
-          <p
-            style="
-              text-align: center;
-              margin-top: 40px;
-              color: #666;
-              font-size: 14px;
-            "
-          >
-            Special thanks to all players and supporters!
-          </p>
-          <p
-            style="
-              text-align: center;
-              margin-top: 10px;
-              color: #ff3333;
-              font-weight: bold;
-            "
-          >
-            🧟 Stay alive and keep hunting! 🧟
+          <p class="credits-closing">
+            Terima kasih kepada seluruh pemain dan instruktur grafika komputer atas dukungan pengujian.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Lightbox for Gallery -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()" role="dialog" aria-modal="true" aria-label="Pratinjau Gambar">
       <div class="lightbox-content" onclick="event.stopPropagation()">
-        <button class="lightbox-close" onclick="closeLightbox()">
-          &times;
-        </button>
-        <img id="lightboxImg" src="" alt="Full size screenshot" />
+        <button class="lightbox-close" onclick="closeLightbox()" aria-label="Tutup pratinjau">&times;</button>
+        <img id="lightboxImg" src="" alt="Tangkapan layar resolusi penuh" />
       </div>
     </div>
 
-    <script>
-      // Modal Functions
-      function openModal(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
+    <!-- Live Weapon Simulator & UI Script -->
+    <script type="module">
+      import { WEAPONS } from "./src/core/Constants.js";
+      import { drawWeaponSprite } from "./src/rendering/SpriteUtils.js";
 
-      function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        modal.classList.remove("active");
-        document.body.style.overflow = "auto";
+      // 1. Data Weapon Real
+      const weaponDescriptions = {
+        katana: {
+          desc: "Bilah pedang tajam jarak dekat untuk manuver cepat membelah formasi zombie.",
+          badge: "Tipe Melee",
+          special: "Efek Khusus: Lifesteal 5% pemulih HP per tebasan telak",
+        },
+        fist: {
+          desc: "Teknik pertarungan tinju tanpa senjata dengan mobilitas gerak maksimal.",
+          badge: "Tipe Melee",
+          special: "Efek Khusus: Lifesteal 10% dan kecepatan lari tertinggi (+1.2)",
+        },
+        wizard: {
+          desc: "Kitab sihir kuno yang melontarkan bola api bersuhu tinggi dari jarak jauh.",
+          badge: "Tipe Range",
+          special: "Efek Khusus: Efek Bakar (DOT 10 dmg/dtk selama 3 detik)",
+        },
+        dualgun: {
+          desc: "Sepasang pistol taktis dengan proyektil berdaya ledak menyebar.",
+          badge: "Tipe Range",
+          special: "Efek Khusus: Ledakan Berantai (Radius AOE 100 px)",
+        },
+      };
 
-        // Stop auto scroll if story modal is closed
-        if (modalId === "storyModal" && autoScrollInterval) {
-          clearInterval(autoScrollInterval);
-          autoScrollInterval = null;
-          const storyScroll = document.getElementById("storyScroll");
-          storyScroll.classList.remove("auto-scrolling");
-        }
-      }
+      let currentWeaponKey = "katana";
 
-      // Close modal when clicking outside
-      document.querySelectorAll(".modal").forEach((modal) => {
-        modal.addEventListener("click", (e) => {
-          if (e.target === modal) {
-            closeModal(modal.id);
-          }
+      window.selectLiveWeapon = function (key) {
+        if (!WEAPONS[key]) return;
+        currentWeaponKey = key;
+        const w = WEAPONS[key];
+        const meta = weaponDescriptions[key];
+
+        // Update active tab buttons
+        document.querySelectorAll(".weapon-select-btn").forEach((btn) => {
+          const isSelected = btn.getAttribute("data-weapon") === key;
+          btn.classList.toggle("active", isSelected);
+          btn.setAttribute("aria-selected", isSelected ? "true" : "false");
         });
-      });
 
-      // Lightbox Functions
-      function openLightbox(imageSrc) {
-        const lightbox = document.getElementById("lightbox");
-        const lightboxImg = document.getElementById("lightboxImg");
-        lightboxImg.src = imageSrc;
-        lightbox.classList.add("active");
-        document.body.style.overflow = "hidden";
-      }
+        // Update labels
+        document.getElementById("liveWeaponName").textContent = w.name;
+        document.getElementById("liveWeaponDesc").textContent = meta.desc;
+        document.getElementById("liveWeaponType").textContent = meta.badge;
+        document.getElementById("statDamage").textContent = w.damage;
+        document.getElementById("statCritical").textContent = w.criticalMultiplier + "x";
+        document.getElementById("statSpeed").textContent = "+" + w.speedBonus;
+        document.getElementById("statRange").textContent = w.range + " px";
+        document.getElementById("statSpecial").textContent = meta.special;
 
-      function closeLightbox() {
-        const lightbox = document.getElementById("lightbox");
-        lightbox.classList.remove("active");
-        document.body.style.overflow = "auto";
-      }
+        // Reset demo animation cycle
+        animFrame = 0;
+      };
 
-      // Story Auto Scroll with Fade Out Effect
-      let autoScrollInterval = null;
-      let scrollSpeed = 1; // pixels per frame
+      // 2. Weapon Canvas Simulator
+      const canvas = document.getElementById("weaponDemoCanvas");
+      const ctx = canvas.getContext("2d");
+      let animFrame = 0;
 
-      function toggleAutoScroll() {
-        const storyScroll = document.getElementById("storyScroll");
+      function renderWeaponSimulator() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (autoScrollInterval) {
-          // Stop scrolling
-          clearInterval(autoScrollInterval);
-          autoScrollInterval = null;
-          storyScroll.classList.remove("auto-scrolling");
+        // Draw tactical grid backdrop
+        ctx.strokeStyle = "rgba(46, 49, 55, 0.4)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 30) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 30) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
+
+        const centerX = 160;
+        const centerY = 100;
+        animFrame = (animFrame + 1) % 120;
+
+        // Draw Player Sprite Base
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // Player shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.beginPath();
+        ctx.ellipse(0, 24, 18, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Player Pixel Body (Simplified preview aligned with Renderer)
+        ctx.fillStyle = "#2c4c8c"; // shirt
+        ctx.fillRect(-8, -6, 16, 20);
+        ctx.fillStyle = "#f4a460"; // skin
+        ctx.fillRect(-6, -18, 12, 12);
+        ctx.fillStyle = "#6b4423"; // hair
+        ctx.fillRect(-7, -22, 14, 6);
+        ctx.fillStyle = "#1a1a2e"; // pants
+        ctx.fillRect(-7, 14, 6, 8);
+        ctx.fillRect(1, 14, 6, 8);
+
+        // Attack Animation by Weapon
+        const w = WEAPONS[currentWeaponKey];
+        const isAttacking = animFrame > 30 && animFrame < 70;
+        const attackProgress = (animFrame - 30) / 40;
+
+        ctx.save();
+        if (currentWeaponKey === "katana") {
+          const swingAngle = isAttacking
+            ? -Math.PI / 3 + attackProgress * (Math.PI * 0.8)
+            : 0.2;
+          ctx.rotate(swingAngle);
+          drawWeaponSprite(ctx, "Katana");
+          ctx.restore();
+
+          // Slash Arc Effect
+          if (isAttacking) {
+            ctx.save();
+            ctx.strokeStyle = "#ff4a1f";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX + 20, centerY, 55, -0.6, 0.6);
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else if (currentWeaponKey === "fist") {
+          const punchOffset = isAttacking ? Math.sin(attackProgress * Math.PI) * 28 : 0;
+          ctx.translate(punchOffset, 0);
+          drawWeaponSprite(ctx, "Tangan Kosong");
+          ctx.restore();
+
+          if (isAttacking && punchOffset > 15) {
+            ctx.fillStyle = "rgba(255, 74, 31, 0.6)";
+            ctx.beginPath();
+            ctx.arc(centerX + 35 + punchOffset, centerY, 14, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (currentWeaponKey === "wizard") {
+          ctx.rotate(-0.1);
+          drawWeaponSprite(ctx, "Wizard Book");
+          ctx.restore();
+
+          if (isAttacking) {
+            const fireX = centerX + 40 + attackProgress * 220;
+            ctx.fillStyle = "#ff4a1f";
+            ctx.beginPath();
+            ctx.arc(fireX, centerY - 5, 8 + Math.sin(animFrame * 0.4) * 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Trail
+            ctx.fillStyle = "rgba(251, 191, 36, 0.6)";
+            ctx.beginPath();
+            ctx.arc(fireX - 16, centerY - 5, 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (currentWeaponKey === "dualgun") {
+          ctx.rotate(0);
+          drawWeaponSprite(ctx, "Dual Gun");
+          ctx.restore();
+
+          if (isAttacking) {
+            const bulletX = centerX + 30 + (attackProgress * 300) % 280;
+            ctx.fillStyle = "#ffd700";
+            ctx.fillRect(bulletX, centerY - 6, 12, 3);
+            ctx.fillRect(bulletX - 18, centerY + 2, 12, 3);
+          }
         } else {
-          // Start scrolling
-          storyScroll.classList.add("auto-scrolling");
-          autoScrollInterval = setInterval(() => {
-            storyScroll.scrollTop += scrollSpeed;
-
-            // Apply fade out effect to lines that pass threshold
-            const lines = storyScroll.querySelectorAll(".story-line");
-            const containerRect = storyScroll.getBoundingClientRect();
-            const fadeThreshold = containerRect.top + 80; // Fade starts 80px from top
-
-            lines.forEach((line) => {
-              const rect = line.getBoundingClientRect();
-
-              if (rect.top < fadeThreshold) {
-                // Calculate opacity based on distance from threshold
-                const distance = fadeThreshold - rect.top;
-                const maxDistance = 80;
-                const opacity = Math.max(0, 1 - distance / maxDistance);
-                line.style.opacity = opacity;
-              } else {
-                line.style.opacity = 1;
-              }
-            });
-
-            // Stop at bottom
-            if (
-              storyScroll.scrollTop >=
-              storyScroll.scrollHeight - storyScroll.clientHeight
-            ) {
-              clearInterval(autoScrollInterval);
-              autoScrollInterval = null;
-              storyScroll.classList.remove("auto-scrolling");
-            }
-          }, 30); // ~33fps
+          ctx.restore();
         }
+
+        ctx.restore();
+        requestAnimationFrame(renderWeaponSimulator);
       }
 
-      function resetScroll() {
-        const storyScroll = document.getElementById("storyScroll");
-        storyScroll.scrollTop = 0;
+      renderWeaponSimulator();
 
-        // Reset all line opacities
-        const lines = storyScroll.querySelectorAll(".story-line");
-        lines.forEach((line) => {
-          line.style.opacity = 1;
+      // Modal & Lightbox Logic
+      window.openModal = function (modalId) {
+        const m = document.getElementById(modalId);
+        if (m) {
+          m.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+      };
+
+      window.closeModal = function (modalId) {
+        const m = document.getElementById(modalId);
+        if (m) {
+          m.classList.remove("active");
+          document.body.style.overflow = "auto";
+        }
+      };
+
+      window.openLightbox = function (src) {
+        const lb = document.getElementById("lightbox");
+        const img = document.getElementById("lightboxImg");
+        if (lb && img) {
+          img.src = src;
+          lb.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+      };
+
+      window.closeLightbox = function () {
+        const lb = document.getElementById("lightbox");
+        if (lb) {
+          lb.classList.remove("active");
+          document.body.style.overflow = "auto";
+        }
+      };
+
+      // Modal background click close
+      document.querySelectorAll(".modal").forEach((m) => {
+        m.addEventListener("click", (e) => {
+          if (e.target === m) window.closeModal(m.id);
         });
+      });
 
-        // Stop auto scroll if running
-        if (autoScrollInterval) {
-          clearInterval(autoScrollInterval);
-          autoScrollInterval = null;
-          storyScroll.classList.remove("auto-scrolling");
-        }
-      }
-
-      // Keyboard shortcuts
+      // Escape key to close
       document.addEventListener("keydown", (e) => {
-        // ESC to close modals
         if (e.key === "Escape") {
-          document.querySelectorAll(".modal.active").forEach((modal) => {
-            closeModal(modal.id);
-          });
-          if (
-            document.getElementById("lightbox").classList.contains("active")
-          ) {
-            closeLightbox();
-          }
+          document.querySelectorAll(".modal.active").forEach((m) => window.closeModal(m.id));
+          window.closeLightbox();
         }
       });
 
-      // Add smooth scroll behavior
-      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-        anchor.addEventListener("click", function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute("href"));
-          if (target) {
-            target.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-          }
-        });
-      });
+      // Story Auto-Scroll Implementation
+      let autoScrollTimer = null;
+      window.toggleAutoScroll = function () {
+        const scroller = document.getElementById("storyScroll");
+        const btn = document.getElementById("btnAutoScroll");
+        if (!scroller) return;
+
+        if (autoScrollTimer) {
+          clearInterval(autoScrollTimer);
+          autoScrollTimer = null;
+          if (btn) btn.classList.remove("active");
+        } else {
+          if (btn) btn.classList.add("active");
+          autoScrollTimer = setInterval(() => {
+            scroller.scrollTop += 1;
+            if (scroller.scrollTop >= scroller.scrollHeight - scroller.clientHeight) {
+              clearInterval(autoScrollTimer);
+              autoScrollTimer = null;
+              if (btn) btn.classList.remove("active");
+            }
+          }, 35);
+        }
+      };
+
+      window.resetScroll = function () {
+        const scroller = document.getElementById("storyScroll");
+        const btn = document.getElementById("btnAutoScroll");
+        if (scroller) scroller.scrollTop = 0;
+        if (autoScrollTimer) {
+          clearInterval(autoScrollTimer);
+          autoScrollTimer = null;
+          if (btn) btn.classList.remove("active");
+        }
+      };
+
+      // Motion: Staggered Intersection Observer for entrances
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+
+      document.querySelectorAll(".motion-enter").forEach((el) => observer.observe(el));
     </script>
   </body>
 </html>

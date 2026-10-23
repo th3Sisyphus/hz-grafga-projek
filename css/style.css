@@ -1,4 +1,50 @@
-@import url("https://fonts.googleapis.com/css2?family=Creepster&family=Vt323&display=swap");
+@import url("../assets/fonts/fonts.css");
+
+/* ==========================================================================
+   HUNTY ZOMBIE — APP SCREEN DESIGN SYSTEM
+   Palette: Graphite & Safety Orange (True Black Flat)
+   Typography: Hanken Grotesk (OFL self-hosted)
+   Constraints: Zero glow, zero bounce, zero emoji tells, crisp touch targets.
+   ========================================================================== */
+
+:root {
+  --ground: #0d0e10;
+  --surface: #18191b;
+  --surface-raised: #222427;
+  --surface-dim: #131416;
+  --surface-card: #1c1e22;
+  --rule: #282a30;
+  
+  --ink: #eff0f1;
+  --ink-secondary: #c5c7cb;
+  --muted: #95989f;
+  --faint: #63666e;
+  
+  --accent: #ff4a1f;
+  --accent-hover: #ff643e;
+  --accent-ink: #18191b;
+  
+  --positive: #2ec486;
+  --warning: #f0b429;
+  --negative: #e53935;
+  
+  --font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  
+  --safe-top: max(52px, calc(44px + env(safe-area-inset-top)));
+  --safe-right: max(24px, env(safe-area-inset-right));
+  --safe-bottom: max(24px, env(safe-area-inset-bottom));
+  --safe-left: max(24px, env(safe-area-inset-left));
+  
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+}
+
+/* ==========================================================================
+   BASE & APP CANVAS VIEWPORT
+   ========================================================================== */
 
 *,
 *::before,
@@ -7,541 +53,1016 @@
   padding: 0;
   box-sizing: border-box;
   user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  background-color: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-family);
+  font-size: 16px;
+  line-height: 1.4;
+  height: 100svh;
+  overflow: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 body {
-  font-family: "Vt323", "Courier New", monospace;
-  background-color: #050505;
-
-  /* FIX: Background Image dipasang di BODY, bukan container game */
-  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-    /* Overlay gelap agar teks terbaca */ url("../assets/icon/background.jpeg"); /* Mundur satu folder dari css/ ke root/ lalu ke icon/ */
-
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  color: #eee;
-  overflow: hidden;
+  justify-content: center;
 }
 
-/* Container Game */
 #gameContainer {
   position: relative;
-  /* Efek shadow merah menyala di sekeliling game */
-  box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
-  border: 2px solid #333;
-  /* Jangan taruh background image disini karena akan tertutup canvas */
-  background: #000;
+  width: 800px;
+  height: 600px;
+  max-width: 100vw;
+  max-height: 100svh;
+  background-color: #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-canvas {
+#gameCanvas {
   display: block;
-  background: #1a1a1a;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
   cursor: crosshair;
 }
 
-/* UI Overlay (HUD) */
+/* ==========================================================================
+   APP SHELL TACTICAL TOPBAR (REQUIREMENT 2 & 5)
+   ========================================================================== */
+
+.app-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 42px;
+  background-color: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-mark {
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.topbar-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.topbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.meta-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.meta-status {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--positive);
+}
+
+/* ==========================================================================
+   PRIMARY IN-GAME HUD (OVERLAY TOP-LEFT)
+   ========================================================================== */
+
 #ui {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid #444;
-  padding: 15px;
-  border-radius: 4px;
-  font-size: 20px;
+  top: var(--safe-top);
+  left: var(--safe-left);
+  background-color: rgba(24, 25, 27, 0.92);
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  z-index: 25;
   pointer-events: none;
-  text-shadow: 1px 1px 0 #000;
-  z-index: 5;
-  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 210px;
 }
 
-#ui div {
-  margin-bottom: 5px;
+.hud-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
 }
 
-/* Health Bar */
+.hud-label {
+  color: var(--muted);
+}
+
+.hud-val {
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-health-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
 .health-bar {
   width: 100%;
-  height: 12px;
-  background: #330000;
-  border: 1px solid #555;
-  margin-top: 8px;
-  position: relative;
+  height: 10px;
+  background-color: var(--surface-dim);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
 }
 
 .health-fill {
   height: 100%;
-  background: linear-gradient(90deg, #ff0000, #ff4d4d);
-  box-shadow: 0 0 10px #ff0000;
-  transition: width 0.2s cubic-bezier(0.4, 1, 0.8, 1);
+  background-color: var(--positive);
+  width: 100%;
+  transition: width 150ms var(--ease-out), background-color 150ms var(--ease-out);
 }
 
-/* Pause Button */
-#pauseBtn {
+.health-fill.low {
+  background-color: var(--negative);
+}
+
+/* ==========================================================================
+   TOP BOSS HP BAR & STUN RESISTANCE
+   ========================================================================== */
+
+.boss-hp-container {
   position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(20, 0, 0, 0.8);
-  color: #ff3333;
-  border: 1px solid #ff3333;
-  border-radius: 4px;
+  top: var(--safe-top);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(24, 25, 27, 0.94);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  z-index: 25;
+  pointer-events: none;
+  width: 380px;
+  max-width: 85vw;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.boss-hp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.boss-hp-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.boss-stun-label {
+  font-size: 13px;
+  color: var(--warning);
+  font-variant-numeric: tabular-nums;
+}
+
+.boss-bar-track {
+  width: 100%;
+  height: 10px;
+  background-color: var(--surface-dim);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.boss-bar-fill {
+  width: 100%;
+  height: 100%;
+  background-color: var(--accent);
+  transition: width 150ms var(--ease-out);
+}
+
+/* ==========================================================================
+   TOP-RIGHT HUD & PAUSE BUTTON
+   ========================================================================== */
+
+.hud-top-right {
+  position: absolute;
+  top: var(--safe-top);
+  right: var(--safe-right);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.radar-telemetry-badge {
+  background-color: rgba(24, 25, 27, 0.92);
   padding: 8px 12px;
-  font-size: 24px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+@media (max-width: 840px) {
+  .radar-telemetry-badge {
+    display: none;
+  }
+}
+
+.radar-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent);
+  border-radius: 50%;
+}
+
+#pauseBtn {
+  background-color: var(--surface-raised);
+  color: var(--ink);
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  z-index: 20;
-  transition: all 0.2s;
-  display: none; /* <-- DEFAULT: TIDAK MUNCUL DI MENU */
+  pointer-events: auto;
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
 #pauseBtn:hover {
-  background: #ff3333;
-  color: #000;
-  box-shadow: 0 0 15px #ff3333;
+  background-color: var(--accent);
+  color: var(--accent-ink);
 }
 
-/* === MENU & OVERLAYS === */
-#menu,
-#pauseMenu,
-#gameOver,
-#tutorial {
+#pauseBtn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   LOW HP VIGNETTE & WAVE BANNER
+   ========================================================================== */
+
+.vignette-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  /* Transparan gelap agar background website terlihat samar di belakang menu */
-  background: rgba(10, 5, 5, 0.85);
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  border: 14px solid rgba(229, 57, 53, 0.45);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.vignette-overlay.active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vignette-overlay {
+    transition: none;
+  }
+}
+
+.wave-banner {
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(13, 14, 16, 0.95);
+  padding: 16px 36px;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--accent);
+  z-index: 35;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  z-index: 10;
-  backdrop-filter: blur(5px);
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
 }
 
-#weaponSelect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(10, 5, 5, 0.85);
-  backdrop-filter: blur(5px);
-  z-index: 10;
-  overflow-y: auto;
-  overflow-x: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 10px;
+.wave-banner.active {
+  opacity: 1;
 }
 
-h1,
-h2 {
-  font-family: "Creepster", cursive, "Vt323", monospace;
-  font-size: 64px;
-  color: #ff0000;
-  text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 2px 2px 0px #330000;
-  margin-bottom: 40px;
-  text-align: center;
-  letter-spacing: 2px;
-  animation: pulseText 3s infinite;
-}
-
-/* Buttons */
-.btn {
-  padding: 15px 50px;
+.wave-banner-headline {
   font-size: 24px;
-  margin: 15px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #ff3333;
-  border: 2px solid #ff3333;
-  cursor: pointer;
-  font-family: "Vt323", monospace;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  transition: all 0.2s;
-  position: relative;
-
-  /* === BAGIAN YANG DIPERBAIKI === */
-  /* Hapus atau ganti overflow: hidden menjadi visible */
-  overflow: visible;
-
-  /* Tambahkan ini agar teks vertikal pas di tengah */
-  line-height: normal;
-  display: inline-block;
-  /* ============================== */
-
-  box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+  font-weight: 800;
+  color: var(--ink);
 }
 
-.btn:hover {
-  background: #ff3333;
-  color: #000;
-  box-shadow: 0 0 30px rgba(255, 51, 51, 0.8);
-  transform: scale(1.05);
-  font-weight: bold;
+.wave-banner-sub {
+  font-size: 14px;
+  color: var(--muted);
 }
 
-.btn:disabled {
-  border-color: #555;
-  color: #555;
-  cursor: not-allowed;
-  box-shadow: none;
+/* ==========================================================================
+   MOBILE CONTROLS (TOUCH INTERFACES)
+   ========================================================================== */
+
+#mobileControls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
 }
 
-.weapon-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 600px;
-  padding: 0;
+#joystickZone {
+  position: absolute;
+  left: var(--safe-left);
+  bottom: var(--safe-bottom);
+  width: 140px;
+  height: 140px;
+  background-color: rgba(24, 25, 27, 0.6);
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.weapon-card {
-  background: linear-gradient(
-    135deg,
-    rgba(30, 30, 30, 0.95),
-    rgba(10, 10, 10, 0.98)
-  );
-  padding: 15px 12px;
-  border: 2px solid #444;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  min-height: 240px;
+#joystickKnob {
+  width: 54px;
+  height: 54px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.mobile-actions-cluster {
+  position: absolute;
+  right: var(--safe-right);
+  bottom: var(--safe-bottom);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
 }
 
-.weapon-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 170, 0, 0.1),
-    transparent
-  );
-  transition: left 0.5s;
-}
-
-.weapon-card:hover::before {
-  left: 100%;
-}
-
-.weapon-card:hover {
-  border-color: #ffaa00;
-  box-shadow: 0 8px 25px rgba(255, 170, 0, 0.3);
-  transform: translateY(-8px) scale(1.02);
-}
-
-.weapon-card.selected {
-  border: 3px solid #ff3333;
-  background: linear-gradient(
-    135deg,
-    rgba(50, 10, 10, 0.95),
-    rgba(30, 5, 5, 0.98)
-  );
-  box-shadow: 0 0 30px rgba(255, 51, 51, 0.5);
-  transform: translateY(-8px) scale(1.02);
-}
-
-.weapon-card.selected::after {
-  content: "✓ SELECTED";
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 11px;
-  background: #ff3333;
-  color: #fff;
-  padding: 4px 10px;
-  font-weight: bold;
-  border-radius: 4px;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 8px rgba(255, 51, 51, 0.4);
-}
-
-.weapon-icon {
-  font-size: 42px;
-  margin-bottom: 8px;
-  filter: drop-shadow(0 2px 8px rgba(255, 170, 0, 0.3));
-  animation: floatIcon 3s ease-in-out infinite;
-  /* Ensure emoji/unicode renders properly */
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  line-height: 1;
-}
-
-@keyframes floatIcon {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-.weapon-card:hover .weapon-icon {
-  filter: drop-shadow(0 6px 16px rgba(255, 170, 0, 0.6));
-  transform: scale(1.1);
-  transition: all 0.3s;
-}
-
-.weapon-card h3 {
-  color: #fff;
-  margin-bottom: 6px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-.weapon-type {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 9px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.weapon-type.melee {
-  background: linear-gradient(135deg, #ff3333, #cc0000);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(255, 51, 51, 0.3);
-}
-
-.weapon-type.range {
-  background: linear-gradient(135deg, #3366ff, #0033cc);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(51, 102, 255, 0.3);
-}
-
-.weapon-stats {
-  font-size: 11px;
-  line-height: 1.5;
-  color: #ccc;
-  text-align: left;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 8px 10px;
-  border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.weapon-stats div {
+.mobile-secondary-row {
   display: flex;
-  justify-content: space-between;
-  padding: 2px 0;
+  gap: 10px;
+  pointer-events: auto;
 }
 
-.stat-label {
-  color: #888;
-  font-weight: 400;
-}
-
-.stat-value {
-  color: #ffaa00;
-  font-weight: 700;
-}
-
-.weapon-special {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ff3333 !important;
-  font-weight: 600;
-  text-align: center;
-  font-size: 10px;
-}
-
-.btn-confirm {
-  background: linear-gradient(135deg, #ff3333, #cc0000);
+.btn-mobile-secondary {
+  width: 48px;
+  height: 48px;
+  background-color: var(--surface-raised);
+  color: var(--ink);
   border: none;
-  color: white;
-  font-size: 16px;
-  padding: 12px 35px;
-  box-shadow: 0 4px 15px rgba(255, 51, 51, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
-.btn-confirm:hover {
-  box-shadow: 0 6px 20px rgba(255, 51, 51, 0.6);
-  transform: translateY(-2px);
+.btn-mobile-secondary svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 
-.btn-confirm:disabled {
-  background: linear-gradient(135deg, #555, #333);
-  color: #888;
-  cursor: not-allowed;
-  box-shadow: none;
+#mobileAttackBtn {
+  width: 72px;
+  height: 72px;
+  background-color: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  font-weight: 700;
+  transition: transform var(--duration-fast) var(--ease-out);
 }
 
-.btn-back {
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid #666;
-  color: #aaa;
-  font-size: 16px;
-  padding: 12px 35px;
+#mobileAttackBtn:active {
+  transform: scale(0.94);
 }
 
-.btn-back:hover {
-  border-color: #fff;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+#mobileAttackBtn svg {
+  width: 32px;
+  height: 32px;
+  fill: currentColor;
 }
 
-/* Tutorial Box */
-#tutorial {
-  align-items: flex-start;
-  overflow-y: auto;
-}
+/* ==========================================================================
+   OVERLAY SCREENS & DIALOG PANELS (MODALS)
+   ========================================================================== */
 
-.tutorial-content {
-  background: rgba(0, 0, 0, 0.9);
-  padding: 40px;
-  border: 1px solid #444;
-  max-width: 600px;
-  margin: auto;
-  border-top: 4px solid #ff3333;
-}
-
-#tutorial h2 {
-  text-align: left;
-  margin-bottom: 10px;
-}
-
-#tutorial ul li {
-  margin-bottom: 8px;
-  padding-left: 20px;
-  position: relative;
-}
-
-#tutorial ul li::before {
-  content: "►";
-  color: #ff3333;
+.app-overlay {
   position: absolute;
-  left: 0;
+  inset: 0;
+  background-color: rgba(13, 14, 16, 0.94);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
 }
 
 .hidden {
   display: none !important;
 }
 
-@keyframes pulseText {
-  0% {
-    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
-  }
-  50% {
-    text-shadow: 0 0 40px rgba(255, 0, 0, 1), 0 0 10px #ff3333;
-  }
-  100% {
-    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
-  }
-}
-
-/* MOBILE CONTROLS */
-#mobileControls {
-  position: absolute;
-  top: 0;
-  left: 0;
+.overlay-panel {
+  background-color: var(--surface);
   width: 100%;
-  height: 100%;
-  pointer-events: none; /* Agar tidak memblokir area tengah */
-  z-index: 15;
-  /* Hanya muncul di layar sentuh atau layar kecil jika diinginkan */
-}
-
-/* Joystick Zone (Kiri Bawah) */
-#joystickZone {
-  position: absolute;
-  bottom: 50px;
-  left: 50px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  pointer-events: auto; /* Bisa diklik/touch */
-  touch-action: none; /* Mencegah scroll saat drag */
-}
-
-/* Joystick Knob (Tongkat) */
-#joystickKnob {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50px;
-  height: 50px;
-  background: rgba(255, 51, 51, 0.8); /* Merah */
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-  pointer-events: none;
-}
-
-/* Attack Button (Kanan Bawah) */
-#mobileAttackBtn {
-  position: absolute;
-  bottom: 50px;
-  right: 50px;
-  width: 90px;
-  height: 90px;
-  background: rgba(200, 0, 0, 0.6);
-  border: 3px solid #ff3333;
-  border-radius: 50%;
-  font-size: 40px;
-  color: white;
+  max-width: 620px;
+  padding: 32px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.overlay-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.overlay-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.overlay-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.overlay-desc {
+  font-size: 14px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+}
+
+.sample-tag {
+  background-color: var(--surface-dim);
+  color: var(--warning);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  align-self: flex-start;
+}
+
+/* Common Buttons */
+.btn {
+  background-color: var(--surface-raised);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  pointer-events: auto;
-  touch-action: manipulation;
-  user-select: none;
-  transition: transform 0.1s, background 0.1s;
+  text-align: center;
+  transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
 
-#mobileAttackBtn:active,
-#mobileAttackBtn.pressed {
-  transform: scale(0.9);
-  background: rgba(255, 50, 50, 0.9);
-  box-shadow: 0 0 20px #ff0000;
+.btn:hover {
+  background-color: var(--rule);
 }
 
-/* Sembunyikan kontrol jika di Menu/Pause/GameOver */
-#mobileControls.hidden {
-  display: none !important;
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
 }
 
-/* Opsional: Media Query agar hanya muncul di layar kecil/touch */
-@media (min-width: 1024px) and (pointer: fine) {
-  /* Bisa di-uncomment jika ingin sembunyi di Desktop */
-  #mobileControls {
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-outline {
+  background-color: var(--surface-dim);
+  color: var(--ink-secondary);
+}
+
+.btn-outline:hover {
+  background-color: var(--surface-raised);
+  color: var(--ink);
+}
+
+.btn-action-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* ==========================================================================
+   START MENU (#menu)
+   ========================================================================== */
+
+.start-menu-panel {
+  max-width: 440px;
+  text-align: center;
+  align-items: center;
+}
+
+.start-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.start-menu-actions .btn {
+  width: 100%;
+}
+
+/* ==========================================================================
+   WEAPON SELECT MENU (#weaponSelect)
+   ========================================================================== */
+
+.weapon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 580px) {
+  .weapon-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.weapon-card {
+  background-color: var(--surface-card);
+  padding: 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.weapon-card:hover {
+  background-color: var(--surface-raised);
+}
+
+.weapon-card.selected {
+  background-color: var(--surface-raised);
+  border-left: 4px solid var(--accent);
+}
+
+.weapon-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weapon-card-icon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--surface-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+}
+
+.weapon-card-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.weapon-card-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.weapon-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.weapon-card-type {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.weapon-stats-table {
+  background-color: var(--surface-dim);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.weapon-stat-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.weapon-stat-row .stat-label {
+  color: var(--muted);
+}
+
+.weapon-stat-row .stat-value {
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.weapon-card-perk {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   TUTORIAL OVERLAY (#tutorial)
+   ========================================================================== */
+
+.tutorial-section-card {
+  background-color: var(--surface-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tutorial-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tutorial-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+
+.tutorial-list li {
+  display: flex;
+  gap: 8px;
+}
+
+.tutorial-list li strong {
+  color: var(--ink);
+  min-width: 90px;
+}
+
+/* ==========================================================================
+   PAUSE OVERLAY (#pauseMenu) & GAME OVER (#gameOver)
+   ========================================================================== */
+
+.pause-panel {
+  max-width: 420px;
+  text-align: center;
+}
+
+.debrief-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background-color: var(--surface-dim);
+  padding: 16px;
+}
+
+.debrief-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.debrief-cell .debrief-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.debrief-cell .debrief-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   UPGRADE & SHOP MODALS (REQUIREMENT 4)
+   ========================================================================== */
+
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 600px) {
+  .upgrade-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.upgrade-card {
+  background-color: var(--surface-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.upgrade-card:hover {
+  background-color: var(--surface-raised);
+}
+
+.upgrade-icon-wrap {
+  width: 36px;
+  height: 36px;
+  background-color: var(--surface-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+}
+
+.upgrade-icon-wrap svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+.upgrade-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.upgrade-effect {
+  font-size: 13px;
+  color: var(--positive);
+  font-weight: 600;
+}
+
+.upgrade-desc {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Merchant Shop */
+.shop-inventory-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 580px) {
+  .shop-inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shop-item-card {
+  background-color: var(--surface-card);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shop-item-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.shop-item-cost {
+  font-size: 13px;
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   SETTINGS MODAL & FORM CONTROLS
+   ========================================================================== */
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: var(--surface-card);
+  padding: 18px;
+}
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.settings-slider {
+  width: 140px;
+  accent-color: var(--accent);
+}
+
+.settings-select {
+  background-color: var(--surface-dim);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.keybind-table {
+  width: 100%;
+  font-size: 13px;
+  background-color: var(--surface-dim);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.keybind-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.keybind-key {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.keybind-action {
+  color: var(--muted);
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT & MEDIA QUERIES (MOBILE LANDSCAPE FIRST)
+   ========================================================================== */
+
+@media (max-width: 600px) {
+  .topbar-title {
+    font-size: 18px;
+  }
+  
+  .topbar-meta {
     display: none;
   }
+  
+  .overlay-panel {
+    padding: 20px 16px;
+  }
+
+  .weapon-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .char-grid,
+  .mode-grid,
+  .upgrade-grid,
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
 }
+
+/* Landscape on short screens (e.g. phones in landscape 844x390) */
+@media (max-height: 480px) {
+  .app-topbar {
+    height: 36px;
+    padding: 0 12px;
+  }
+
+  .topbar-title {
+    font-size: 16px;
+  }
+
+  .app-overlay {
+    padding: 42px 12px 12px 12px;
+  }
+
+  .overlay-panel {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  #ui {
+    top: 42px;
+    padding: 8px 12px;
+    gap: 4px;
+    min-width: 170px;
+  }
+
+  .boss-hp-container {
+    top: 42px;
+    padding: 6px 12px;
+    width: 280px;
+    max-width: 40vw;
+  }
+}
+
+/* ==========================================================================
+   PREFERS-REDUCED-MOTION (ACCESSIBILITY & REQUIREMENT 5)
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .vignette-overlay.active {
+    animation: none !important;
+    opacity: 0.8 !important;
+  }
+
+  .wave-banner.active {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}
+

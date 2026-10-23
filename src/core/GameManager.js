@@ -288,20 +288,40 @@ export class GameManager {
 
   // ... (Sisa method UI tetap sama seperti sebelumnya)
   updateUI() {
+    if (window.uiManager && typeof window.uiManager.updateHUD === "function") {
+      window.uiManager.updateHUD(this.context);
+      return;
+    }
     const player = this.context.player;
     if (!player) return;
 
-    document.getElementById("wave").textContent = this.context.wave;
-    document.getElementById("score").textContent = this.context.score;
-    document.getElementById("zombieCount").textContent =
-      this.context.zombies.length;
-    document.getElementById("health").textContent = Math.max(
-      0,
-      Math.floor(player.health)
-    );
-    const healthPercent = (player.health / player.maxHealth) * 100;
-    document.getElementById("healthBar").style.width =
-      Math.max(0, healthPercent) + "%";
+    if (this._lastWave !== this.context.wave) {
+      this._lastWave = this.context.wave;
+      const el = document.getElementById("wave");
+      if (el) el.textContent = this.context.wave;
+    }
+    if (this._lastScore !== this.context.score) {
+      this._lastScore = this.context.score;
+      const el = document.getElementById("score");
+      if (el) el.textContent = this.context.score;
+    }
+    const zCount = this.context.zombies ? this.context.zombies.length : 0;
+    if (this._lastZombies !== zCount) {
+      this._lastZombies = zCount;
+      const el = document.getElementById("zombieCount");
+      if (el) el.textContent = zCount;
+    }
+    const curHp = Math.max(0, Math.floor(player.health));
+    if (this._lastHp !== curHp) {
+      this._lastHp = curHp;
+      const el = document.getElementById("health");
+      if (el) el.textContent = curHp;
+      const hb = document.getElementById("healthBar");
+      if (hb) {
+        const healthPercent = (player.health / player.maxHealth) * 100;
+        hb.style.width = Math.max(0, healthPercent) + "%";
+      }
+    }
   }
 
   showTutorial() {

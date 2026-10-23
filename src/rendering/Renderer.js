@@ -626,24 +626,24 @@ export class Renderer {
     } else if (effect.constructor.name === "DamageNumber") {
       // Khusus Text Stun
       if (typeof effect.damage === "string") {
-        ctx.font = "bold 24px monospace";
-        ctx.fillStyle = `rgba(255, 255, 0, ${alpha})`;
+        ctx.font = "bold 22px 'Hanken Grotesk', sans-serif";
+        ctx.fillStyle = `rgba(240, 180, 41, ${alpha})`;
         ctx.fillText(effect.damage, screenX, screenY);
       } else {
-        ctx.font = effect.isCritical ? "bold 20px monospace" : "14px monospace";
+        ctx.font = effect.isCritical ? "bold 20px 'Hanken Grotesk', sans-serif" : "15px 'Hanken Grotesk', sans-serif";
         ctx.fillStyle = effect.isCritical
-          ? `rgba(255, 215, 0, ${alpha})`
-          : `rgba(255, 255, 255, ${alpha})`;
+          ? `rgba(240, 180, 41, ${alpha})`
+          : `rgba(239, 240, 241, ${alpha})`;
         ctx.fillText(effect.damage, screenX, screenY);
       }
     } else if (effect.constructor.name === "HealEffect") {
-      ctx.font = "bold 18px monospace";
-      ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`; // Warna Hijau
+      ctx.font = "bold 18px 'Hanken Grotesk', sans-serif";
+      ctx.fillStyle = `rgba(46, 196, 134, ${alpha})`;
       // Tampilkan dengan tanda plus
       ctx.fillText("+" + effect.amount, screenX, screenY);
     } else if (effect.constructor.name === "BurnEffect") {
       const size = 8 * (effect.life / 20);
-      ctx.fillStyle = `rgba(255, 100, 0, ${alpha})`;
+      ctx.fillStyle = `rgba(255, 74, 31, ${alpha})`;
       ctx.beginPath();
       ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
       ctx.fill();
