@@ -20,7 +20,12 @@ export class CombatSystem {
   }
 
   applyDamage(entity, damage, isCritical = false) {
-    const isDead = entity.takeDamage(damage, isCritical, this.context.effects);
+    const isDead = entity.takeDamage(
+      damage,
+      isCritical,
+      this.context.effects,
+      this.context
+    );
 
     // Update real stats
     if (entity.type === "player") {
@@ -64,12 +69,29 @@ export class CombatSystem {
     }
   }
 
-  checkZombieAttack() {
+  checkZombieAttack(dtNormal = 1) {
     const { player, zombies, time } = this.context;
     if (!player) return;
 
+    // 1. Update StatusEffects pada Player
+    if (player.status) {
+      player.status.update(this, time);
+    }
+
     for (let i = 0; i < zombies.length; i++) {
       const zombie = zombies[i];
+      if (zombie.health <= 0) continue;
+
+      // 2. Update StatusEffects pada Zombie
+      if (zombie.status) {
+        zombie.status.update(this, time);
+      }
+
+      // 3. Update aksi & telegraf khusus musuh (Spitter, Necromancer, Boss)
+      if (typeof zombie.updateSpecialBehaviors === "function") {
+        zombie.updateSpecialBehaviors(this.context, dtNormal);
+      }
+
       const dist = Math.hypot(player.x - zombie.x, player.y - zombie.y);
 
       // Jangkauan serangan: Boss (50) lebih luas dari Zombie biasa (30)
@@ -77,13 +99,13 @@ export class CombatSystem {
 
       if (dist < attackRange) {
         if (time - zombie.lastAttack > zombie.attackCooldown) {
-          // 1. Berikan damage ke player
+          // Berikan damage ke player
           this.applyDamage(player, zombie.damage);
           zombie.lastAttack = time;
 
-          // 2. Ability Boss: Stun setiap 4 pukulan
-          if (zombie.isBoss) {
-            zombie.attackCount++;
+          // Ability Boss: Stun setiap 4 pukulan di Fase 1
+          if (zombie.isBoss && zombie.phase === 1) {
+            zombie.attackCount = (zombie.attackCount || 0) + 1;
 
             if (zombie.attackCount >= 4) {
               player.applyStun(2000, time);
@@ -97,19 +119,6 @@ export class CombatSystem {
             }
           }
         }
-      }
-
-      // Handle Burn DOT menggunakan game clock
-      if (zombie.burning && time < zombie.burnEndTime) {
-        if (time - zombie.lastBurnTick > 500) {
-          this.applyDamage(zombie, zombie.burnDamage, false);
-          zombie.lastBurnTick = time;
-          if (this.context.effects.length < 300) {
-            this.context.effects.push(new BurnEffect(zombie.x, zombie.y));
-          }
-        }
-      } else {
-        zombie.burning = false;
       }
     }
   }
@@ -140,7 +149,10 @@ export class CombatSystem {
         pickups.push(new Pickup(zombie.x, zombie.y, "coin", 10, time));
       }
     } else {
-      const coinVal = Math.floor(Math.random() * 4) + 2; // 2-5 koin
+      const dropRange = zombie.definition?.dropCoins || [2, 5];
+      const coinVal =
+        Math.floor(Math.random() * (dropRange[1] - dropRange[0] + 1)) +
+        dropRange[0];
       pickups.push(new Pickup(zombie.x, zombie.y, "coin", coinVal, time));
     }
 
@@ -174,6 +186,24 @@ export class CombatSystem {
       const isAlive = p.update(this.context, dtNormal);
       if (!isAlive) continue;
 
+      // 1. Proyektil Musuh (Spitter dll)
+      if (p.type === "enemy_projectile") {
+        if (player && player.health > 0) {
+          const dist = Math.hypot(player.x - p.x, player.y - p.y);
+          if (dist < 22) {
+            this.applyDamage(player, p.damage, false);
+            if (p.effectType === "poison") {
+              player.status?.apply("poison", 3000, 8, this.context.time);
+            }
+            p.hit = true;
+            continue;
+          }
+        }
+        activeProjectiles.push(p);
+        continue;
+      }
+
+      // 2. Proyektil Pemain Menghantam Zombie
       let hitZombie = null;
       for (let j = 0; j < zombies.length; j++) {
         const zombie = zombies[j];
@@ -207,9 +237,10 @@ export class CombatSystem {
         hitZombie.y += Math.sin(p.angle) * kbDist;
 
         if (p.weapon.name === "Wizard Book") {
-          hitZombie.applyBurn(
-            p.weapon.dotDamage,
+          hitZombie.status?.apply(
+            "burn",
             p.weapon.dotDuration,
+            p.weapon.dotDamage,
             this.context.time
           );
           if (effects.length < 300) {
@@ -335,7 +366,7 @@ export class CombatSystem {
 
   update(dtNormal = 1) {
     this.updateProjectiles(dtNormal);
-    this.checkZombieAttack();
+    this.checkZombieAttack(dtNormal);
     this.checkSpikeHazards();
     this.updatePickups(dtNormal);
   }

@@ -5,6 +5,7 @@ import {
 } from "../core/Constants.js";
 import { MeleeEffect } from "./Effect.js";
 import { Projectile } from "./Projectile.js";
+import { StatusEffects } from "./StatusEffects.js";
 
 export class Player {
   constructor(x, y) {
@@ -13,6 +14,9 @@ export class Player {
     this.y = y;
     this.width = 30;
     this.height = 30;
+
+    // Sistem Status Effects terpadu
+    this.status = new StatusEffects(this);
 
     // Stat Dasar
     this.baseMaxHealth = BASE_PLAYER_HEALTH;

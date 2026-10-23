@@ -134,3 +134,32 @@ Fase 2 mengintegrasikan sistem ekonomi, jarahan musuh, dan pos perbekalan taktis
    - Alur transisi otomatis: Gelombang Selesai -> Pemulihan 20% HP -> Modal Upgrade -> Modal Toko Pedagang Karantina -> Lanjut ke Gelombang Berikutnya -> Jeda 3 detik -> Musuh Diterjunkan.
    - Menghapus fungsi demo `buyItemDemo` dan tag simulasi hardcode. State `menu.html?ui=shop` terhubung penuh dengan katalog data nyata.
 
+---
+
+## 8. Log Pengembangan: Fase 3 — Musuh, Boss Tiga Fase, dan Telegraf
+
+Fase 3 mengimplementasikan ragam arketipe musuh baru, sistem status terpadu, dan pertarungan boss berfase:
+1. **Data Sumber Kebenaran Musuh (`src/core/data/enemies.js`)**:
+   - Mendefinisikan 5 arketipe spesimen:
+     - **Runner**: Cepat (speed 1.45x), rapuh (hp 0.6x), damage 0.75x, minWave 2, cost 8.
+     - **Brute**: Tank berotot (hp 2.8x), lambat (speed 0.65x), damage 1.8x, minWave 3, cost 20.
+     - **Spitter**: Penembak ludah asam (range 260px, damage 12 + efek poison), telegraf 0.6s, minWave 2, cost 14.
+     - **Exploder**: Mutan labil yang meledak AoE saat tereliminasi (radius 80px, damage 45), minWave 4, cost 16.
+     - **Necromancer**: Pembangkit minion (summon 2 zombie biasa tiap 6 detik), minWave 5, cost 30.
+2. **Sistem Terpadu Status Effects (`src/domain/StatusEffects.js`)**:
+   - Satu sistem terpadu untuk Player dan seluruh Zombie/Boss mencakup `burn`, `poison`, `slow`, `freeze`, `stun`, dan `knockback`.
+   - Wizard Book menyalurkan efek `burn` berkala; Spitter menyalurkan efek `poison`; power-up freeze menyalurkan perlambatan 80% ke seluruh kawanan musuh.
+3. **Komposisi Gelombang Berbasis Anggaran Cost (`WaveSystem.js`)**:
+   - Gelombang musuh disusun dinamis dari total anggaran (`24 + wave * 16`), bukan jumlah musuh tetap.
+   - Event Wave khusus: **Gelombang Horde** (anggaran 1.5x, dominasi Runner & Normal, speed +10%) dan **Kawanan Elite** (anggaran 1.25x, HP musuh +40%, damage +25%).
+4. **Pertarungan Boss Kelipatan 3 Wave & 3 Fase HP**:
+   - Rotasi Boss: Wave 3 (Brute Boss "Mutasi Brute Primal"), Wave 6 (Necromancer Boss "Panggilan Abadi Necromancer"), Wave 9 (Abomination "Abominasi Karantina").
+   - Banner intro boss megah via `waveBanner` dan game clock timer.
+   - Bar HP Boss atas layar (`bossHpBarContainer`) dan meteran status fase terhubung dengan data riil.
+   - **Fase 1 (HP > 66%)**: Serangan fisik dasar + meteran stun (setiap 4 pukulan berturut-turut menyebabkan Player stun selama 2 detik).
+   - **Fase 2 (33% < HP <= 66%)**: Serangan serudukan lurus (*Charge Attack*) berkecepatan tinggi dengan telegraf garis merah $\ge 0.8$ detik (850ms) + pemanggilan 2 minion pengawal.
+   - **Fase 3 (HP <= 33%)**: Status Enrage (speed +30%, damage +30%) + Ground Slam gempa AoE radius 95px dengan telegraf lingkaran merah selama 850ms sebelum hantaman 35 damage dan knockback masif.
+5. **Aturan Telegraf & Placeholder Palette-Swap (`Renderer.js`)**:
+   - Ditambahkan rendering telegraf dinamis berbasis waktu riil untuk serangan telegraf Spitter dan Boss (`drawTelegraphs`).
+   - Placeholder visual untuk variasi arketipe menggunakan palette-swap filter CSS Canvas yang ditandai dengan komentar `TODO-art` untuk penyelesaian aset artis berikutnya.
+

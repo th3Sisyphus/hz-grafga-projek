@@ -315,13 +315,36 @@ export class Renderer {
     );
     ctx.fill();
 
-    // Apply visual effects (hit flash, burning)
+    // Apply visual effects & TODO-art: palette-swap placeholder per tipe musuh
     if (zombie.hitFlash > 0) {
       ctx.globalAlpha = 0.7;
       ctx.filter = "brightness(2) saturate(0) hue-rotate(0deg)"; // Red flash
       zombie.hitFlash--;
-    } else if (zombie.burning) {
-      ctx.filter = "hue-rotate(30deg) saturate(1.5)"; // Orange tint
+    } else if (zombie.status?.isFrozen(this.context.time)) {
+      ctx.filter = "hue-rotate(190deg) saturate(2) brightness(1.2)"; // Cyan freeze
+    } else if (zombie.status?.isPoisoned(this.context.time)) {
+      ctx.filter = "hue-rotate(90deg) saturate(1.8)"; // Green poison
+    } else if (zombie.status?.isBurning(this.context.time) || zombie.burning) {
+      ctx.filter = "hue-rotate(30deg) saturate(1.8)"; // Orange fire
+    } else {
+      // TODO-art: palette-swap placeholder arketipe musuh
+      switch (zombie.enemyType) {
+        case "runner":
+          ctx.filter = "hue-rotate(65deg) saturate(1.7)";
+          break;
+        case "brute":
+          ctx.filter = "hue-rotate(250deg) saturate(1.5) brightness(0.85)";
+          break;
+        case "spitter":
+          ctx.filter = "hue-rotate(105deg) saturate(1.8)";
+          break;
+        case "exploder":
+          ctx.filter = "hue-rotate(340deg) saturate(2.2) brightness(1.1)";
+          break;
+        case "necromancer":
+          ctx.filter = "hue-rotate(180deg) saturate(1.8)";
+          break;
+      }
     }
 
     // Draw zombie sprite with animation
@@ -372,11 +395,25 @@ export class Renderer {
   }
 
   drawProjectile(projectile, camera) {
-    /* ... Copy dari kode sebelumnya ... */
     const ctx = this.ctx;
     const screenX = projectile.x - camera.x;
     const screenY = projectile.y - camera.y;
-    if (projectile.weapon.name === "Wizard Book") {
+
+    // Render proyektil musuh (ludah asam Spitter)
+    if (projectile.type === "enemy_projectile") {
+      ctx.fillStyle = "#84cc16";
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#4d7c0f";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = "#d9f99d";
+      ctx.fillRect(screenX - 1.5, screenY - 1.5, 3, 3);
+      return;
+    }
+
+    if (projectile.weapon?.name === "Wizard Book") {
       // Fire projectile effect
       const time = this.context.time / 100;
 
@@ -836,6 +873,94 @@ export class Renderer {
     }
   }
 
+  drawTelegraphs(camera) {
+    const ctx = this.ctx;
+    const time = this.context.time || 0;
+    const zombies = this.context.zombies || [];
+
+    for (let i = 0; i < zombies.length; i++) {
+      const z = zombies[i];
+      if (z.health <= 0) continue;
+
+      // 1. Telegraf Serangan Kuat Boss (Charge Line & Ground Slam Circle)
+      // TODO-art: aset telegraf visual final dikerjakan terpisah
+      const tg = z.activeTelegraph;
+      if (tg) {
+        const elapsed = time - tg.startTime;
+        const progress = Math.min(1.0, Math.max(0, elapsed / tg.duration));
+
+        if (tg.shape === "line") {
+          const sx = tg.startX - camera.x;
+          const sy = tg.startY - camera.y;
+
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.rotate(tg.angle);
+
+          // Area peringatan semi-transparan (Flat OLED safety red)
+          ctx.fillStyle = "rgba(239, 68, 68, 0.22)";
+          ctx.fillRect(0, -tg.width / 2, tg.length, tg.width);
+
+          // Bar meteran pengisian progresif
+          ctx.fillStyle = "rgba(239, 68, 68, 0.45)";
+          ctx.fillRect(0, -tg.width / 2, tg.length * progress, tg.width);
+
+          // Garis batas tegas
+          ctx.strokeStyle = "rgba(239, 68, 68, 0.9)";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(0, -tg.width / 2, tg.length, tg.width);
+
+          ctx.restore();
+        } else if (tg.shape === "circle") {
+          const cx = tg.x - camera.x;
+          const cy = tg.y - camera.y;
+
+          ctx.save();
+          // Area lingkaran luar
+          ctx.fillStyle = "rgba(239, 68, 68, 0.2)";
+          ctx.beginPath();
+          ctx.arc(cx, cy, tg.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Lingkaran progres mengembang ke luar
+          ctx.fillStyle = "rgba(239, 68, 68, 0.4)";
+          ctx.beginPath();
+          ctx.arc(cx, cy, tg.radius * progress, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Garis batas lingkaran
+          ctx.strokeStyle = "#ef4444";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, tg.radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.restore();
+        }
+      }
+
+      // 2. Telegraf Ludah Asam Spitter (Line dash)
+      const st = z.skillTelegraph;
+      if (st && st.shape === "line") {
+        const sx = z.x - camera.x;
+        const sy = z.y - camera.y;
+        const elapsed = time - st.startTime;
+        const progress = Math.min(1.0, elapsed / st.duration);
+
+        ctx.save();
+        ctx.strokeStyle = `rgba(132, 204, 22, ${0.4 + progress * 0.5})`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(st.targetX - camera.x, st.targetY - camera.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+    }
+  }
+
   drawWaveDelayBanner(waveNumber) {
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -883,6 +1008,7 @@ export class Renderer {
         this.drawPickup(pickup, camera);
       }
     }
+    this.drawTelegraphs(camera);
     for (let zombie of zombies) {
       this.drawZombie(zombie, camera);
     }

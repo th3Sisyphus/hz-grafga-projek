@@ -33,8 +33,8 @@ export class MovementSystem {
     const { player, keys, joystickInput } = this.context;
     if (!player) return;
 
-    // Player stunned
-    if (player.isStunned) return;
+    // Player stunned (baik via flag langsung atau status effects)
+    if (player.isStunned || player.status?.isStunned(this.context.time)) return;
 
     let dx = 0;
     let dy = 0;
@@ -42,7 +42,8 @@ export class MovementSystem {
     const isSpeedBoost =
       this.context.activePowerups &&
       this.context.activePowerups.speed_boost > this.context.time;
-    const playerDt = dtNormal * (isSpeedBoost ? 1.5 : 1.0);
+    const statusMult = player.status?.getSpeedMultiplier(this.context.time) || 1.0;
+    const playerDt = dtNormal * (isSpeedBoost ? 1.5 : 1.0) * statusMult;
 
     if (joystickInput && joystickInput.active) {
       dx = joystickInput.x;
@@ -88,6 +89,18 @@ export class MovementSystem {
 
     for (let i = 0; i < zombies.length; i++) {
       const zombie = zombies[i];
+      if (zombie.health <= 0) continue;
+
+      // Jika boss sedang meluncur dalam aksi charge atau stun, abaikan movement normal
+      if (zombie.isCharging || zombie.status?.isStunned(this.context.time)) {
+        continue;
+      }
+
+      // Jika spitter/boss sedang ancang-ancang telegraf serangan, diam di tempat
+      if (zombie.skillTelegraph || zombie.activeTelegraph) {
+        continue;
+      }
+
       let dx = 0;
       let dy = 0;
       let currentSpeedMultiplier = 1;
@@ -96,6 +109,13 @@ export class MovementSystem {
         this.context.activePowerups.freeze > this.context.time
       ) {
         currentSpeedMultiplier *= 0.2; // Slow 80% (Pembekuan Kawanan)
+      }
+
+      // Aplikasikan status effects slow / freeze entitas
+      if (zombie.status) {
+        currentSpeedMultiplier *= zombie.status.getSpeedMultiplier(
+          this.context.time
+        );
       }
 
       const distToPlayer = Math.hypot(player.x - zombie.x, player.y - zombie.y);

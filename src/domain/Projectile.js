@@ -43,3 +43,43 @@ export class Projectile {
     return true;
   }
 }
+
+export class EnemyProjectile {
+  constructor(
+    x,
+    y,
+    angle,
+    speed = 4.5,
+    damage = 12,
+    range = 280,
+    effectType = "poison"
+  ) {
+    this.type = "enemy_projectile";
+    this.x = x;
+    this.y = y;
+    this.angle = angle;
+    this.speed = speed;
+    this.damage = damage;
+    this.range = range;
+    this.effectType = effectType;
+    this.distance = 0;
+    this.hit = false;
+  }
+
+  update(context, dtNormal = 1) {
+    const moveStep = this.speed * dtNormal;
+    this.x += Math.cos(this.angle) * moveStep;
+    this.y += Math.sin(this.angle) * moveStep;
+    this.distance += moveStep;
+
+    if (
+      this.distance >= this.range ||
+      context.isObstacle(this.x, this.y) ||
+      this.hit
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+}

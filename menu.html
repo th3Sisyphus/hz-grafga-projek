@@ -640,6 +640,36 @@
               else vig.classList.remove("active");
             }
           }
+
+          // Boss HP Bar & Meteran Fase Riil
+          const boss = context.zombies?.find((z) => z.isBoss && z.health > 0);
+          const bossContainer = document.getElementById("bossHpBarContainer");
+          if (bossContainer) {
+            if (boss) {
+              bossContainer.classList.remove("hidden");
+              const bossTitle = bossContainer.querySelector(".boss-hp-title");
+              if (bossTitle && bossTitle.textContent !== boss.name) {
+                bossTitle.textContent = boss.name;
+              }
+              const bossFill = document.getElementById("bossHpFill");
+              if (bossFill) {
+                const bossHpPct = Math.max(0, (boss.health / boss.maxHealth) * 100);
+                bossFill.style.width = `${bossHpPct}%`;
+              }
+              const stunMeter = document.getElementById("bossStunMeter");
+              if (stunMeter) {
+                if (boss.phase === 1) {
+                  stunMeter.textContent = `Fase 1: Stun ${boss.attackCount || 0} / 4 Pukulan`;
+                } else if (boss.phase === 2) {
+                  stunMeter.textContent = `Fase 2: Teror Serudukan Beruntun`;
+                } else {
+                  stunMeter.textContent = `Fase 3: AMUKAN ENRAGE (Hantaman Gempa)`;
+                }
+              }
+            } else if (uiParam !== "boss") {
+              bossContainer.classList.add("hidden");
+            }
+          }
         }
       };
 
