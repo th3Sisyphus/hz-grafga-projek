@@ -267,6 +267,36 @@ export function drawWeaponSprite(ctx, weaponName, gameTime = null) {
       ctx.shadowBlur = 0;
       ctx.restore();
       break;
+
+    case "Shotgun":
+      // TODO-art: aset final dikerjakan terpisah, placeholder shotgun barrel
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(10, -4, 24, 8);
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(10, -3, 26, 6);
+      ctx.fillStyle = "#854d0e"; // Popor kayu
+      ctx.fillRect(0, -3, 10, 6);
+      break;
+
+    case "Sniper":
+      // TODO-art: aset final dikerjakan terpisah, placeholder sniper long barrel & scope
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(10, -2, 36, 4);
+      ctx.fillStyle = "#475569";
+      ctx.fillRect(16, -6, 12, 3); // Scope
+      ctx.fillStyle = "#334155";
+      ctx.fillRect(2, -3, 8, 6);
+      break;
+
+    case "Flamethrower":
+      // TODO-art: aset final dikerjakan terpisah, placeholder nozzle & gas tank
+      ctx.fillStyle = "#ea580c";
+      ctx.fillRect(8, -5, 14, 10); // Tangki gas oranye
+      ctx.fillStyle = "#475569";
+      ctx.fillRect(22, -3, 16, 6); // Nozzle logam
+      ctx.fillStyle = "#fbbf24";
+      ctx.fillRect(36, -2, 4, 4); // Pilot flame tip
+      break;
   }
 
   ctx.restore();

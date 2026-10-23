@@ -161,10 +161,23 @@ export class Renderer {
     const isHit = player.hitFlash > 0;
     if (isHit) player.hitFlash--;
 
-    // Setup Warna
+    // Setup Warna (TODO-art: palette-swap karakter operatif)
+    let baseShirt = "#2c4c8c";
+    let baseLight = "#5a7bb8";
+    if (player.characterKey === "scout") {
+      baseShirt = "#10b981";
+      baseLight = "#34d399";
+    } else if (player.characterKey === "vanguard") {
+      baseShirt = "#64748b";
+      baseLight = "#94a3b8";
+    } else if (player.characterKey === "arcane") {
+      baseShirt = "#8b5cf6";
+      baseLight = "#a78bfa";
+    }
+
     const colors = {
-      shirt: isHit ? "#ff0000" : "#2c4c8c",
-      shirtLight: isHit ? "#ff6666" : "#5a7bb8",
+      shirt: isHit ? "#ff0000" : baseShirt,
+      shirtLight: isHit ? "#ff6666" : baseLight,
       skin: isHit ? "#ff9999" : "#f4a460",
       hair: isHit ? "#8b4513" : "#6b4423",
       pants: isHit ? "#333333" : "#1a1a2e",
@@ -172,6 +185,11 @@ export class Renderer {
       white: "#ffffff",
       black: "#000000",
     };
+
+    // Efek i-frame (kedip saat dash / skill invulnerable)
+    if (player.isInvulnerable && player.isInvulnerable(this.context.time)) {
+      ctx.globalAlpha = 0.4 + Math.sin(this.context.time / 30) * 0.3;
+    }
 
     const scale = 2;
     ctx.scale(scale, scale);
@@ -984,6 +1002,22 @@ export class Renderer {
     const { tilemap, camera, zombies, player, projectiles, effects, pickups } =
       this.context;
     const ctx = this.ctx;
+
+    let shakeX = 0;
+    let shakeY = 0;
+    if (this.context.screenShake > 0) {
+      if (this.context.settings?.screenShake !== false) {
+        shakeX = (Math.random() - 0.5) * this.context.screenShake;
+        shakeY = (Math.random() - 0.5) * this.context.screenShake;
+      }
+      this.context.screenShake = Math.max(0, this.context.screenShake - 0.5);
+    }
+
+    ctx.save();
+    if (shakeX !== 0 || shakeY !== 0) {
+      ctx.translate(shakeX, shakeY);
+    }
+
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     const startX = Math.floor(camera.x / TILE_SIZE);
@@ -1021,5 +1055,7 @@ export class Renderer {
     for (let effect of effects) {
       this.drawEffect(effect, camera);
     }
+
+    ctx.restore();
   }
 }

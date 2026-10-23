@@ -15,7 +15,7 @@ export class WaveSystem {
 
   spawnZombies() {
     const wave = this.context.wave;
-    const isBossWave = wave % 3 === 0;
+    const isBossWave = this.context.selectedMode === "bossrush" || wave % 3 === 0;
 
     let eventType = "normal"; // "normal", "horde", "elite"
     if (!isBossWave) {
@@ -23,7 +23,8 @@ export class WaveSystem {
       else if (wave >= 5 && wave % 5 === 0) eventType = "elite";
     }
 
-    let budget = 24 + wave * 16;
+    const diff = this.context.difficultyMultiplier || 1.0;
+    let budget = Math.round((24 + wave * 16) * diff);
     if (eventType === "horde") budget = Math.round(budget * 1.5);
     if (eventType === "elite") budget = Math.round(budget * 1.25);
 
@@ -148,14 +149,24 @@ export class WaveSystem {
       this.context.waveDelay = true;
       this.context.waveUpgradeActive = true;
 
-      // 1. Regen 20% max HP antar wave (+ bonus modifier jika ada)
+      // 1. Regen 20% max HP antar wave (kecuali mode Hardcore)
       const p = this.context.player;
-      if (p) {
+      if (p && this.context.selectedMode !== "hardcore") {
         const regenPct = p.waveRegenPercent || 0.2;
         const healAmt = Math.round(p.maxHealth * regenPct);
         p.heal(healAmt);
         if (this.context.effects.length < 300) {
           this.context.effects.push(new HealEffect(p.x, p.y - 30, healAmt));
+        }
+      }
+
+      // Track achievements
+      const tracker = this.context.achievementTracker;
+      if (tracker) {
+        if (this.context.wave >= 5) tracker.unlock("wave_5");
+        if (this.context.wave >= 10) tracker.unlock("wave_10");
+        if (p && p.modifiers && p.modifiers.length >= 5) {
+          tracker.unlock("upgrade_enthusiast");
         }
       }
 

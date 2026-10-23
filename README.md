@@ -163,3 +163,36 @@ Fase 3 mengimplementasikan ragam arketipe musuh baru, sistem status terpadu, dan
    - Ditambahkan rendering telegraf dinamis berbasis waktu riil untuk serangan telegraf Spitter dan Boss (`drawTelegraphs`).
    - Placeholder visual untuk variasi arketipe menggunakan palette-swap filter CSS Canvas yang ditandai dengan komentar `TODO-art` untuk penyelesaian aset artis berikutnya.
 
+---
+
+## 9. Log Pengembangan: Fase 4 — Senjata, Skill, Karakter, Mode, dan Pengaturan
+
+Fase 4 melengkapi seluruh fondasi gameplay taktikal, sistem karakter, pilihan mode, dan menghubungkan seluruh antarmuka modal demo ke logika nyata:
+1. **Senjata Baru & Mekanika Munisi (`src/core/data/weapons.js`, `Player.js`)**:
+   - Menambahkan 3 senjata baru: **Shotgun** (sebaran 5 butir balistik, 6 magazin, reload 1.8s), **Sniper Rifle** (daya tembus 3 target, proyektil cepat, 4 magazin, reload 2.2s), dan **Flamethrower** (semburan api beruntun berkelanjutan, 40 unit tangki, efek bakar massal).
+   - Sistem amunisi riil: magazin senjata, inventaris cadangan, manual reload via tombol `R`, dan auto-reload saat peluru habis.
+   - Sistem slot ganda (Primary & Secondary Weapon) dan pergantian senjata instan (*Weapon Swap*) melalui tombol `Q` atau tombol sentuh mobile `#mobileSwapBtn`.
+   - Rendering sprite senjata baru pada `SpriteUtils.js` dengan penanda komentar `TODO-art`.
+2. **Karakter Operatif & Skill Aktif (`src/core/data/characters.js`, `Player.js`)**:
+   - Tiga karakter spesialis dengan stat dasar, perlengkapan awal, dan skill unik:
+     - **Scout Hunter**: HP 240, Speed 3.2, Default: Dual Pistol & Katana. Skill: *Tactical Dash* (lesatan cepat dengan i-frame kebal kerusakan 450ms, cooldown 4s).
+     - **Vanguard Guard**: HP 380, Armor 20%, Speed 2.3, Default: Shotgun & Bare Fist. Skill: *Benteng Baja* (kebal mutlak 2.2s + gelombang tolak knockback zombie sekitar, cooldown 10s).
+     - **Arcane Survivor**: HP 260, Lifesteal 8%, Speed 2.8, Default: Wizard Book & Dual Pistol. Skill: *Frost Nova* (ledakan es radius 200px membekukan kawanan zombie selama 3.5s, cooldown 6s).
+   - Visual i-frame berkedip pada `Renderer.js` dan banner status skill di HUD.
+3. **Mode Permainan & Kesulitan (`src/core/data/modes.js`, `WaveSystem.js`)**:
+   - 5 Mode Permainan: **Standard**, **Endless**, **Boss Rush** (setiap gelombang adalah gelombang Boss), **Daily Seed** (peta dan pilihan seeded seragam berbasis tanggal UTC `YYYY-MM-DD`), dan **Hardcore** (1 nyawa, regenerasi 20% antar gelombang dinonaktifkan).
+   - Pengali Kesulitan Taktis: Normal (1.0x), Taktikal (1.3x), dan Ekstrem (1.75x) yang terhubung ke kalkulasi anggaran gelombang musuh.
+   - Pengaturan mode disimpan persisten pada localStorage (`hz_mode_v1`).
+4. **Pengaturan Operasional Sistem (`settingsModal`)**:
+   - Slider kontrol volume Musik Latar dan Efek Suara (SFX) terhubung langsung ke `SoundManager`.
+   - Pengendalian Screen Shake aktif/nonaktif terhubung ke `Renderer.js` dan dipicu saat benturan fisik atau ledakan area.
+   - Dropdown batas partikel visual (Tinggi: 300 partikel, Sedang: 200 partikel, Rendah: 100 partikel).
+   - Konfigurasi tersimpan persisten pada localStorage (`hz_settings_v1`).
+5. **Catatan Prestasi & Multiplier Combo (`src/core/data/achievements.js`, `CombatSystem.js`)**:
+   - 9 pencapaian lapangan unik terlacak secara otomatis dengan penyimpanan persisten pada localStorage (`hz_achievements_v1`).
+   - Sistem Pengali Combo (*Streak Multiplier*): bertambah +0.1 per eliminasi (hingga batas x5.0) dan reset kembali ke x1.0 saat pemburu terkena serangan.
+6. **Pembersihan Komponen Demo**:
+   - Seluruh fungsi demo lama (`triggerSkillDemo`, `triggerSwapDemo`, `selectCharDemo`) telah dihapus secara tuntas.
+   - Seluruh query parameter pengembang `?ui=<state>` (`menu`, `weapon`, `tutorial`, `hud`, `boss`, `pause`, `gameover`, `upgrade`, `shop`, `character`, `mode`, `settings`, `achievements`) berfungsi penuh dengan rendering data nyata.
+
+

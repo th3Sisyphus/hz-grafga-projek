@@ -8,6 +8,8 @@ import {
 } from "./Constants.js";
 import { Player } from "../domain/Player.js";
 import { SoundManager } from "./SoundManager.js";
+import { AchievementTracker } from "./data/achievements.js";
+import { MODES } from "./data/modes.js";
 
 /**
  * World Generation dengan jaminan:
@@ -276,6 +278,12 @@ export class GameContext {
     this.waveUpgradeActive = false;
     this.shopActive = false;
 
+    // Karakter, Mode, Combo & Achievements
+    this.selectedCharacter = this.selectedCharacter || "scout";
+    this.selectedMode = this.selectedMode || "standard";
+    this.comboMultiplier = 1.0;
+    this.achievementTracker = this.achievementTracker || new AchievementTracker();
+
     // Flow Field Pathfinding State
     this.flowField = null;
     this.lastFlowFieldTime = -10000;
@@ -537,12 +545,42 @@ export class GameContext {
     return { x: TILE_SIZE * 2, y: TILE_SIZE * 2 };
   }
 
-  start(weaponKey) {
+  addCombo() {
+    this.comboMultiplier = Math.min(
+      5.0,
+      Math.round((this.comboMultiplier + 0.1) * 10) / 10
+    );
+    if (this.comboMultiplier >= 3.0) {
+      this.achievementTracker.unlock("combo_master");
+    }
+  }
+
+  resetCombo() {
+    this.comboMultiplier = 1.0;
+  }
+
+  start(weaponKey, characterKey = null, modeKey = null) {
+    if (characterKey) this.selectedCharacter = characterKey;
+    if (modeKey) this.selectedMode = modeKey;
+
     this.init();
     this.selectedWeapon = weaponKey;
+
     const spawnPos = this.findSafeSpawn();
     this.player = new Player(spawnPos.x, spawnPos.y);
-    this.player.setWeapon(weaponKey);
+
+    if (this.selectedCharacter) {
+      this.player.setCharacter(this.selectedCharacter);
+    }
+    if (weaponKey) {
+      this.player.setWeapon(weaponKey);
+    }
+
+    // Jika mode Hardcore: tanpa heal (waveRegen 0%)
+    if (this.selectedMode === "hardcore") {
+      this.player.waveRegenPercent = 0;
+    }
+
     this.running = true;
   }
 

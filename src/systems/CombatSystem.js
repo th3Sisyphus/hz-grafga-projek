@@ -30,6 +30,8 @@ export class CombatSystem {
     // Update real stats
     if (entity.type === "player") {
       this.context.stats.damageTaken += damage;
+      this.context.resetCombo();
+      this.context.screenShake = 6;
     } else if (entity.type === "zombie" || entity.type === "zombie_boss") {
       this.context.stats.damageDealt += damage;
     }
@@ -127,12 +129,26 @@ export class CombatSystem {
     const index = this.context.zombies.indexOf(zombie);
     if (index > -1) {
       this.context.zombies.splice(index, 1);
-      const scoreReward = zombie.isBoss
+
+      // Hitung reward skor dengan combo multiplier
+      this.context.addCombo();
+      const combo = this.context.comboMultiplier || 1.0;
+      const baseReward = zombie.isBoss
         ? this.context.wave * 10
         : this.context.wave;
-      this.context.score += scoreReward;
+      this.context.score += Math.round(baseReward * combo);
       this.context.zombiesKilled++;
       this.context.stats.kills++;
+
+      // Track achievements
+      const tracker = this.context.achievementTracker;
+      if (tracker) {
+        tracker.unlock("first_blood");
+        if (this.context.stats.kills >= 50) tracker.unlock("kill_50");
+        if (this.context.stats.kills >= 200) tracker.unlock("kill_200");
+        if (zombie.isBoss) tracker.unlock("boss_slayer");
+        if (this.context.coins >= 100) tracker.unlock("coin_hoarder");
+      }
 
       // Drop koin, medkit, ammo, power-up
       this.spawnDrops(zombie);
@@ -267,6 +283,7 @@ export class CombatSystem {
   }
 
   handleExplosion(centerZombie, baseDamage, aoeRadius) {
+    this.context.screenShake = 10;
     if (this.context.effects.length < 300) {
       this.context.effects.push(
         new ExplosionEffect(centerZombie.x, centerZombie.y, aoeRadius)

@@ -25,13 +25,100 @@ export class GameManager {
     };
 
     this._lastFrameTime = 0;
+    this.loadSettings();
     this.setupInputHandlers();
+  }
+
+  loadSettings() {
+    const defaultSettings = {
+      musicVolume: 70,
+      sfxVolume: 85,
+      screenShake: true,
+      particleQuality: "medium",
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem("hz_settings_v1"));
+      this.context.settings = Object.assign(defaultSettings, saved || {});
+    } catch (e) {
+      this.context.settings = defaultSettings;
+    }
+    this.applySettings();
+  }
+
+  applySettings() {
+    const s = this.context.settings;
+    if (this.context.soundManager) {
+      if (typeof this.context.soundManager.setMusicVolume === "function") {
+        this.context.soundManager.setMusicVolume(s.musicVolume / 100);
+      }
+      if (typeof this.context.soundManager.setSfxVolume === "function") {
+        this.context.soundManager.setSfxVolume(s.sfxVolume / 100);
+      }
+    }
+    if (s.particleQuality === "low") {
+      this.context.maxParticles = 100;
+    } else if (s.particleQuality === "high") {
+      this.context.maxParticles = 300;
+    } else {
+      this.context.maxParticles = 200;
+    }
+  }
+
+  saveSettings(newSettings) {
+    this.context.settings = Object.assign(this.context.settings, newSettings);
+    try {
+      localStorage.setItem("hz_settings_v1", JSON.stringify(this.context.settings));
+    } catch (e) {}
+    this.applySettings();
+  }
+
+  swapWeapon() {
+    if (this.context.player && !this.context.paused && this.context.running) {
+      this.context.player.swapWeapon();
+      this.updateUI();
+    }
+  }
+
+  triggerSkill() {
+    if (this.context.player && !this.context.paused && this.context.running) {
+      const success = this.context.player.triggerSkill(
+        this.context.time,
+        this.context
+      );
+      if (success) {
+        const b = document.getElementById("waveBanner");
+        const t = document.getElementById("bannerWaveTitle");
+        const s = document.getElementById("bannerWaveSub");
+        const skill = this.context.player.character?.skill;
+        const skillName = skill?.name || "SKILL";
+        const skillDesc = skill?.desc || "";
+        if (b && t && s) {
+          t.textContent = `SKILL AKTIF: ${skillName.toUpperCase()}`;
+          s.textContent = skillDesc;
+          b.classList.add("active");
+          this.context.addTimer(1200, () => b.classList.remove("active"));
+        }
+      }
+    }
+  }
+
+  reload() {
+    if (this.context.player && !this.context.paused && this.context.running) {
+      this.context.player.startReload(this.context.time);
+    }
   }
 
   setupInputHandlers() {
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         this.togglePause();
+      } else if (e.key === "q" || e.key === "Q") {
+        this.swapWeapon();
+      } else if (e.key === " " || e.key === "Shift") {
+        e.preventDefault();
+        this.triggerSkill();
+      } else if (e.key === "r" || e.key === "R") {
+        this.reload();
       }
       this.context.keys[e.key.toLowerCase()] = true;
     });
