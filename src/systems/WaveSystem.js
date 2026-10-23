@@ -1,4 +1,3 @@
-// Import ZombieBoss
 import { Zombie, ZombieBoss } from "../domain/Zombie.js";
 import {
   TILE_SIZE,
@@ -16,21 +15,18 @@ export class WaveSystem {
     const zombieCount = 5 + this.context.wave * 3;
     const { player } = this.context;
 
-    // Helper function untuk spawn entity di lokasi aman
     const spawnEntity = (EntityClass) => {
       let spawned = false;
       let attempts = 0;
-      // Coba cari posisi aman maksimal 50 kali
-      while (!spawned && attempts < 50) {
+      while (!spawned && attempts < 60) {
         const x = Math.random() * MAP_WIDTH * TILE_SIZE;
         const y = Math.random() * MAP_HEIGHT * TILE_SIZE;
 
         if (!this.context.isObstacle(x, y)) {
-          const dist = Math.hypot(player.x - x, player.y - y);
-          // Jarak aman dari player
-          if (dist > 400) {
+          const dist = player ? Math.hypot(player.x - x, player.y - y) : 500;
+          if (dist > 380) {
             this.context.zombies.push(new EntityClass(x, y, this.context.wave));
-            spawned = true; 
+            spawned = true;
           }
         }
         attempts++;
@@ -45,9 +41,9 @@ export class WaveSystem {
     // 2. Spawn Zombie BOSS (Setiap kelipatan 3 Wave)
     if (this.context.wave % 3 === 0) {
       spawnEntity(ZombieBoss);
-      setTimeout(() => {
+      this.context.addTimer(Math.random() * 500, () => {
         this.context.soundManager.playZombieSound();
-      }, Math.random() * 500);
+      });
     }
   }
 
@@ -60,12 +56,13 @@ export class WaveSystem {
       this.context.waveDelay = true;
       this.context.wave++;
 
-      setTimeout(() => {
+      // Timer wave delay menggunakan Game Clock (terjeda saat game paused)
+      this.context.addTimer(WAVE_DELAY, () => {
         if (this.context.running) {
           this.context.waveDelay = false;
           this.spawnZombies();
         }
-      }, WAVE_DELAY);
+      });
     }
   }
 

@@ -1,5 +1,7 @@
-export function drawWeaponSprite(ctx, weaponName) {
+export function drawWeaponSprite(ctx, weaponName, gameTime = null) {
   ctx.save();
+
+  const currentTime = gameTime !== null && gameTime !== undefined ? gameTime : Date.now();
 
   // Semua drawing relatif terhadap titik (0, 0) yang sudah di-translate/rotate sebelumnya.
   switch (weaponName) {
@@ -192,7 +194,7 @@ export function drawWeaponSprite(ctx, weaponName) {
       ctx.translate(0, -15); // Slightly above center, to the side
 
       // Floating animation (subtle bob)
-      const floatOffset = Math.sin(Date.now() / 300) * 2;
+      const floatOffset = Math.sin(currentTime / 300) * 2;
       ctx.translate(0, floatOffset);
 
       // Magical aura glow
@@ -249,13 +251,13 @@ export function drawWeaponSprite(ctx, weaponName) {
       ctx.shadowBlur = 8;
       for (let i = 0; i < 3; i++) {
         const angle =
-          (Date.now() / 500 + (i * Math.PI * 2) / 3) % (Math.PI * 2);
+          (currentTime / 500 + (i * Math.PI * 2) / 3) % (Math.PI * 2);
         const radius = 18;
         const px = 11 + Math.cos(angle) * radius;
         const py = Math.sin(angle) * radius;
 
         ctx.fillStyle = `rgba(168, 85, 247, ${
-          0.3 + Math.sin(Date.now() / 200 + i) * 0.2
+          0.3 + Math.sin(currentTime / 200 + i) * 0.2
         })`;
         ctx.beginPath();
         ctx.arc(px, py, 1.5, 0, Math.PI * 2);

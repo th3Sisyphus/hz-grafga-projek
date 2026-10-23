@@ -1,0 +1,65 @@
+/**
+ * Data Sumber Kebenaran Senjata (Weapons)
+ * Seluruh atribut senjata dibaca dari sini.
+ */
+export const WEAPONS = {
+  katana: {
+    id: "katana",
+    name: "Katana",
+    type: "melee",
+    damage: 70,
+    criticalMultiplier: 3.0,
+    critChance: 0.25,
+    speedBonus: 0.4,
+    range: 80,
+    cooldown: 400,
+    // arc: setengah sudut kerucut dalam radian (1.0 rad ~ 57.3°, total kerucut ~114.6°)
+    arc: 1.0,
+    lifesteal: 0.05,
+  },
+  fist: {
+    id: "fist",
+    name: "Tangan Kosong",
+    type: "melee",
+    damage: 35,
+    criticalMultiplier: 1.5,
+    critChance: 0.15,
+    speedBonus: 0.7,
+    range: 45,
+    cooldown: 300,
+    // arc: setengah sudut kerucut dalam radian (0.7 rad ~ 40.1°, total kerucut ~80.2°)
+    arc: 0.7,
+    lifesteal: 0.10,
+  },
+  wizard: {
+    id: "wizard",
+    name: "Wizard Book",
+    displayName: "Kitab Sihir",
+    type: "range",
+    damage: 45,
+    criticalMultiplier: 1.5,
+    critChance: 0.10,
+    dotDamage: 12,
+    dotDuration: 3000,
+    speedBonus: 0.2,
+    range: 300,
+    cooldown: 550,
+    arc: 0,
+    lifesteal: 0,
+  },
+  dualgun: {
+    id: "dualgun",
+    name: "Dual Gun",
+    displayName: "Pistol Ganda",
+    type: "range",
+    damage: 28,
+    criticalMultiplier: 1.5,
+    critChance: 0.10,
+    aoeRadius: 90,
+    speedBonus: 0.3,
+    range: 380,
+    cooldown: 450,
+    arc: 0,
+    lifesteal: 0,
+  },
+};

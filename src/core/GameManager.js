@@ -24,6 +24,7 @@ export class GameManager {
       pointerId: null,
     };
 
+    this._lastFrameTime = 0;
     this.setupInputHandlers();
   }
 
@@ -52,14 +53,12 @@ export class GameManager {
     // Mobile joystick handlers
     const { joystickZone, joystickKnob, attackBtn } = this.uiElements;
     if (joystickZone && joystickKnob && attackBtn) {
-      // --- Joystick Logic ---
       const handleJoyStart = (e) => {
         e.preventDefault();
         const touch = e.changedTouches[0];
         this.joystick.pointerId = touch.identifier;
         this.joystick.active = true;
 
-        // Set Origin ke tengah zona
         const rect = joystickZone.getBoundingClientRect();
         this.joystick.origin = {
           x: rect.left + rect.width / 2,
@@ -89,10 +88,7 @@ export class GameManager {
         this.joystick.x = 0;
         this.joystick.y = 0;
 
-        // Reset Visual
         joystickKnob.style.transform = `translate(-50%, -50%)`;
-
-        // FIX: Reset State Context Joystick
         this.context.joystickInput = { x: 0, y: 0, active: false };
       };
 
@@ -109,7 +105,6 @@ export class GameManager {
         passive: false,
       });
 
-      // --- Attack Button Logic ---
       const handleAttackStart = (e) => {
         e.preventDefault();
         this.context.mouseDown = true;
@@ -154,23 +149,16 @@ export class GameManager {
       active: distance > 5,
     };
 
-    // === FIX: MOBILE AIMING ===
-    // Jangan pakai tengah layar (rect.width/2).
-    // Pakai posisi relatif player terhadap kamera.
     if (distance > 5) {
       const { player, camera } = this.context;
-
-      // Default ke tengah jika player belum ada
       let originX = this.context.canvas.width / 2;
       let originY = this.context.canvas.height / 2;
 
-      // Jika player ada, gunakan posisi layarnya yang akurat
       if (player) {
         originX = player.x - camera.x;
         originY = player.y - camera.y;
       }
 
-      // Set mousePos relatif terhadap posisi player yang sebenarnya
       this.context.mousePos.x = originX + this.context.joystickInput.x * 100;
       this.context.mousePos.y = originY + this.context.joystickInput.y * 100;
     }
@@ -182,25 +170,31 @@ export class GameManager {
       (this.context.player && this.context.player.health <= 0)
     )
       return;
+
     this.context.paused = !this.context.paused;
     if (this.context.paused) {
       this.uiElements.pauseMenu.classList.remove("hidden");
     } else {
       this.uiElements.pauseMenu.classList.add("hidden");
+      this._lastFrameTime = performance.now();
     }
   }
 
-  update() {
+  update(deltaMs) {
     if (!this.context.running) return;
 
-    // Calculate delta time for animations
-    const now = Date.now();
-    const deltaTime = this.context.lastTime ? now - this.context.lastTime : 16;
-    this.context.lastTime = now;
+    // Normalisasi delta time ke 60 FPS (1.0 pada 60Hz, 0.417 pada 144Hz)
+    const dtNormal = deltaMs / (1000 / 60);
 
-    // FIX: Selalu update arah hadap player mengikuti mouse (Hover Aiming)
-    if (this.context.player && !this.context.paused) {
-      this.context.player.updateAim(this.context.mousePos, this.context.camera);
+    // Update Game Clock & Timers
+    this.context.updateTimers(deltaMs);
+
+    // Player update stun & aim
+    if (this.context.player) {
+      this.context.player.update(this.context.time);
+      if (!this.context.paused) {
+        this.context.player.updateAim(this.context.mousePos, this.context.camera);
+      }
     }
 
     // Handle Attack
@@ -209,52 +203,49 @@ export class GameManager {
         this.context.mousePos,
         this.context.camera,
         this.context.projectiles,
-        this.context.effects
+        this.context.effects,
+        this.context.time
       );
 
       if (didAttack) {
+        this.context.stats.shotsFired++;
         const weapon = this.context.player.weapon;
 
-        // MELEE WEAPONS: Play miss sound first
         if (weapon.type === "melee") {
-          // Play "miss" sound dulu
           this.context.soundManager.playWeaponSound(weapon.name, false);
-
-          // Handle melee attack (akan trigger hit sound di CombatSystem jika hit)
           this.combatSystem.handleMeleeAttack(this.context.player);
-        }
-        // RANGED WEAPONS: Play shoot sound immediately
-        else if (weapon.type === "range") {
+        } else if (weapon.type === "range") {
           this.context.soundManager.playWeaponSound(weapon.name);
         }
       }
     }
 
-    // 1. Systems Update
-    this.movementSystem.update();
-    this.combatSystem.update();
+    // 1. Systems Update with dtNormal
+    this.movementSystem.update(dtNormal);
+    this.combatSystem.update(dtNormal);
     this.waveSystem.update();
 
     // 2. Update zombie animations
-    for (let zombie of this.context.zombies) {
-      // Check if zombie is attacking (close to player)
+    for (let i = 0; i < this.context.zombies.length; i++) {
+      const zombie = this.context.zombies[i];
       if (this.context.player) {
         const dist = Math.hypot(
           this.context.player.x - zombie.x,
           this.context.player.y - zombie.y
         );
-        const now = Date.now();
-
-        // Set attack state if within attack range and cooldown ready
-        zombie.isAttacking = dist < 40 && now - zombie.lastAttack < 300;
+        zombie.isAttacking =
+          dist < 40 && this.context.time - zombie.lastAttack < 300;
       }
-
-      // Update sprite animation
-      zombie.sprite.update(deltaTime, zombie.isAttacking);
+      zombie.sprite.update(deltaMs, zombie.isAttacking);
     }
 
-    // 3. Effect Update
-    this.context.effects = this.context.effects.filter((e) => e.update());
+    // 3. Effect Update with dtNormal & particle pooling/capping (max 300)
+    this.context.effects = this.context.effects.filter((e) =>
+      e.update(dtNormal)
+    );
+    if (this.context.effects.length > 300) {
+      this.context.effects.splice(0, this.context.effects.length - 300);
+    }
 
     // 4. Camera Update
     this.renderer.updateCamera();
@@ -278,15 +269,19 @@ export class GameManager {
       return;
     }
 
+    const now = performance.now();
+    const rawDelta = this._lastFrameTime ? now - this._lastFrameTime : 16.67;
+    this._lastFrameTime = now;
+    const deltaMs = Math.min(rawDelta, 100);
+
     if (!this.context.paused) {
-      this.update();
+      this.update(deltaMs);
     }
     this.render();
 
     requestAnimationFrame(this.gameLoop.bind(this));
   }
 
-  // ... (Sisa method UI tetap sama seperti sebelumnya)
   updateUI() {
     if (window.uiManager && typeof window.uiManager.updateHUD === "function") {
       window.uiManager.updateHUD(this.context);
@@ -316,10 +311,19 @@ export class GameManager {
       this._lastHp = curHp;
       const el = document.getElementById("health");
       if (el) el.textContent = curHp;
+
+      const healthPercent = (curHp / (player.maxHealth || 300)) * 100;
       const hb = document.getElementById("healthBar");
       if (hb) {
-        const healthPercent = (player.health / player.maxHealth) * 100;
         hb.style.width = Math.max(0, healthPercent) + "%";
+        if (healthPercent <= 30) hb.classList.add("low");
+        else hb.classList.remove("low");
+      }
+
+      const vig = document.getElementById("lowHpVignette");
+      if (vig) {
+        if (healthPercent <= 25) vig.classList.add("active");
+        else vig.classList.remove("active");
       }
     }
   }
@@ -327,17 +331,20 @@ export class GameManager {
   showTutorial() {
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.tutorial.classList.remove("hidden");
-    document.getElementById("pauseBtn").style.display = "none"; // ADDED
+    const pauseBtn = document.getElementById("pauseBtn");
+    if (pauseBtn) pauseBtn.style.display = "none";
   }
 
   showWeaponSelect() {
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.weaponSelect.classList.remove("hidden");
-    document.getElementById("pauseBtn").style.display = "none"; // ADDED
+    const pauseBtn = document.getElementById("pauseBtn");
+    if (pauseBtn) pauseBtn.style.display = "none";
   }
 
   backToMenu() {
     this.context.running = false;
+    this.context.paused = false;
     this.uiElements.menu.classList.remove("hidden");
     this.uiElements.tutorial.classList.add("hidden");
     this.uiElements.weaponSelect.classList.add("hidden");
@@ -348,7 +355,8 @@ export class GameManager {
     document
       .querySelectorAll(".weapon-card")
       .forEach((card) => card.classList.remove("selected"));
-    document.getElementById("pauseBtn").style.display = "none"; // ADDED
+    const pauseBtn = document.getElementById("pauseBtn");
+    if (pauseBtn) pauseBtn.style.display = "none";
   }
 
   selectWeapon(weapon) {
@@ -367,15 +375,19 @@ export class GameManager {
     this.uiElements.weaponSelect.classList.add("hidden");
     this.uiElements.mobileControls.classList.remove("hidden");
     this.context.start(this.context.selectedWeapon);
-    document.getElementById("pauseBtn").style.display = "block"; // ADDED
 
-    setTimeout(() => {
+    const pauseBtn = document.getElementById("pauseBtn");
+    if (pauseBtn) pauseBtn.style.display = "flex";
+
+    // Timer wave delay menggunakan Game Clock
+    this.context.addTimer(WAVE_DELAY, () => {
       if (this.context.running) {
         this.context.waveDelay = false;
         this.waveSystem.spawnZombies();
       }
-    }, WAVE_DELAY);
+    });
 
+    this._lastFrameTime = performance.now();
     this.gameLoop();
   }
 
@@ -385,17 +397,78 @@ export class GameManager {
   }
 
   handleGameOver() {
-    if (this.context.player && this.context.player.health <= 0) {
+    const p = this.context.player;
+    if (p && p.health <= 0) {
       const finalScore = document.getElementById("finalScore");
       const finalWave = document.getElementById("finalWave");
-      if (finalScore) finalScore.textContent = this.context.score;
+      const finalKills = document.getElementById("finalKills");
+      const finalAccuracy = document.getElementById("finalAccuracy");
+      const finalDamage = document.getElementById("finalDamage");
+      const finalRecord = document.getElementById("finalRecord");
+
+      if (finalScore)
+        finalScore.textContent = this.context.score.toLocaleString("id-ID");
       if (finalWave) finalWave.textContent = this.context.wave;
+      if (finalKills) finalKills.textContent = this.context.stats.kills;
+
+      const shots = this.context.stats.shotsFired;
+      const hits = this.context.stats.hits;
+      const accuracy =
+        shots > 0 ? Math.min(100, Math.round((hits / shots) * 100)) : 0;
+      if (finalAccuracy) finalAccuracy.textContent = `${accuracy}%`;
+
+      const dmg = Math.round(this.context.stats.damageDealt);
+      if (finalDamage) finalDamage.textContent = dmg.toLocaleString("id-ID");
+
+      // Simpan skor tertinggi di localStorage dengan key berversi
+      const STORAGE_KEY = "hz_record_v1";
+      let saved = null;
+      try {
+        saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      } catch (e) {}
+
+      let isNewRecord = false;
+      const currentScore = this.context.score;
+      const currentWave = this.context.wave;
+
+      if (!saved || currentScore > (saved.score || 0)) {
+        isNewRecord = true;
+        saved = {
+          score: currentScore,
+          wave: currentWave,
+          kills: this.context.stats.kills,
+          date: new Date().toISOString(),
+        };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+        } catch (e) {}
+      }
+
+      if (finalRecord) {
+        if (isNewRecord) {
+          finalRecord.textContent = "Rekor Baru Tercipta!";
+          finalRecord.style.color = "var(--positive)";
+        } else {
+          finalRecord.textContent = `Rekor: ${saved.score.toLocaleString(
+            "id-ID"
+          )}`;
+          finalRecord.style.color = "var(--accent)";
+        }
+      }
+
+      const highScoreRecord = document.getElementById("highScoreRecord");
+      const highWaveRecord = document.getElementById("highWaveRecord");
+      if (highScoreRecord && saved)
+        highScoreRecord.textContent = saved.score.toLocaleString("id-ID");
+      if (highWaveRecord && saved)
+        highWaveRecord.textContent = `Wave ${saved.wave}`;
 
       this.uiElements.gameOver.classList.remove("hidden");
-      // kontrol joystik disembunyikan saat game over
       this.uiElements.mobileControls.classList.add("hidden");
     }
-    document.getElementById("pauseBtn").style.display = "none"; // ADDED
+
+    const pauseBtn = document.getElementById("pauseBtn");
+    if (pauseBtn) pauseBtn.style.display = "none";
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.pauseMenu.classList.add("hidden");
   }

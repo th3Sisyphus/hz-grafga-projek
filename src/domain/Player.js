@@ -8,6 +8,7 @@ import { Projectile } from "./Projectile.js";
 
 export class Player {
   constructor(x, y) {
+    this.type = "player";
     this.x = x;
     this.y = y;
     this.width = 30;
@@ -16,12 +17,14 @@ export class Player {
     this.maxHealth = BASE_PLAYER_HEALTH;
     this.speed = BASE_PLAYER_SPEED;
     this.weapon = null;
-    this.lastAttack = 0;
+    this.lastAttack = -99999;
     this.hitFlash = 0;
     this.direction = 0;
     this.stunEndTime = 0;
-    this.lastFootstepTime = 0;
+    this.isStunned = false;
+    this.lastFootstepTime = -99999;
     this.footstepInterval = 500;
+    this.lastSpikeTime = -99999;
   }
 
   setWeapon(weaponKey) {
@@ -34,25 +37,23 @@ export class Player {
     this.hitFlash = 10;
     return this.health <= 0;
   }
+
   heal(amount) {
     this.health += amount;
     if (this.health > this.maxHealth) {
       this.health = this.maxHealth;
     }
   }
-  // Cek apakah player sedang stun
-  get isStunned() {
-    return Date.now() < this.stunEndTime;
+
+  update(gameTime) {
+    this.isStunned = gameTime < this.stunEndTime;
   }
 
-  applyStun(duration) {
-    this.stunEndTime = Date.now() + duration;
+  applyStun(duration, gameTime = 0) {
+    this.stunEndTime = gameTime + duration;
+    this.isStunned = true;
   }
 
-  /**
-   * BARU: Mengupdate arah hadap senjata berdasarkan posisi mouse.
-   * Dipanggil setiap frame oleh GameManager.
-   */
   updateAim(mousePos, camera) {
     if (this.isStunned) return;
 
@@ -61,24 +62,23 @@ export class Player {
     this.direction = Math.atan2(dy, dx);
   }
 
-  /**
-   * Logika attack sekarang hanya fokus pada trigger dan cooldown.
-   * Arah (this.direction) sudah diurus oleh updateAim.
-   */
-  attemptAttack(mousePos, camera, projectiles, effects) {
+  attemptAttack(mousePos, camera, projectiles, effects, gameTime = 0) {
     if (this.isStunned) return false;
 
-    const now = Date.now();
-    if (now - this.lastAttack < this.weapon.cooldown) return false;
-    this.lastAttack = now;
+    if (gameTime - this.lastAttack < this.weapon.cooldown) return false;
+    this.lastAttack = gameTime;
 
-    // Arah sudah diupdate di updateAim(), jadi kita langsung pakai this.direction
-    // Tapi untuk keamanan (jika mouse bergerak cepat saat klik), kita bisa pastikan update sekali lagi
     this.updateAim(mousePos, camera);
 
     if (this.weapon.type === "melee") {
       effects.push(
-        new MeleeEffect(this.x, this.y, this.direction, this.weapon.name)
+        new MeleeEffect(
+          this.x,
+          this.y,
+          this.direction,
+          this.weapon.name,
+          this.weapon.arc || 1.0
+        )
       );
     } else {
       projectiles.push(

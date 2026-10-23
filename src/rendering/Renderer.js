@@ -265,8 +265,8 @@ export class Renderer {
     if (player.isStunned) {
       ctx.save();
       ctx.translate(screenX, screenY - 40);
-      // Putar bintang di atas kepala
-      const time = Date.now() / 200;
+      // Putar bintang di atas kepala menggunakan game clock
+      const time = this.context.time / 200;
       ctx.fillStyle = "#FFFF00"; // Kuning
       for (let i = 0; i < 3; i++) {
         const angle = time + (i * Math.PI * 2) / 3;
@@ -283,7 +283,7 @@ export class Renderer {
     ctx.save();
     ctx.translate(screenX, screenY);
     ctx.rotate(player.direction);
-    drawWeaponSprite(ctx, player.weapon.name);
+    drawWeaponSprite(ctx, player.weapon.name, this.context.time);
     ctx.restore();
   }
 
@@ -293,7 +293,7 @@ export class Renderer {
     const screenY = zombie.y - camera.y;
 
     // Cek apakah Boss
-    const isBoss = zombie.constructor.name === "ZombieBoss";
+    const isBoss = zombie.isBoss || zombie.type === "zombie_boss";
 
     // Update facing direction based on movement
     if (zombie.x !== zombie.lastX) {
@@ -331,9 +331,9 @@ export class Renderer {
     ctx.globalAlpha = 1;
     ctx.filter = "none";
 
-    // Burning effect particles
+    // Burning effect particles menggunakan game clock
     if (zombie.burning) {
-      const time = Date.now() / 100;
+      const time = this.context.time / 100;
       for (let i = 0; i < 3; i++) {
         const offsetX = Math.sin(time + i) * 5;
         const offsetY = -10 - Math.cos(time + i * 2) * 8;
@@ -378,7 +378,7 @@ export class Renderer {
     const screenY = projectile.y - camera.y;
     if (projectile.weapon.name === "Wizard Book") {
       // Fire projectile effect
-      const time = Date.now() / 100;
+      const time = this.context.time / 100;
 
       // Outer flame glow
       const outerGlow = ctx.createRadialGradient(
@@ -503,42 +503,45 @@ export class Renderer {
     const maxLife = effect.maxLife || 20;
     const alpha = Math.max(0, effect.life / maxLife);
 
-    if (effect.constructor.name === "MeleeEffect") {
+    if (effect.type === "melee") {
       ctx.save();
       ctx.translate(screenX, screenY);
       ctx.rotate(effect.angle);
+
+      const halfArc = effect.arc !== undefined ? effect.arc : 1.0;
+
       if (effect.weaponName === "Katana") {
         // Outer glow
         ctx.strokeStyle = `rgba(255, 50, 50, ${alpha * 0.3})`;
         ctx.lineWidth = 8;
         ctx.beginPath();
-        ctx.arc(0, 0, 45, -Math.PI / 3, Math.PI / 3);
+        ctx.arc(0, 0, 45, -halfArc, halfArc);
         ctx.stroke();
 
         // Middle layer
         ctx.strokeStyle = `rgba(255, 100, 100, ${alpha * 0.6})`;
         ctx.lineWidth = 5;
         ctx.beginPath();
-        ctx.arc(0, 0, 42, -Math.PI / 3, Math.PI / 3);
+        ctx.arc(0, 0, 42, -halfArc, halfArc);
         ctx.stroke();
 
         // Main slash
         ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(0, 0, 40, -Math.PI / 3, Math.PI / 3);
+        ctx.arc(0, 0, 40, -halfArc, halfArc);
         ctx.stroke();
 
         // Inner edge
         ctx.strokeStyle = `rgba(200, 230, 255, ${alpha})`;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(0, 0, 38, -Math.PI / 3, Math.PI / 3);
+        ctx.arc(0, 0, 38, -halfArc, halfArc);
         ctx.stroke();
 
         // Speed lines
         for (let i = 0; i < 5; i++) {
-          const angle = -Math.PI / 3 + (i / 5) * ((2 * Math.PI) / 3);
+          const angle = -halfArc + (i / 5) * (halfArc * 2);
           ctx.strokeStyle = `rgba(255, 200, 200, ${alpha * 0.4})`;
           ctx.lineWidth = 2;
           ctx.beginPath();
@@ -550,7 +553,7 @@ export class Renderer {
         // Sparkles
         if (alpha > 0.5) {
           for (let i = 0; i < 8; i++) {
-            const angle = -Math.PI / 3 + Math.random() * ((2 * Math.PI) / 3);
+            const angle = -halfArc + Math.random() * (halfArc * 2);
             const dist = 35 + Math.random() * 10;
             ctx.fillStyle = `rgba(255, 255, 255, ${alpha * Math.random()})`;
             ctx.beginPath();
@@ -623,7 +626,7 @@ export class Renderer {
         }
       }
       ctx.restore();
-    } else if (effect.constructor.name === "DamageNumber") {
+    } else if (effect.type === "damage_number") {
       // Khusus Text Stun
       if (typeof effect.damage === "string") {
         ctx.font = "bold 22px 'Hanken Grotesk', sans-serif";
@@ -636,18 +639,18 @@ export class Renderer {
           : `rgba(239, 240, 241, ${alpha})`;
         ctx.fillText(effect.damage, screenX, screenY);
       }
-    } else if (effect.constructor.name === "HealEffect") {
+    } else if (effect.type === "heal") {
       ctx.font = "bold 18px 'Hanken Grotesk', sans-serif";
       ctx.fillStyle = `rgba(46, 196, 134, ${alpha})`;
       // Tampilkan dengan tanda plus
       ctx.fillText("+" + effect.amount, screenX, screenY);
-    } else if (effect.constructor.name === "BurnEffect") {
+    } else if (effect.type === "burn") {
       const size = 8 * (effect.life / 20);
       ctx.fillStyle = `rgba(255, 74, 31, ${alpha})`;
       ctx.beginPath();
       ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
       ctx.fill();
-    } else if (effect.constructor.name === "ExplosionEffect") {
+    } else if (effect.type === "explosion") {
       const currentRadius = effect.radius * (1 - alpha);
       const progress = 1 - alpha;
 
@@ -720,14 +723,14 @@ export class Renderer {
         ctx.arc(screenX, screenY, currentRadius * 2, 0, Math.PI * 2);
         ctx.fill();
       }
-    } else if (effect.constructor.name === "DeathEffect") {
+    } else if (effect.type === "death") {
       for (let p of effect.particles) {
         ctx.beginPath();
         ctx.fillStyle = `rgba(180, 255, 220, ${p.alpha})`;
         ctx.arc(screenX + p.x, screenY + p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
       }
-    } else if (effect.constructor.name === "MagicTrail") {
+    } else if (effect.type === "magic_trail") {
       const color =
         effect.colorType === "purple"
           ? `rgba(168, 85, 247, ${alpha})`
@@ -739,7 +742,7 @@ export class Renderer {
       ctx.arc(screenX, screenY, effect.size, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-    } else if (effect.constructor.name === "SmokeTrail") {
+    } else if (effect.type === "smoke_trail") {
       ctx.fillStyle = `rgba(150, 150, 150, ${alpha * 0.5})`;
       ctx.beginPath();
       ctx.arc(screenX, screenY, effect.size, 0, Math.PI * 2);
