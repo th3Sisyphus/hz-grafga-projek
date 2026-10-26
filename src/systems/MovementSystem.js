@@ -5,10 +5,10 @@ export class MovementSystem {
     this.context = context;
   }
 
-  moveEntity(entity, dx, dy) {
-    const { isObstacle } = this.context;
-    const nextX = entity.x + dx * entity.speed;
-    const nextY = entity.y + dy * entity.speed;
+  moveEntity(entity, dx, dy, dtNormal = 1) {
+    const moveStep = entity.speed * dtNormal;
+    const nextX = entity.x + dx * moveStep;
+    const nextY = entity.y + dy * moveStep;
     const halfW = entity.width / 2;
     const halfH = entity.height / 2;
 
@@ -29,26 +29,29 @@ export class MovementSystem {
     );
   }
 
-  updatePlayerMovement() {
+  updatePlayerMovement(dtNormal = 1) {
     const { player, keys, joystickInput } = this.context;
     if (!player) return;
 
-    // LOGIC STUN: Player beku
-    if (player.isStunned) return;
+    // Player stunned (baik via flag langsung atau status effects)
+    if (player.isStunned || player.status?.isStunned(this.context.time)) return;
 
     let dx = 0;
     let dy = 0;
 
+    const isSpeedBoost =
+      this.context.activePowerups &&
+      this.context.activePowerups.speed_boost > this.context.time;
+    const statusMult = player.status?.getSpeedMultiplier(this.context.time) || 1.0;
+    const playerDt = dtNormal * (isSpeedBoost ? 1.5 : 1.0) * statusMult;
+
     if (joystickInput && joystickInput.active) {
       dx = joystickInput.x;
       dy = joystickInput.y;
-
-      // Langsung gerakkan player menggunakan vector joystick
-      this.moveEntity(player, dx, dy);
-
-      // Return agar tidak ditimpa oleh logic keyboard
+      this.moveEntity(player, dx, dy, playerDt);
       return;
     }
+
     if (keys["w"]) dy -= 1;
     if (keys["s"]) dy += 1;
     if (keys["a"]) dx -= 1;
@@ -58,42 +61,97 @@ export class MovementSystem {
       const len = Math.hypot(dx, dy);
       dx /= len;
       dy /= len;
-      this.moveEntity(player, dx, dy);
+      this.moveEntity(player, dx, dy, playerDt);
 
-      // PLAY FOOTSTEP SOUND
-      const now = Date.now();
+      // Play footstep sound menggunakan game clock
+      const now = this.context.time;
       if (now - player.lastFootstepTime > player.footstepInterval) {
         this.context.soundManager.playFootstep();
         player.lastFootstepTime = now;
-      } else {
-        this.context.soundManager.stopFootstepLoop(); // Stop saat diam
       }
+    } else {
+      this.context.soundManager.stopFootstepLoop();
     }
   }
 
-  updateZombieMovement() {
+  updateZombieMovement(dtNormal = 1) {
     const { zombies, player } = this.context;
     if (!player) return;
 
+    // Perbarui flow field tiap ~0.4 detik (400ms)
+    this.context.updateFlowField();
+
+    // Rebuild spatial hash untuk separasi O(n)
+    this.context.spatialHash.clear();
+    for (let i = 0; i < zombies.length; i++) {
+      this.context.spatialHash.insert(zombies[i]);
+    }
+
     for (let i = 0; i < zombies.length; i++) {
       const zombie = zombies[i];
+      if (zombie.health <= 0) continue;
+
+      // Jika boss sedang meluncur dalam aksi charge atau stun, abaikan movement normal
+      if (zombie.isCharging || zombie.status?.isStunned(this.context.time)) {
+        continue;
+      }
+
+      // Jika spitter/boss sedang ancang-ancang telegraf serangan, diam di tempat
+      if (zombie.skillTelegraph || zombie.activeTelegraph) {
+        continue;
+      }
+
       let dx = 0;
       let dy = 0;
       let currentSpeedMultiplier = 1;
+      if (
+        this.context.activePowerups &&
+        this.context.activePowerups.freeze > this.context.time
+      ) {
+        currentSpeedMultiplier *= 0.2; // Slow 80% (Pembekuan Kawanan)
+      }
+
+      // Aplikasikan status effects slow / freeze entitas
+      if (zombie.status) {
+        currentSpeedMultiplier *= zombie.status.getSpeedMultiplier(
+          this.context.time
+        );
+      }
 
       const distToPlayer = Math.hypot(player.x - zombie.x, player.y - zombie.y);
 
       if (distToPlayer < zombie.detectionRadius) {
-        dx = player.x - zombie.x;
-        dy = player.y - zombie.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist > 0) {
-          dx /= dist;
-          dy /= dist;
+        // Cek apakah ada garis lurus bebas obstacle
+        const hasLOS = this.context.hasLineOfSight(
+          zombie.x,
+          zombie.y,
+          player.x,
+          player.y
+        );
+
+        if (hasLOS) {
+          // Garis lurus ke arah player
+          dx = (player.x - zombie.x) / distToPlayer;
+          dy = (player.y - zombie.y) / distToPlayer;
+        } else {
+          // Di balik obstacle: ikuti vektor flow field BFS
+          const tx = Math.floor(zombie.x / TILE_SIZE);
+          const ty = Math.floor(zombie.y / TILE_SIZE);
+          const flow = this.context.getFlowDirection(tx, ty);
+
+          if (flow.dx !== 0 || flow.dy !== 0) {
+            dx = flow.dx;
+            dy = flow.dy;
+          } else {
+            // Fallback ke arah player langsung jika di luar grid
+            dx = (player.x - zombie.x) / distToPlayer;
+            dy = (player.y - zombie.y) / distToPlayer;
+          }
         }
       } else {
+        // Wandering saat di luar radius deteksi
         currentSpeedMultiplier = 0.5;
-        zombie.wanderTimer--;
+        zombie.wanderTimer -= dtNormal;
         if (zombie.wanderTimer <= 0) {
           zombie.wanderAngle += (Math.random() - 0.5) * 2;
           zombie.wanderTimer = 30 + Math.random() * 60;
@@ -102,15 +160,19 @@ export class MovementSystem {
         dy = Math.sin(zombie.wanderAngle);
       }
 
+      // Separasi antar-zombie menggunakan Spatial Hash (O(n))
       let pushX = 0;
       let pushY = 0;
-      // Radius separasi Boss lebih besar
-      const separationRadius =
-        zombie.constructor.name === "ZombieBoss" ? 50 : 30;
+      const separationRadius = zombie.isBoss ? 50 : 30;
+      const neighbors = this.context.spatialHash.query(
+        zombie.x,
+        zombie.y,
+        separationRadius
+      );
 
-      for (let j = 0; j < zombies.length; j++) {
-        if (i === j) continue;
-        const other = zombies[j];
+      for (let j = 0; j < neighbors.length; j++) {
+        const other = neighbors[j];
+        if (other === zombie) continue;
         const distOther = Math.hypot(zombie.x - other.x, zombie.y - other.y);
 
         if (distOther < separationRadius && distOther > 0) {
@@ -129,7 +191,12 @@ export class MovementSystem {
         const oldY = zombie.y;
         const originalSpeed = zombie.speed;
         zombie.speed = originalSpeed * currentSpeedMultiplier;
-        this.moveEntity(zombie, finalDx / finalLen, finalDy / finalLen);
+        this.moveEntity(
+          zombie,
+          finalDx / finalLen,
+          finalDy / finalLen,
+          dtNormal
+        );
         zombie.speed = originalSpeed;
 
         if (distToPlayer >= zombie.detectionRadius) {
@@ -144,8 +211,8 @@ export class MovementSystem {
     }
   }
 
-  update() {
-    this.updatePlayerMovement();
-    this.updateZombieMovement();
+  update(dtNormal = 1) {
+    this.updatePlayerMovement(dtNormal);
+    this.updateZombieMovement(dtNormal);
   }
 }

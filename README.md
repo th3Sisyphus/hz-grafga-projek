@@ -1,1 +1,198 @@
-# hz-grafga-projek
+# Hunty Zombie — Arena Bertahan Hidup 2D
+
+Game web retro 2D survival zombie berbasis **HTML5 Canvas**, **Vanilla CSS**, dan **JavaScript ES Modules murni** tanpa framework, bundler, atau dependency eksternal.
+
+---
+
+## 1. Arsitektur & Struktur Proyek
+
+- `index.html`: **Marketing & Informational Field Log Page** — Berkas log lapangan pemburu, live weapon simulator berbasis data nyata dari `src/core/Constants.js`, arsip transmisi radar, galeri tangkapan layar, dan daftar kredit pengembang.
+- `menu.html`: **Tactical Game Screen (App Screen)** — Arena game 2D interaktif, HUD tempur berkinerja tinggi, virtual joystick & tombol kontrol mobile, boss HP bar, dan seluruh overlay modal operasional.
+- `css/home.css`: Sistem desain berorientasi arsip log lapangan (`page-is-the-object`) dengan tipografi mandiri *Hanken Grotesk*.
+- `css/style.css`: Sistem antarmuka game taktis OLED datar (`true-black-flat`) dengan palet bersama *Graphite & Safety Orange*.
+- `src/`: Modul logika game (GameManager, Player, Zombie, Boss, SoundManager, dll) yang tetap terlindungi tanpa perubahan logika internal.
+- `assets/fonts/`: File font Google Fonts berlisensi OFL (*Hanken Grotesk* 400, 500, 600, 700, 800) yang di-host mandiri tanpa CDN eksternal.
+
+---
+
+## 2. Parameter Debug UI Pengembang (`?ui=<state>`)
+
+Untuk mempermudah inspeksi visual otomatis (`inspect.mjs --app`), review desain, dan pengujian komponen simulasi tanpa harus memainkan sesi pertempuran penuh dari awal, `menu.html` menyediakan parameter query dev-only `?ui=<state>`.
+
+Buka URL berikut di browser atau jalankan via web server:
+
+| Parameter URL | Status Tampilan Layar | Deskripsi & Komponen yang Ditampilkan |
+| :--- | :--- | :--- |
+| `menu.html?ui=menu` | **Pos Komando (Menu Awal)** | Menu utama dengan aksi mulai operasi, panduan, pengaturan, dan navigasi modal. |
+| `menu.html?ui=weapon` | **Seleksi Arsenal Senjata** | Grid 4 senjata taktikal (Katana, Fist, Kitab Sihir, Dual Pistol) beserta statistik. |
+| `menu.html?ui=tutorial` | **Instruksi Protokol Lapangan** | Manual panduan kontrol gerak W/A/S/D, mouse, mobile joystick, dan mekanika boss. |
+| `menu.html?ui=hud` | **HUD Tempur In-Game** | Status HP pemburu, gelombang, skor, koin, munisi, virtual joystick, dan tombol pause. |
+| `menu.html?ui=boss` | **Fase Boss & Darurat** | Bar HP Boss besar di atas layar, meteran stun, serta efek vignette merah saat HP kritis. |
+| `menu.html?ui=pause` | **Simulasi Dijeda** | Overlay jeda operasi dengan opsi resume, pengaturan audio/visual, dan kembali ke menu. |
+| `menu.html?ui=gameover` | **Debriefing Gugur** | Ringkasan statistik akhir: skor, wave, kill, akurasi, total damage, dan catatan rekor. |
+| `menu.html?ui=upgrade` | **Modifikasi Antar Gelombang** | 3 pilihan upgrade taktikal antar-wave dengan angka riil dan glyph piksel geometris. |
+| `menu.html?ui=shop` | **Pos Pedagang Karantina** | Toko logistik untuk menukar koin hasil eliminasi dengan P3K, munisi, dan rompi balistik. |
+| `menu.html?ui=character`| **Seleksi Karakter Operatif** | Pilihan 3 karakter pemburu (Scout, Vanguard, Arcane Survivor) dengan stat unik. |
+| `menu.html?ui=mode` | **Mode & Tingkat Kesulitan** | Pengaturan mode (Endless, Boss Rush, Daily Seed, Hardcore) dan tingkat agresi. |
+| `menu.html?ui=settings` | **Pengaturan Operasional** | Slider volume audio/SFX, toggle screen shake, kualitas partikel, dan tabel keybind. |
+
+> **Catatan:** Membuka `menu.html` tanpa parameter query akan menjalankan alur game normal secara default (langsung menuju seleksi senjata sebelum penerjunan).
+
+---
+
+## 3. Menjalankan Game Secara Lokal
+
+Buka file langsung di browser atau jalankan server statis sederhana:
+
+```bash
+# Menggunakan npx serve atau Python
+npx serve .
+# atau
+python -m http.server 8000
+```
+
+Buka `http://localhost:8000/index.html` untuk halaman beranda atau `http://localhost:8000/menu.html` untuk arena game.
+
+---
+
+## 4. Verifikasi Standar Kualitas Desain (Tasteskill v2)
+
+Proyek ini telah lulus verifikasi desain ketat anti-template menggunakan real-browser inspector:
+- **Lint Check (`lint.mjs`)**: 0 FAIL, 0 WARN
+- **Page Inspection (`inspect.mjs index.html`)**: 0 FAIL
+- **App Inspection (`inspect.mjs menu.html --app`)**: 0 FAIL, 0 WARN
+- Bebas dari emoji dekoratif, bayangan glow berlebih, font stock acak, dan layout thrashing pada game loop.
+
+---
+
+## 5. Log Pengembangan: Fase 0 — Bug dan Fondasi
+
+Fase 0 telah diselesaikan dengan fondasi logika permainan yang bersih dan terukur:
+1. **Game Clock (`context.time`)**: Menghilangkan seluruh `Date.now()` dan `setTimeout` di logika gameplay (`src/`). Timer cooldown senjata, durasi terbakar (*burn*), stun, dan delay antar gelombang dihentikan sepenuhnya saat game di-pause (terbukti durasi stun/burn tidak berkurang selama 10 detik jeda).
+2. **Delta Time Normalization (dt @ 60 FPS)**: Gerak operatif, zombie, dan proyektil dinormalisasi ke 60 FPS sehingga jarak tempuh per detik identik pada layar 60 Hz maupun 144 Hz (deviasi < 1e-13).
+3. **Mekanika Tile Duri (Spike)**: Duri bukan lagi rintangan dinding padat, melainkan hazard lantai yang melukai operatif maupun zombie yang melangkah di atasnya (10 damage setiap interval 500ms).
+4. **Sentralisasi Data & Weapon Balance (`arc`)**:
+   - Sumber kebenaran senjata dipindahkan ke `src/core/data/weapons.js` dan di-re-export melalui `Constants.js` sehingga simulator di `index.html` tetap berjalan mulus.
+   - Ditambahkan field `arc` (setengah sudut kerucut tebasan dalam radian) untuk sinkronisasi 100% antara hit detection dan visual rendering.
+   - **Katana**: Damage 70, Range 80, Crit 3.0x, Arc 1.0 rad (~57.3°), Cooldown 400ms, Speed +0.4, Lifesteal 5%.
+   - **Tangan Kosong (Fist)**: Damage 35, Range 45, Crit 1.5x, Arc 0.7 rad (~40.1°), Cooldown 300ms, Speed +0.7, Lifesteal 10%.
+   - **Kitab Sihir**: Damage 45, DOT Bakar 12/dtk (3d), Range 300, Cooldown 550ms.
+   - **Pistol Ganda**: Damage 28, Area Ledakan 90 px, Range 380, Cooldown 450ms.
+5. **Kurva Scaling Persentase Musuh**:
+   - Kecepatan zombie asimptotik berbatas: tidak pernah melebihi 90% kecepatan dasar operatif (maks 2.43 px/frame).
+   - Darah zombie: formula eksponensial `65 * (1.08)^(wave - 1)`. Pada gelombang 10 zombie biasa memiliki darah 130 HP (tepat tumbang dalam 2 tebasan Katana 70 dmg). Pada gelombang 20 darah mencapai 281 HP.
+6. **Pathfinding Flow Field (BFS)**:
+   - Dihitung ulang tiap ~0.4 detik pada grid 40x30 dari posisi player. Musuh yang terhalang obstacle pohon/batu mengikuti gradien flow field sehingga tidak pernah menempel atau tersangkut pada obstacle.
+7. **Generator Peta Terhubung (Flood Fill)**:
+   - Area spawn tengah (radius 3 tile) dijamin bebas obstacle. Seluruh area lantai dihubungkan dengan flood fill sehingga tidak ada pulau terisolasi, serta duri tidak pernah membentuk bottleneck tunggal.
+8. **Identifikasi Entitas**: Mengganti seluruh pemeriksaan `constructor.name` dengan field `type` (`player`, `zombie`, `zombie_boss`, `melee`, dll).
+9. **Statistik Riil & High Score**: Layar Debriefing Gugur menampilkan metrik nyata dari `context.stats` (`kills`, `shotsFired`, `hits`, `damageDealt`, `damageTaken`), menghapus angka hardcode 84% dan 1.420. Rekor skor dan wave tertinggi disimpan di localStorage dengan key `hz_record_v1`.
+10. **Ambang HP Relatif**: Ambang vignette merah HP kritis (<= 25%) dan status bar bahaya (<= 30%) dihitung berdasarkan persentase `maxHealth`, bukan angka tetap.
+11. **Optimasi Performa**: Batas partikel/efek maksimal 300 serta Spatial Hash grid cell 60px untuk kalkulasi separasi zombie O(n).
+
+---
+
+## 6. Log Pengembangan: Fase 1 — Upgrade Antar Wave
+
+Fase 1 telah mengimplementasikan sistem modifikasi persenjataan antar gelombang:
+1. **Sentralisasi Data Upgrade (`src/core/data/upgrades.js`)**:
+   - Berisi 15 upgrade unik yang mencakup seluruh statistik tempur: `damage %`, `attack speed`, `move speed`, `max HP`, `lifesteal`, `crit chance`, `crit multiplier`, `pierce`, `multi-shot (+1 projectile)`, `knockback`, `aoe radius`, dan `wave regen`.
+   - Klasifikasi Tiga Tingkat Rarity: **Common** (bobot 60), **Rare** (bobot 30), dan **Epic** (bobot 10).
+   - Pengundian 3 kartu acak tanpa duplikat (`drawRandomUpgrades(3)`) berdasarkan bobot peluang rarity.
+2. **Sistem Modifier Stack Reaktif (`Player.js`)**:
+   - Player mengakumulasi tumpukan modifier dan secara instan merekalkulasi statistik efektif (`effectiveDamage`, `effectiveCooldown`, `maxHealth`, `speed`, `effectiveLifesteal`, `effectiveCritChance`, `effectiveCritMult`, `pierce`, `extraProjectiles`, `knockbackMultiplier`, `waveRegenPercent`).
+   - Peningkatan `maxHealth` secara otomatis menambah HP saat ini dengan proporsi yang adil.
+3. **Mekanika Pemulihan & Jeda Game Clock (`WaveSystem.js`)**:
+   - Saat seluruh zombie dalam wave tereliminasi, game clock berhenti dan pemain memulihkan 20% max HP secara otomatis (ditambah bonus modifier ransum).
+   - Modal upgrade (#waveUpgradeModal) terbuka dengan 3 pilihan terundi secara dinamis.
+4. **Pembersihan Komponen Demo**:
+   - Menghapus fungsi demo `selectUpgradeDemo`.
+   - Menggantikan kartu statis dan tag sampel pada modal upgrade dengan rendering dinamis data nyata.
+   - Mengintegrasikan aksi `window.selectWaveUpgrade(upgradeId)` yang menerapkan modifier ke operatif, memajukan wave, dan menjadwalkan timer `WAVE_DELAY` sebelum gelombang musuh berikutnya diterjunkan.
+   - Parameter debug `menu.html?ui=upgrade` tetap berfungsi penuh menampilkan 3 kartu acak dari sumber data.
+
+---
+
+## 7. Log Pengembangan: Fase 2 — Drop, Koin, dan Toko Pedagang
+
+Fase 2 mengintegrasikan sistem ekonomi, jarahan musuh, dan pos perbekalan taktis:
+1. **Data Sumber Kebenaran (`src/core/data/items.js`)**:
+   - Menentukan inventaris toko `SHOP_ITEMS`: Kotak P3K Lapangan (50 koin, heal 80 HP), Kantong Munisi Penuh (40 koin, +50 munisi), Rompi Balistik Ringan (90 koin, reduksi damage 15% hingga batas max 60%), dan Penyetelan Senjata Tempur (75 koin, +15% damage permanen).
+   - Peluang drop jarahan musuh: Medkit (~8%), Munisi (~15%), Power-Up Temporer (~3%).
+   - 4 Arketipe Power-Up Temporer: Kerusakan Ganda (x2 damage, 10s), Akselerasi Cepat (+50% speed, 10s), Magnet Logistik (radius tarik 600px, 10s), dan Pembekuan Kawanan (-80% zombie speed, 6s).
+2. **Domain Entitas Pickup & Magnetik (`src/domain/Pickup.js`)**:
+   - Entitas jarahan dengan durasi eksistensi 12 detik (berkedip visual saat tersisa < 3 detik).
+   - Radius tarikan magnetik 75px (meningkat drastis menjadi 600px saat power-up magnet aktif) dengan pergerakan lerp halus.
+3. **Rendering Jarahan Retro (`Renderer.js`)**:
+   - Ikon koin emas bulat (#eab308) bergaris luar tajam dan bayangan lantai.
+   - Ikon P3K kotak putih dengan salib hijau medis (#22c55e).
+   - Ikon amunisi tembaga kotak dengan peluru kuning ganda (#fde047).
+   - Ikon power-up wajik (*diamond*) berdenyut vertikal dengan kode warna taktis OLED.
+4. **Integrasi Combat & Toko Nyata (`CombatSystem.js`, `menu.html`)**:
+   - Setiap zombie gugur menjatuhkan koin (2-5 koin untuk zombie biasa, 30 koin untuk Boss).
+   - HUD koin (`coinCount`) disinkronkan secara riil dengan `context.coins`.
+   - Alur transisi otomatis: Gelombang Selesai -> Pemulihan 20% HP -> Modal Upgrade -> Modal Toko Pedagang Karantina -> Lanjut ke Gelombang Berikutnya -> Jeda 3 detik -> Musuh Diterjunkan.
+   - Menghapus fungsi demo `buyItemDemo` dan tag simulasi hardcode. State `menu.html?ui=shop` terhubung penuh dengan katalog data nyata.
+
+---
+
+## 8. Log Pengembangan: Fase 3 — Musuh, Boss Tiga Fase, dan Telegraf
+
+Fase 3 mengimplementasikan ragam arketipe musuh baru, sistem status terpadu, dan pertarungan boss berfase:
+1. **Data Sumber Kebenaran Musuh (`src/core/data/enemies.js`)**:
+   - Mendefinisikan 5 arketipe spesimen:
+     - **Runner**: Cepat (speed 1.45x), rapuh (hp 0.6x), damage 0.75x, minWave 2, cost 8.
+     - **Brute**: Tank berotot (hp 2.8x), lambat (speed 0.65x), damage 1.8x, minWave 3, cost 20.
+     - **Spitter**: Penembak ludah asam (range 260px, damage 12 + efek poison), telegraf 0.6s, minWave 2, cost 14.
+     - **Exploder**: Mutan labil yang meledak AoE saat tereliminasi (radius 80px, damage 45), minWave 4, cost 16.
+     - **Necromancer**: Pembangkit minion (summon 2 zombie biasa tiap 6 detik), minWave 5, cost 30.
+2. **Sistem Terpadu Status Effects (`src/domain/StatusEffects.js`)**:
+   - Satu sistem terpadu untuk Player dan seluruh Zombie/Boss mencakup `burn`, `poison`, `slow`, `freeze`, `stun`, dan `knockback`.
+   - Wizard Book menyalurkan efek `burn` berkala; Spitter menyalurkan efek `poison`; power-up freeze menyalurkan perlambatan 80% ke seluruh kawanan musuh.
+3. **Komposisi Gelombang Berbasis Anggaran Cost (`WaveSystem.js`)**:
+   - Gelombang musuh disusun dinamis dari total anggaran (`24 + wave * 16`), bukan jumlah musuh tetap.
+   - Event Wave khusus: **Gelombang Horde** (anggaran 1.5x, dominasi Runner & Normal, speed +10%) dan **Kawanan Elite** (anggaran 1.25x, HP musuh +40%, damage +25%).
+4. **Pertarungan Boss Kelipatan 3 Wave & 3 Fase HP**:
+   - Rotasi Boss: Wave 3 (Brute Boss "Mutasi Brute Primal"), Wave 6 (Necromancer Boss "Panggilan Abadi Necromancer"), Wave 9 (Abomination "Abominasi Karantina").
+   - Banner intro boss megah via `waveBanner` dan game clock timer.
+   - Bar HP Boss atas layar (`bossHpBarContainer`) dan meteran status fase terhubung dengan data riil.
+   - **Fase 1 (HP > 66%)**: Serangan fisik dasar + meteran stun (setiap 4 pukulan berturut-turut menyebabkan Player stun selama 2 detik).
+   - **Fase 2 (33% < HP <= 66%)**: Serangan serudukan lurus (*Charge Attack*) berkecepatan tinggi dengan telegraf garis merah $\ge 0.8$ detik (850ms) + pemanggilan 2 minion pengawal.
+   - **Fase 3 (HP <= 33%)**: Status Enrage (speed +30%, damage +30%) + Ground Slam gempa AoE radius 95px dengan telegraf lingkaran merah selama 850ms sebelum hantaman 35 damage dan knockback masif.
+5. **Aturan Telegraf & Placeholder Palette-Swap (`Renderer.js`)**:
+   - Ditambahkan rendering telegraf dinamis berbasis waktu riil untuk serangan telegraf Spitter dan Boss (`drawTelegraphs`).
+   - Placeholder visual untuk variasi arketipe menggunakan palette-swap filter CSS Canvas yang ditandai dengan komentar `TODO-art` untuk penyelesaian aset artis berikutnya.
+
+---
+
+## 9. Log Pengembangan: Fase 4 — Senjata, Skill, Karakter, Mode, dan Pengaturan
+
+Fase 4 melengkapi seluruh fondasi gameplay taktikal, sistem karakter, pilihan mode, dan menghubungkan seluruh antarmuka modal demo ke logika nyata:
+1. **Senjata Baru & Mekanika Munisi (`src/core/data/weapons.js`, `Player.js`)**:
+   - Menambahkan 3 senjata baru: **Shotgun** (sebaran 5 butir balistik, 6 magazin, reload 1.8s), **Sniper Rifle** (daya tembus 3 target, proyektil cepat, 4 magazin, reload 2.2s), dan **Flamethrower** (semburan api beruntun berkelanjutan, 40 unit tangki, efek bakar massal).
+   - Sistem amunisi riil: magazin senjata, inventaris cadangan, manual reload via tombol `R`, dan auto-reload saat peluru habis.
+   - Sistem slot ganda (Primary & Secondary Weapon) dan pergantian senjata instan (*Weapon Swap*) melalui tombol `Q` atau tombol sentuh mobile `#mobileSwapBtn`.
+   - Rendering sprite senjata baru pada `SpriteUtils.js` dengan penanda komentar `TODO-art`.
+2. **Karakter Operatif & Skill Aktif (`src/core/data/characters.js`, `Player.js`)**:
+   - Tiga karakter spesialis dengan stat dasar, perlengkapan awal, dan skill unik:
+     - **Scout Hunter**: HP 240, Speed 3.2, Default: Dual Pistol & Katana. Skill: *Tactical Dash* (lesatan cepat dengan i-frame kebal kerusakan 450ms, cooldown 4s).
+     - **Vanguard Guard**: HP 380, Armor 20%, Speed 2.3, Default: Shotgun & Bare Fist. Skill: *Benteng Baja* (kebal mutlak 2.2s + gelombang tolak knockback zombie sekitar, cooldown 10s).
+     - **Arcane Survivor**: HP 260, Lifesteal 8%, Speed 2.8, Default: Wizard Book & Dual Pistol. Skill: *Frost Nova* (ledakan es radius 200px membekukan kawanan zombie selama 3.5s, cooldown 6s).
+   - Visual i-frame berkedip pada `Renderer.js` dan banner status skill di HUD.
+3. **Mode Permainan & Kesulitan (`src/core/data/modes.js`, `WaveSystem.js`)**:
+   - 5 Mode Permainan: **Standard**, **Endless**, **Boss Rush** (setiap gelombang adalah gelombang Boss), **Daily Seed** (peta dan pilihan seeded seragam berbasis tanggal UTC `YYYY-MM-DD`), dan **Hardcore** (1 nyawa, regenerasi 20% antar gelombang dinonaktifkan).
+   - Pengali Kesulitan Taktis: Normal (1.0x), Taktikal (1.3x), dan Ekstrem (1.75x) yang terhubung ke kalkulasi anggaran gelombang musuh.
+   - Pengaturan mode disimpan persisten pada localStorage (`hz_mode_v1`).
+4. **Pengaturan Operasional Sistem (`settingsModal`)**:
+   - Slider kontrol volume Musik Latar dan Efek Suara (SFX) terhubung langsung ke `SoundManager`.
+   - Pengendalian Screen Shake aktif/nonaktif terhubung ke `Renderer.js` dan dipicu saat benturan fisik atau ledakan area.
+   - Dropdown batas partikel visual (Tinggi: 300 partikel, Sedang: 200 partikel, Rendah: 100 partikel).
+   - Konfigurasi tersimpan persisten pada localStorage (`hz_settings_v1`).
+5. **Catatan Prestasi & Multiplier Combo (`src/core/data/achievements.js`, `CombatSystem.js`)**:
+   - 9 pencapaian lapangan unik terlacak secara otomatis dengan penyimpanan persisten pada localStorage (`hz_achievements_v1`).
+   - Sistem Pengali Combo (*Streak Multiplier*): bertambah +0.1 per eliminasi (hingga batas x5.0) dan reset kembali ke x1.0 saat pemburu terkena serangan.
+6. **Pembersihan Komponen Demo**:
+   - Seluruh fungsi demo lama (`triggerSkillDemo`, `triggerSwapDemo`, `selectCharDemo`) telah dihapus secara tuntas.
+   - Seluruh query parameter pengembang `?ui=<state>` (`menu`, `weapon`, `tutorial`, `hud`, `boss`, `pause`, `gameover`, `upgrade`, `shop`, `character`, `mode`, `settings`, `achievements`) berfungsi penuh dengan rendering data nyata.
+
+

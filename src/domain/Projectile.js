@@ -1,38 +1,79 @@
-// FIX: Import effect baru
 import { MagicTrail, SmokeTrail } from "./Effect.js";
 
 export class Projectile {
   constructor(x, y, angle, weapon) {
+    this.type = "projectile";
     this.x = x;
     this.y = y;
     this.angle = angle;
     this.speed = 8;
+    this.vx = Math.cos(angle) * this.speed;
+    this.vy = Math.sin(angle) * this.speed;
     this.weapon = weapon;
     this.distance = 0;
     this.maxDistance = weapon.range;
     this.hit = false;
   }
 
-  update(context) {
-    this.x += Math.cos(this.angle) * this.speed;
-    this.y += Math.sin(this.angle) * this.speed;
-    this.distance += this.speed;
+  update(context, dtNormal = 1) {
+    const moveStep = this.speed * dtNormal;
+    this.x += Math.cos(this.angle) * moveStep;
+    this.y += Math.sin(this.angle) * moveStep;
+    this.distance += moveStep;
 
-    // ========== NEW: SPAWN TRAIL PARTICLES ==========
-    // Spawn effect setiap frame (atau setiap frame ganjil untuk performa)
-    if (this.weapon.name === "Wizard Book") {
-      // Efek Magis: Banyak partikel kecil
-      context.effects.push(new MagicTrail(this.x, this.y));
-    } else if (this.weapon.name === "Dual Gun") {
-      // Efek Asap/Debu: Lebih sedikit
-      if (Math.random() < 0.5) {
-        context.effects.push(new SmokeTrail(this.x, this.y));
+    // Batasi penambahan partikel trail jika efek sudah mendekati batas 300
+    if (context.effects.length < 280) {
+      if (this.weapon.name === "Wizard Book") {
+        context.effects.push(new MagicTrail(this.x, this.y));
+      } else if (this.weapon.name === "Dual Gun") {
+        if (Math.random() < 0.5) {
+          context.effects.push(new SmokeTrail(this.x, this.y));
+        }
       }
     }
-    // ================================================
 
     if (
       this.distance >= this.maxDistance ||
+      context.isObstacle(this.x, this.y) ||
+      this.hit
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+export class EnemyProjectile {
+  constructor(
+    x,
+    y,
+    angle,
+    speed = 4.5,
+    damage = 12,
+    range = 280,
+    effectType = "poison"
+  ) {
+    this.type = "enemy_projectile";
+    this.x = x;
+    this.y = y;
+    this.angle = angle;
+    this.speed = speed;
+    this.damage = damage;
+    this.range = range;
+    this.effectType = effectType;
+    this.distance = 0;
+    this.hit = false;
+  }
+
+  update(context, dtNormal = 1) {
+    const moveStep = this.speed * dtNormal;
+    this.x += Math.cos(this.angle) * moveStep;
+    this.y += Math.sin(this.angle) * moveStep;
+    this.distance += moveStep;
+
+    if (
+      this.distance >= this.range ||
       context.isObstacle(this.x, this.y) ||
       this.hit
     ) {

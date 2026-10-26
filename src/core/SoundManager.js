@@ -142,6 +142,15 @@ export class SoundManager {
             case "Dual Gun":
                 this.playGunSound();
                 break;
+
+            case "Shotgun":
+            case "Sniper":
+                this.playGunSound();
+                break;
+
+            case "Flamethrower":
+                this.playFireballSound();
+                break;
             
             default:
                 console.warn(`Unknown weapon: ${weaponName}`);
@@ -216,6 +225,24 @@ export class SoundManager {
      */
     setVolume(volume) {
         this.volume.master = Math.max(0, Math.min(1, volume));
+    }
+
+    /**
+     * Set music volume (0.0 - 1.0)
+     */
+    setMusicVolume(volume) {
+        this.volume.music = Math.max(0, Math.min(1, volume));
+    }
+
+    /**
+     * Set SFX volume (0.0 - 1.0)
+     */
+    setSfxVolume(volume) {
+        this.volume.sfx = Math.max(0, Math.min(1, volume));
+        // Update loaded sound objects
+        Object.values(this.sounds).forEach(sound => {
+            sound.volume = this.volume.master * this.volume.sfx;
+        });
     }
 
     /**
