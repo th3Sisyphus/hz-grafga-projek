@@ -202,7 +202,11 @@ export class Renderer {
     };
 
     // Efek i-frame (kedip saat dash / skill invulnerable)
-    if (player.isInvulnerable && player.isInvulnerable(this.context.time)) {
+    if (
+      player.isInvincible ||
+      (typeof player.isInvulnerable === "function" &&
+        player.isInvulnerable(this.context.time))
+    ) {
       ctx.globalAlpha = 0.4 + Math.sin(this.context.time / 30) * 0.3;
     }
 
@@ -918,12 +922,128 @@ export class Renderer {
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    // 10. FPS & Performance Counter di Pojok Atas
+    // 10. Zombie Off-screen Direction Indicator (Tracker/Radar)
+    this.drawZombieOffscreenIndicators(camera);
+
+    // 11. FPS & Performance Counter di Pojok Atas
     ctx.font = "bold 11px monospace";
     ctx.textAlign = "left";
     ctx.fillStyle = this.fps >= 55 ? "#2ec486" : "#ff4a1f";
     ctx.fillText(`${this.fps} FPS | Sprites: Baked Atlas | Filters: 0`, 12, 20);
 
     ctx.restore();
+  }
+
+  /**
+   * Zombie Off-screen Direction Indicator (Tracker/Radar)
+   * KONDISI AKTIF: HANYA aktif jika sudah TIDAK ADA NPC yang hidup di map (npcs.length === 0)
+   * DETEKSI TARGET: Loop semua zombie aktif yang posisinya berada di luar batas viewport/kamera saat ini
+   * INDIKATOR VISUAL: Panah/segitiga merah berputar (Math.atan2) clamped edge margin ~25-30px, outline putih tipis
+   * Dipanggil di layer HUD/UI canvas teratas
+   */
+  drawZombieOffscreenIndicators(camera) {
+    const { player, zombies, npcs } = this.context;
+    if (!player || player.health <= 0 || !zombies || zombies.length === 0) return;
+
+    // KONDISI AKTIF: HANYA aktif jika sudah TIDAK ADA NPC yang hidup di map (npcs.length === 0)
+    const hasLivingNpc = npcs && npcs.length > 0 && npcs.some((npc) => npc.health > 0);
+    if (hasLivingNpc) return;
+
+    const ctx = this.ctx;
+    const viewW = this.canvas.width;
+    const viewH = this.canvas.height;
+    const camX = camera.x;
+    const camY = camera.y;
+
+    // Batas viewport kamera dalam koordinat dunia
+    const viewLeft = camX;
+    const viewRight = camX + viewW;
+    const viewTop = camY;
+    const viewBottom = camY + viewH;
+
+    // Posisi layar pemain
+    const playerScreenX = player.x - camX;
+    const playerScreenY = player.y - camY;
+
+    // Clamped edge margin (~25-30px dari border canvas)
+    const margin = 28;
+    const minX = margin;
+    const maxX = viewW - margin;
+    const minY = margin;
+    const maxY = viewH - margin;
+
+    // Anchor ray-cast dari posisi screen pemain yang di-clamp di dalam margin layar
+    const startX = Math.max(minX + 1, Math.min(maxX - 1, playerScreenX));
+    const startY = Math.max(minY + 1, Math.min(maxY - 1, playerScreenY));
+
+    for (let i = 0; i < zombies.length; i++) {
+      const zombie = zombies[i];
+      if (zombie.health <= 0) continue;
+
+      // DETEKSI TARGET: Periksa apakah zombie berada di luar batas viewport/kamera
+      const isOffScreen =
+        zombie.x < viewLeft ||
+        zombie.x > viewRight ||
+        zombie.y < viewTop ||
+        zombie.y > viewBottom;
+
+      if (!isOffScreen) continue;
+
+      // INDIKATOR VISUAL: Hitung sudut vektor arah dari Player ke Zombie
+      const dx = zombie.x - player.x;
+      const dy = zombie.y - player.y;
+      const angle = Math.atan2(dy, dx);
+
+      // Hitung perpotongan ray dari startX/startY sepanjang cos/sin angle ke tepi layar
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+
+      let t = Infinity;
+      if (cosA > 0.0001) {
+        t = Math.min(t, (maxX - startX) / cosA);
+      } else if (cosA < -0.0001) {
+        t = Math.min(t, (minX - startX) / cosA);
+      }
+
+      if (sinA > 0.0001) {
+        t = Math.min(t, (maxY - startY) / sinA);
+      } else if (sinA < -0.0001) {
+        t = Math.min(t, (minY - startY) / sinA);
+      }
+
+      let drawX = startX + cosA * t;
+      let drawY = startY + sinA * t;
+
+      // Clamping ganda agar presisi di margin tepi layar
+      drawX = Math.max(minX, Math.min(maxX, drawX));
+      drawY = Math.max(minY, Math.min(maxY, drawY));
+
+      // Gambar indikator panah/segitiga merah berputar menghadap arah zombie
+      ctx.save();
+      ctx.translate(drawX, drawY);
+      ctx.rotate(angle);
+
+      const isBoss = !!zombie.isBoss;
+      const arrowLength = isBoss ? 16 : 12;
+      const arrowWidth = isBoss ? 11 : 8;
+
+      ctx.beginPath();
+      ctx.moveTo(arrowLength, 0); // Ujung panah menunjuk ke arah target zombie
+      ctx.lineTo(-arrowLength * 0.75, -arrowWidth);
+      ctx.lineTo(-arrowLength * 0.35, 0); // Lekukan belakang (notch)
+      ctx.lineTo(-arrowLength * 0.75, arrowWidth);
+      ctx.closePath();
+
+      // Warna panah merah kontras
+      ctx.fillStyle = isBoss ? "#ff1744" : "#e53935";
+      ctx.fill();
+
+      // Outline putih tipis agar kontras di segala jenis latar map
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+
+      ctx.restore();
+    }
   }
 }

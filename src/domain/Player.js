@@ -98,8 +98,29 @@ export class Player {
     this.setWeapon(this.primaryWeaponKey);
   }
 
+  setPrimaryWeapon(weaponKey) {
+    this.primaryWeaponKey = weaponKey;
+    this.magSlot1 = undefined;
+    if (this.activeSlot === 1) {
+      this.setWeapon(weaponKey);
+    }
+  }
+
+  setSecondaryWeapon(weaponKey) {
+    this.secondaryWeaponKey = weaponKey;
+    this.magSlot2 = undefined;
+    if (this.activeSlot === 2) {
+      this.setWeapon(weaponKey);
+    }
+  }
+
   setWeapon(weaponKey) {
     this.weaponKey = weaponKey;
+    if (this.activeSlot === 1) {
+      this.primaryWeaponKey = weaponKey;
+    } else {
+      this.secondaryWeaponKey = weaponKey;
+    }
     this.weapon = WEAPONS[weaponKey] || WEAPONS.katana;
     this.magazine = this.weapon.hasAmmo ? this.weapon.maxMag : Infinity;
     this.isReloading = false;
@@ -107,10 +128,24 @@ export class Player {
   }
 
   swapWeapon() {
+    // Simpan magazine slot saat ini sebelum menukar
+    if (this.activeSlot === 1) {
+      this.magSlot1 = this.magazine;
+    } else {
+      this.magSlot2 = this.magazine;
+    }
+
     this.activeSlot = this.activeSlot === 1 ? 2 : 1;
     const targetKey =
       this.activeSlot === 1 ? this.primaryWeaponKey : this.secondaryWeaponKey;
     this.setWeapon(targetKey);
+
+    // Pulihkan magazine yang tersimpan untuk slot baru jika tersedia
+    const savedMag = this.activeSlot === 1 ? this.magSlot1 : this.magSlot2;
+    if (savedMag !== undefined && this.weapon.hasAmmo) {
+      this.magazine = savedMag;
+    }
+
     return true;
   }
 
@@ -253,8 +288,22 @@ export class Player {
     return true;
   }
 
-  triggerSkill(context) {
-    const time = context.time;
+  isInvulnerable(gameTime = 0) {
+    if (this.isInvincible) return true;
+    if (gameTime > 0 && gameTime < this.invincibleEndTime) return true;
+    return false;
+  }
+
+  triggerSkill(contextOrTime, maybeContext) {
+    const context =
+      typeof contextOrTime === "object" && contextOrTime !== null
+        ? contextOrTime
+        : maybeContext;
+    const time =
+      typeof contextOrTime === "number"
+        ? contextOrTime
+        : context?.time || performance.now();
+
     const skill = this.character?.skill;
     if (!skill) return false;
 

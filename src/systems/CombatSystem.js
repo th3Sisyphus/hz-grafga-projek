@@ -51,26 +51,33 @@ export class CombatSystem {
   }
 
   checkSpikeHazards() {
-    const { player, zombies, tilemap, time } = this.context;
-    if (!tilemap) return;
+    const { player, tilemap, time } = this.context;
+    if (!tilemap || !player || player.health <= 0) return;
 
-    const checkEntity = (ent) => {
-      if (!ent || ent.health <= 0) return;
-      const tx = Math.floor(ent.x / TILE_SIZE);
-      const ty = Math.floor(ent.y / TILE_SIZE);
+    // Pengurangan darah HANYA kepada pemain (bukan ke zombie/NPC) saat menyentuh batas duri
+    const halfW = player.width / 2;
+    const halfH = player.height / 2;
 
-      if (tilemap[ty] && tilemap[ty][tx] === TILES.SPIKE) {
-        if (time - (ent.lastSpikeTime || 0) >= SPIKE_TICK_INTERVAL) {
-          ent.lastSpikeTime = time;
-          this.applyDamage(ent, SPIKE_DAMAGE, false);
-        }
-      }
+    const isSpikeAt = (x, y) => {
+      const tx = Math.floor(x / TILE_SIZE);
+      const ty = Math.floor(y / TILE_SIZE);
+      return tilemap[ty] && tilemap[ty][tx] === TILES.SPIKE;
     };
 
-    if (player) checkEntity(player);
-    for (let i = 0; i < zombies.length; i++) {
-      checkEntity(zombies[i]);
+    const isTouchingSpike =
+      isSpikeAt(player.x, player.y) ||
+      isSpikeAt(player.x - halfW - 2, player.y) ||
+      isSpikeAt(player.x + halfW + 2, player.y) ||
+      isSpikeAt(player.x, player.y - halfH - 2) ||
+      isSpikeAt(player.x, player.y + halfH + 2);
+
+    if (isTouchingSpike) {
+      if (time - (player.lastSpikeTime || 0) >= SPIKE_TICK_INTERVAL) {
+        player.lastSpikeTime = time;
+        this.applyDamage(player, SPIKE_DAMAGE, false);
+      }
     }
+    // CATATAN: Seluruh zombie tidak menerima damage dari duri sesuai spesifikasi
   }
 
   checkZombieAttack(dtNormal = 1) {

@@ -12,10 +12,29 @@ export class MovementSystem {
     const halfW = entity.width / 2;
     const halfH = entity.height / 2;
 
-    if (!this.context.isObstacle(nextX, entity.y)) {
+    // Pengecekan collision multi-point (bounding box) agar entity tidak menembus batas obstacle/spike
+    const padW = Math.max(2, halfW - 3);
+    const padH = Math.max(2, halfH - 3);
+
+    const canMoveX =
+      !this.context.isObstacle(nextX, entity.y) &&
+      !this.context.isObstacle(nextX - padW, entity.y - padH) &&
+      !this.context.isObstacle(nextX + padW, entity.y - padH) &&
+      !this.context.isObstacle(nextX - padW, entity.y + padH) &&
+      !this.context.isObstacle(nextX + padW, entity.y + padH);
+
+    if (canMoveX) {
       entity.x = nextX;
     }
-    if (!this.context.isObstacle(entity.x, nextY)) {
+
+    const canMoveY =
+      !this.context.isObstacle(entity.x, nextY) &&
+      !this.context.isObstacle(entity.x - padW, nextY - padH) &&
+      !this.context.isObstacle(entity.x + padW, nextY - padH) &&
+      !this.context.isObstacle(entity.x - padW, nextY + padH) &&
+      !this.context.isObstacle(entity.x + padW, nextY + padH);
+
+    if (canMoveY) {
       entity.y = nextY;
     }
 
@@ -42,8 +61,11 @@ export class MovementSystem {
     const isSpeedBoost =
       this.context.activePowerups &&
       this.context.activePowerups.speed_boost > this.context.time;
+    const isDashBoost = player.isDashing
+      ? (player.character?.skill?.speedBoost || 2.5)
+      : 1.0;
     const statusMult = player.status?.getSpeedMultiplier(this.context.time) || 1.0;
-    const playerDt = dtNormal * (isSpeedBoost ? 1.5 : 1.0) * statusMult;
+    const playerDt = dtNormal * (isSpeedBoost ? 1.5 : 1.0) * isDashBoost * statusMult;
 
     if (joystickInput && joystickInput.active) {
       dx = joystickInput.x;

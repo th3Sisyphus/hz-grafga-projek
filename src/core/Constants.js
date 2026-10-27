@@ -1,6 +1,6 @@
 export const TILE_SIZE = 40;
-export const MAP_WIDTH = 40;
-export const MAP_HEIGHT = 30;
+export const MAP_WIDTH = 50;
+export const MAP_HEIGHT = 38;
 
 export const BASE_PLAYER_SPEED = 2.7;
 export const BASE_PLAYER_HEALTH = 300;

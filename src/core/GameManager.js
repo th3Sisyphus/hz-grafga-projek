@@ -128,13 +128,17 @@ export class GameManager {
     });
     this.context.canvas.addEventListener("mousemove", (e) => {
       const rect = this.context.canvas.getBoundingClientRect();
-      this.context.mousePos.x = e.clientX - rect.left;
-      this.context.mousePos.y = e.clientY - rect.top;
+      const scaleX = this.context.canvas.width / (rect.width || 1);
+      const scaleY = this.context.canvas.height / (rect.height || 1);
+      this.context.mousePos.x = (e.clientX - rect.left) * scaleX;
+      this.context.mousePos.y = (e.clientY - rect.top) * scaleY;
     });
-    this.context.canvas.addEventListener("mousedown", () => {
-      this.context.mouseDown = true;
+    this.context.canvas.addEventListener("mousedown", (e) => {
+      if (e.button === 0) {
+        this.context.mouseDown = true;
+      }
     });
-    this.context.canvas.addEventListener("mouseup", () => {
+    window.addEventListener("mouseup", () => {
       this.context.mouseDown = false;
     });
 
@@ -408,6 +412,7 @@ export class GameManager {
     }
     const curHp = Math.max(0, Math.floor(player.health));
     if (this._lastHp !== curHp) {
+      const isDamaged = this._lastHp !== undefined && curHp < this._lastHp;
       this._lastHp = curHp;
       const el = document.getElementById("health");
       if (el) el.textContent = curHp;
@@ -418,6 +423,15 @@ export class GameManager {
         hb.style.width = Math.max(0, healthPercent) + "%";
         if (healthPercent <= 30) hb.classList.add("low");
         else hb.classList.remove("low");
+
+        // Flash merah pekat ketika pemain menerima damage (hit)
+        if (isDamaged) {
+          hb.classList.add("hit");
+          if (this._hitTimer) clearTimeout(this._hitTimer);
+          this._hitTimer = setTimeout(() => {
+            hb.classList.remove("hit");
+          }, 350);
+        }
       }
 
       const vig = document.getElementById("lowHpVignette");
@@ -436,6 +450,7 @@ export class GameManager {
   }
 
   showWeaponSelect() {
+    if (this.context.running) return;
     this.uiElements.menu.classList.add("hidden");
     this.uiElements.weaponSelect.classList.remove("hidden");
     const pauseBtn = document.getElementById("pauseBtn");
@@ -451,6 +466,8 @@ export class GameManager {
     this.uiElements.gameOver.classList.add("hidden");
     this.uiElements.pauseMenu.classList.add("hidden");
     this.uiElements.mobileControls.classList.add("hidden");
+    document.getElementById("characterSelectModal")?.classList.add("hidden");
+    document.getElementById("modeSelectModal")?.classList.add("hidden");
     this.uiElements.confirmWeapon.disabled = true;
     document
       .querySelectorAll(".weapon-card")
@@ -459,22 +476,44 @@ export class GameManager {
     if (pauseBtn) pauseBtn.style.display = "none";
   }
 
-  selectWeapon(weapon) {
-    this.context.selectedWeapon = weapon;
-    document
-      .querySelectorAll(".weapon-card")
-      .forEach((card) => card.classList.remove("selected"));
-    document
-      .querySelector(`[data-weapon="${weapon}"]`)
-      .classList.add("selected");
-    this.uiElements.confirmWeapon.disabled = false;
+  selectWeapon(weapon, slot = null) {
+    if (this.context.running) return;
+    const currentSlot = slot || this.activeWeaponSlot || 1;
+    if (currentSlot === 2) {
+      this.context.selectedSecondaryWeapon = weapon;
+    } else {
+      this.context.selectedWeapon = weapon;
+    }
+
+    if (window.updateWeaponSelectionUI) {
+      window.updateWeaponSelectionUI();
+    } else {
+      document
+        .querySelectorAll(".weapon-card")
+        .forEach((card) => card.classList.remove("selected"));
+      document
+        .querySelector(`[data-weapon="${weapon}"]`)
+        ?.classList.add("selected");
+    }
+    this.uiElements.confirmWeapon.disabled = !this.context.selectedWeapon;
   }
 
   startGame() {
-    if (!this.context.selectedWeapon) return;
+    const primary = this.context.selectedWeapon || "katana";
+    const secondary = this.context.selectedSecondaryWeapon || "dualgun";
+    this.context.selectedWeapon = primary;
+    this.context.selectedSecondaryWeapon = secondary;
+
     this.uiElements.weaponSelect.classList.add("hidden");
+    document.getElementById("characterSelectModal")?.classList.add("hidden");
+    document.getElementById("modeSelectModal")?.classList.add("hidden");
     this.uiElements.mobileControls.classList.remove("hidden");
-    this.context.start(this.context.selectedWeapon);
+    this.context.start(
+      primary,
+      this.context.selectedCharacter || "scout",
+      this.context.selectedMode || "endless",
+      secondary
+    );
 
     const pauseBtn = document.getElementById("pauseBtn");
     if (pauseBtn) pauseBtn.style.display = "flex";

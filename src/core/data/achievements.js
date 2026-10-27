@@ -96,28 +96,33 @@ export class AchievementTracker {
   }
 
   showToast(ach) {
+    const container = document.getElementById("gameContainer") || document.body;
+    const oldToast = container.querySelector(".achievement-toast");
+    if (oldToast) oldToast.remove();
+
     const toast = document.createElement("div");
     toast.className = "achievement-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
     toast.innerHTML = `
-      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 700;">
-        PENCAPAIAN TERBUKA!
-      </div>
-      <div style="font-size: 14px; font-weight: 800; color: var(--ink); margin: 2px 0;">
-        ${ach.title}
-      </div>
-      <div style="font-size: 11px; color: var(--ink-secondary);">
-        ${ach.desc}
+      <span class="achievement-toast-icon" aria-hidden="true">★</span>
+      <div class="achievement-toast-content">
+        <span class="achievement-toast-badge">PENCAPAIAN TERSELESAIKAN</span>
+        <span class="achievement-toast-title">${ach.title}</span>
       </div>
     `;
-    document.body.appendChild(toast);
+    container.appendChild(toast);
 
-    setTimeout(() => {
-      toast.classList.add("show");
-    }, 50);
+    // Trigger frame for smooth CSS slide-down animation
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.classList.add("show");
+      });
+    });
 
     setTimeout(() => {
       toast.classList.remove("show");
-      setTimeout(() => toast.remove(), 400);
-    }, 3500);
+      setTimeout(() => toast.remove(), 350);
+    }, 3200);
   }
 }

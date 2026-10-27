@@ -1,21 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <link rel="icon" href="assets/icon/hz_icon.jpeg" type="image/jpeg" />
-    <title>Hunty Zombie - Arena Bertahan Hidup</title>
+    <title>Wave of Zombies - Arena Bertahan Hidup</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div id="gameContainer">
-      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      <canvas id="gameCanvas" width="1200" height="720"></canvas>
 
       <!-- App Shell Tactical Topbar (Requirement 2 & 5) -->
       <header id="gameAppHeader" class="app-topbar">
         <div class="topbar-brand">
           <span class="topbar-mark" aria-hidden="true">■</span>
-          <h1 id="screenTitle" class="topbar-title">Hunty Zombie: Pos Komando Karantina</h1>
+          <h1 id="screenTitle" class="topbar-title">
+            Wave of Zombies: Pos Komando Karantina
+          </h1>
         </div>
         <div class="topbar-meta">
           <span class="meta-tag">Sektor 04</span>
@@ -28,64 +33,69 @@
 
       <!-- Wave Announcement Banner -->
       <div id="waveBanner" class="wave-banner hidden" aria-live="polite">
-        <span class="wave-banner-headline" id="bannerWaveTitle">Gelombang 1</span>
-        <span class="wave-banner-sub" id="bannerWaveSub">Amankan Sektor Perimeter Karantina</span>
+        <span class="wave-banner-headline" id="bannerWaveTitle"
+          >Gelombang 1</span
+        >
+        <span class="wave-banner-sub" id="bannerWaveSub"
+          >Amankan Sektor Perimeter Karantina</span
+        >
       </div>
 
-      <!-- In-Game Primary Tactical HUD -->
+      <!-- In-Game Primary Tactical HUD (Streamlined Telemetry) -->
       <div id="ui" aria-label="Status Tempur Taktikal">
         <div class="hud-health-wrap">
-          <div class="hud-row">
+          <div class="hud-row-hp">
             <span class="hud-label">Kesehatan</span>
-            <span class="hud-val"><span id="health">300</span> / 300</span>
+            <span class="hud-val hud-val-hp"><span id="health">300</span> / <span id="maxHealth">300</span></span>
           </div>
           <div class="health-bar">
             <div class="health-fill" id="healthBar" style="width: 100%"></div>
           </div>
         </div>
 
-        <div class="hud-row">
-          <span class="hud-label">Gelombang</span>
-          <span class="hud-val" id="wave">1</span>
-        </div>
-
-        <div class="hud-row">
-          <span class="hud-label">Skor Tempur</span>
-          <span class="hud-val" id="score">0</span>
-        </div>
-
-        <div class="hud-row">
-          <span class="hud-label">Sisa Zombie</span>
-          <span class="hud-val" id="zombieCount">0</span>
-        </div>
-
-        <!-- Expanded HUD Fields (Requirement 4) -->
-        <div class="hud-row">
-          <span class="hud-label">Koin Pemburu</span>
-          <span class="hud-val" id="coinCount">120</span>
-        </div>
-
-        <div class="hud-row">
-          <span class="hud-label">Munisi</span>
-          <span class="hud-val" id="ammoCount">Ready (<span id="hudWeaponName">Katana</span>)</span>
-        </div>
-
-        <div class="hud-row">
-          <span class="hud-label">Pengali Combo</span>
-          <span class="hud-val" id="comboMultiplier">x1.0</span>
-        </div>
-
-        <div class="hud-row">
-          <span class="hud-label">Skill Aktif</span>
-          <span class="hud-val" id="hudSkillStatus" style="color: var(--positive)">Siap (Shift/Space)</span>
+        <div class="hud-telemetry-grid">
+          <div class="hud-col">
+            <span class="hud-label">Wave</span>
+            <span class="hud-val hud-val-wave" id="wave">1</span>
+          </div>
+          <div class="hud-col">
+            <span class="hud-label">Sisa Musuh</span>
+            <span class="hud-val hud-val-zombie" id="zombieCount">0</span>
+          </div>
+          <div class="hud-col">
+            <span class="hud-label">Koin</span>
+            <span class="hud-val hud-val-coin"><span id="coinCount">0</span> ⬡</span>
+          </div>
+          <div class="hud-col">
+            <span class="hud-label">Skor Tempur</span>
+            <span class="hud-val hud-val-score" id="score">0</span>
+          </div>
+          <div class="hud-col hud-col-wide">
+            <span class="hud-label">Munisi [R]</span>
+            <span class="hud-val hud-val-ammo" id="ammoCount">Ready (<span id="hudWeaponName">Katana</span>)</span>
+          </div>
+          <div class="hud-col">
+            <span class="hud-label">Combo</span>
+            <span class="hud-val hud-val-combo" id="comboMultiplier">x1.0</span>
+          </div>
+          <div class="hud-col hud-col-wide">
+            <span class="hud-label">Skill [Space]</span>
+            <span class="hud-val hud-val-skill" id="hudSkillStatus">Siap</span>
+          </div>
         </div>
       </div>
 
       <!-- Top Boss HP Bar (Appears on Boss Wave / State Demo) -->
-      <div id="bossHpBarContainer" class="boss-hp-container hidden" aria-label="Status Boss Zombie">
+      <div
+        id="bossHpBarContainer"
+        class="boss-hp-container hidden"
+        aria-label="Status Boss Zombie"
+      >
         <div class="boss-hp-header">
           <span class="boss-hp-title">MUTASI BESAR TINGKAT TINGGI</span>
-          <span class="boss-stun-label" id="bossStunMeter">Stun: 0 / 4 Pukulan</span>
+          <span class="boss-stun-label" id="bossStunMeter"
+            >Stun: 0 / 4 Pukulan</span
+          >
         </div>
         <div class="boss-bar-track">
           <div class="boss-bar-fill" id="bossHpFill" style="width: 100%"></div>
@@ -99,7 +109,11 @@
           <span id="waveCountdown">Radar Sektor: Aktif</span>
         </div>
 
-        <button id="pauseBtn" onclick="window.gameApp.togglePause()" aria-label="Jeda Permainan">
+        <button
+          id="pauseBtn"
+          onclick="window.gameApp.togglePause()"
+          aria-label="Jeda Permainan"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <rect x="6" y="4" width="4" height="16" />
             <rect x="14" y="4" width="4" height="16" />
@@ -115,21 +129,37 @@
 
         <div class="mobile-actions-cluster">
           <div class="mobile-secondary-row">
-            <button class="btn-mobile-secondary" id="mobileSkillBtn" onclick="window.gameApp.triggerSkill()" aria-label="Skill Aktif">
+            <button
+              class="btn-mobile-secondary"
+              id="mobileSkillBtn"
+              onclick="window.gameApp.triggerSkill()"
+              aria-label="Skill Aktif"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                <path
+                  d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z"
+                />
               </svg>
             </button>
-            <button class="btn-mobile-secondary" id="mobileSwapBtn" onclick="window.gameApp.swapWeapon()" aria-label="Ganti Senjata">
+            <button
+              class="btn-mobile-secondary"
+              id="mobileSwapBtn"
+              onclick="window.gameApp.swapWeapon()"
+              aria-label="Ganti Senjata"
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 7H17V10L21 6L17 2V5H5V11H7V7ZM17 17H7V14L3 18L7 22V19H19V13H17V17Z" />
+                <path
+                  d="M7 7H17V10L21 6L17 2V5H5V11H7V7ZM17 17H7V14L3 18L7 22V19H19V13H17V17Z"
+                />
               </svg>
             </button>
           </div>
 
           <button id="mobileAttackBtn" aria-label="Serang">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M19.7 4.3L15.4 0L14 1.4L15.3 2.7L2.7 15.3L0 14L1.4 12.6L4.3 15.5L1.4 18.4L2.8 19.8L5.7 16.9L8.6 19.8L10 18.4L8.7 17.1L21.3 4.5L22.6 5.8L24 4.4L19.7 4.3Z" />
+              <path
+                d="M19.7 4.3L15.4 0L14 1.4L15.3 2.7L2.7 15.3L0 14L1.4 12.6L4.3 15.5L1.4 18.4L2.8 19.8L5.7 16.9L8.6 19.8L10 18.4L8.7 17.1L21.3 4.5L22.6 5.8L24 4.4L19.7 4.3Z"
+              />
             </svg>
           </button>
         </div>
@@ -141,17 +171,34 @@
           <div class="overlay-header">
             <span class="overlay-badge">Pos Komando Karantina</span>
             <h2 class="overlay-title">HUNTY ZOMBIE</h2>
-            <p class="overlay-desc">Bertahan hidup dari gelombang mutasi terinfeksi dalam simulasi arena retro 2D.</p>
+            <p class="overlay-desc">
+              Bertahan hidup dari gelombang mutasi terinfeksi dalam simulasi
+              arena retro 2D.
+            </p>
           </div>
 
           <div class="start-menu-actions">
-            <button class="btn btn-primary" onclick="window.gameApp.showWeaponSelect()">Mulai Operasi</button>
-            <button class="btn" onclick="openOverlay('characterSelectModal')">Pilih Karakter Operatif</button>
-            <button class="btn" onclick="openOverlay('modeSelectModal')">Mode & Tingkat Kesulitan</button>
-            <button class="btn" onclick="window.gameApp.showTutorial()">Panduan Taktis</button>
-            <button class="btn" onclick="openOverlay('settingsModal')">Pengaturan Operasional</button>
-            <button class="btn" onclick="openOverlay('achievementsModal')">Catatan & Prestasi</button>
-            <a href="index.html" class="btn btn-outline" style="text-decoration: none">Kembali ke Beranda</a>
+            <button
+              class="btn btn-primary"
+              onclick="window.gameApp.showWeaponSelect()"
+            >
+              Mulai Operasi
+            </button>
+            <button class="btn" onclick="window.gameApp.showTutorial()">
+              Panduan Taktis
+            </button>
+            <button class="btn" onclick="openOverlay('settingsModal')">
+              Pengaturan Operasional
+            </button>
+            <button class="btn" onclick="openOverlay('achievementsModal')">
+              Catatan & Prestasi
+            </button>
+            <a
+              href="index.html"
+              class="btn btn-outline"
+              style="text-decoration: none"
+              >Kembali ke Beranda</a
+            >
           </div>
         </div>
       </div>
@@ -161,171 +208,272 @@
         <div class="overlay-panel">
           <div class="overlay-header">
             <span class="overlay-badge">Instruksi Lapangan</span>
-            <h2 class="overlay-title">Manual Protokol Taktis</h2>
-            <p class="overlay-desc">Misi: Bertahan hidup selama mungkin dan eliminasi ancaman mutasi zombie sebanyak mungkin di dalam perimeter.</p>
+            <h2 class="overlay-title">Manual Protokol Taktis (How to Play)</h2>
+            <p class="overlay-desc">
+              Panduan navigasi, kendali persenjataan, dan protokol pertahanan menghadapi mutasi terinfeksi di perimeter karantina.
+            </p>
           </div>
 
           <div class="tutorial-section-card">
-            <h3 class="tutorial-card-title">Kontrol Fisik Operasi</h3>
+            <h3 class="tutorial-card-title">Kendali Operasional Taktikal</h3>
             <ul class="tutorial-list">
-              <li><strong>W, A, S, D</strong> Manuver gerak omnidirectional pemburu.</li>
-              <li><strong>MOUSE</strong> Mengarahkan orientasi hadap dan poros senjata.</li>
-              <li><strong>KLIK KIRI</strong> Melancarkan tebasan melee atau proyektil ranged.</li>
-              <li><strong>ESC / TOMBOL JEDA</strong> Menjeda jalannya simulasi untuk tinjauan status.</li>
-              <li><strong>SENTUH (MOBILE)</strong> Virtual joystick di kiri bawah, tombol serang di kanan bawah.</li>
+              <li>
+                <strong>W, A, S, D</strong> Manuver gerak operatif ke segala arah.
+              </li>
+              <li>
+                <strong>MOUSE</strong> Mengarahkan poros dan garis bidik senjata.
+              </li>
+              <li>
+                <strong>KLIK KIRI</strong> Melancarkan tebasan pedang atau tembakan proyektil.
+              </li>
+              <li>
+                <strong>TOMBOL [ Q ]</strong> Menukar senjata aktif (Slot 1 ⇄ Slot 2) secara instan saat pertempuran.
+              </li>
+              <li>
+                <strong>SPACE / SHIFT</strong> Memicu Skill Aktif operatif (Dash taktis / Dodge Roll dengan i-frame kebal).
+              </li>
+              <li>
+                <strong>TOMBOL [ R ]</strong> Mengisi ulang munisi senjata api (Reload).
+              </li>
+              <li>
+                <strong>ESC / P</strong> Menjeda operasi untuk evaluasi taktis.
+              </li>
+              <li>
+                <strong>SENTUH (MOBILE)</strong> Virtual joystick di kiri bawah, tombol serang, ganti senjata, dan skill di kanan bawah.
+              </li>
             </ul>
           </div>
 
           <div class="tutorial-section-card">
-            <h3 class="tutorial-card-title">Mekanika Gelombang & Musuh</h3>
+            <h3 class="tutorial-card-title">Ancaman & Bahaya yang Harus Dihindari</h3>
             <ul class="tutorial-list">
-              <li><strong>ESKALASI WAVE</strong> Kecepatan dan ketahanan zombie bertambah di setiap wave.</li>
-              <li><strong>BOSS GELOMBANG</strong> Muncul setiap wave kelipatan 3 (Wave 3, 6, 9...).</li>
-              <li><strong>EFEK STUN</strong> Boss zombie menimbulkan stun melumpuhkan bila memukul 4 kali beruntun.</li>
-              <li><strong>RINTANGAN ARENA</strong> Manfaatkan batu dan pohon sebagai choke-point; hindari tile duri.</li>
+              <li>
+                <strong style="color: var(--negative)">TILE DURI (SPIKE HAZARD)</strong> Perangkap logam berdarah di lantai; melukai terus-menerus (-10 HP tiap 0.5 detik) jika diinjak!
+              </li>
+              <li>
+                <strong style="color: var(--warning)">STUN BOSS (4 PUKULAN)</strong> Jangan biarkan Boss memukul 4 kali beruntun; serangan keempat memicu efek Stun melumpuhkan selama 2 detik!
+              </li>
+              <li>
+                <strong style="color: var(--accent)">ZOMBIE EXPLODER</strong> Musuh bertubuh bengkak meledak dahsyat saat tewas; segera mundur sebelum ledakan area terjadi!
+              </li>
+              <li>
+                <strong style="color: var(--positive)">ZOMBIE SPITTER</strong> Menembakkan proyektil asam beracun jarak jauh yang menimbulkan kerusakan DoT; hindari cairannya!
+              </li>
+              <li>
+                <strong>TERJEBAK DI SUDUT (CHOKEPOINT)</strong> Hindari terpojok di dinding atau batu saat gelombang musuh mengepung.
+              </li>
             </ul>
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-primary" onclick="window.gameApp.backToMenu()">Kembali ke Menu</button>
+            <button
+              class="btn btn-primary"
+              onclick="window.closeTutorial()"
+            >
+              Tutup Panduan
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Weapon Select Menu (#weaponSelect) -->
       <div id="weaponSelect" class="app-overlay">
-        <div class="overlay-panel" style="max-width: 680px">
+        <div class="overlay-panel" style="max-width: 780px">
           <div class="overlay-header">
-            <span class="overlay-badge">Seleksi Persenjataan</span>
-            <h2 class="overlay-title">Pilih Arsenal Taktikal</h2>
-            <p class="overlay-desc">Tentukan senjata operatif sebelum diterjunkan ke area karantina.</p>
+            <span class="overlay-badge">Persiapan Penerjunan</span>
+            <h2 class="overlay-title">Loadout & Arsenal Operasi</h2>
+            <p class="overlay-desc">
+              Tentukan karakter, parameter mode, dan dua kombinasi persenjataan sebelum diterjunkan ke area karantina.
+            </p>
+          </div>
+
+          <!-- Wizard Stepper (Step 1/3: Persenjataan) -->
+          <div class="wizard-stepper">
+            <div class="step-node active">
+              <span class="step-num">1</span>
+              <span class="step-text">Senjata</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-node">
+              <span class="step-num">2</span>
+              <span class="step-text">Karakter</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-node">
+              <span class="step-num">3</span>
+              <span class="step-text">Kesulitan</span>
+            </div>
+          </div>
+
+          <!-- Dual Weapon Slot Selector -->
+          <div class="weapon-slot-tabs" role="tablist">
+            <button class="slot-tab-btn active" id="slotTab1" onclick="window.setSelectingSlot(1)" type="button">
+              <span class="slot-tab-badge">SLOT 1 (UTAMA)</span>
+              <span class="slot-tab-name" id="slotName1">Katana</span>
+            </button>
+            <button class="slot-tab-btn" id="slotTab2" onclick="window.setSelectingSlot(2)" type="button">
+              <span class="slot-tab-badge">SLOT 2 (SEKUNDER)</span>
+              <span class="slot-tab-name" id="slotName2">Pistol Ganda</span>
+            </button>
           </div>
 
           <div class="weapon-grid">
             <!-- Weapon 1: Katana -->
-            <div class="weapon-card" data-weapon="katana" onclick="window.gameApp.selectWeapon('katana')">
+            <div
+              class="weapon-card selected-slot-1"
+              data-weapon="katana"
+              onclick="window.selectWeaponCard('katana')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="katana"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Katana</span>
                   <span class="weapon-card-type">Melee Presisi</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">70</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Pengali Kritis</span><span class="stat-value">3.0x</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Bonus Kecepatan</span><span class="stat-value">+0.4</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">80 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Tebasan Kritis + Pemulihan Lifesteal</span>
+              <span class="weapon-card-perk">Tebasan Cepat & Pemulihan Lifesteal</span>
             </div>
 
             <!-- Weapon 2: Bare Fist -->
-            <div class="weapon-card" data-weapon="fist" onclick="window.gameApp.selectWeapon('fist')">
+            <div
+              class="weapon-card"
+              data-weapon="fist"
+              onclick="window.selectWeaponCard('fist')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="fist"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Tangan Kosong</span>
                   <span class="weapon-card-type">Melee Agresif</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">35</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Pengali Kritis</span><span class="stat-value">1.5x</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Bonus Kecepatan</span><span class="stat-value">+0.7</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">45 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Kecepatan Tertinggi + Pemulihan Lifesteal</span>
+              <span class="weapon-card-perk">Hentakan Cepat & Bonus Lari Tertinggi</span>
             </div>
 
             <!-- Weapon 3: Spell Book -->
-            <div class="weapon-card" data-weapon="wizard" onclick="window.gameApp.selectWeapon('wizard')">
+            <div
+              class="weapon-card"
+              data-weapon="wizard"
+              onclick="window.selectWeaponCard('wizard')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="wizard"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Kitab Sihir</span>
                   <span class="weapon-card-type">Jarak Jauh Area</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">45</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan Terbakar</span><span class="stat-value">12/detik (3d)</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Bonus Kecepatan</span><span class="stat-value">+0.2</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">300 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Efek Terbakar Pembakar Berkelanjutan</span>
+              <span class="weapon-card-perk">Bola Api Berkelanjutan & Efek Burn</span>
             </div>
 
             <!-- Weapon 4: Dual Pistol -->
-            <div class="weapon-card" data-weapon="dualgun" onclick="window.gameApp.selectWeapon('dualgun')">
+            <div
+              class="weapon-card selected-slot-2"
+              data-weapon="dualgun"
+              onclick="window.selectWeaponCard('dualgun')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="dualgun"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Pistol Ganda</span>
                   <span class="weapon-card-type">Jarak Jauh Ledakan</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">28</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Radius Area</span><span class="stat-value">90 px</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Bonus Kecepatan</span><span class="stat-value">+0.3</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">380 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Ledakan Berantai Tembakan Balistik</span>
+              <span class="weapon-card-perk">Tembakan Beruntun & Ledakan Area 90px</span>
             </div>
 
             <!-- Weapon 5: Shotgun -->
-            <div class="weapon-card" data-weapon="shotgun" onclick="window.gameApp.selectWeapon('shotgun')">
+            <div
+              class="weapon-card"
+              data-weapon="shotgun"
+              onclick="window.selectWeaponCard('shotgun')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="shotgun"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Shotgun</span>
                   <span class="weapon-card-type">Sebaran Balistik</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">18 x 5</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Kapasitas Magazin</span><span class="stat-value">6 Butir</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Bonus Kecepatan</span><span class="stat-value">+0.1</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">260 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Tembakan 5 Butir Menyebar Menumpas Kawanan</span>
+              <span class="weapon-card-perk">5 Butir Proyektil Sebaran Menumpas Kawanan</span>
             </div>
 
             <!-- Weapon 6: Sniper -->
-            <div class="weapon-card" data-weapon="sniper" onclick="window.gameApp.selectWeapon('sniper')">
+            <div
+              class="weapon-card"
+              data-weapon="sniper"
+              onclick="window.selectWeaponCard('sniper')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="sniper"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Sniper Rifle</span>
                   <span class="weapon-card-type">Jarak Jauh Menembus</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">110</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Daya Tembus</span><span class="stat-value">3 Target</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Kapasitas Magazin</span><span class="stat-value">4 Butir</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">550 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Proyektil Kecepatan Tinggi Menembus Barisan</span>
+              <span class="weapon-card-perk">Damage 110 & Daya Tembus 3 Target</span>
             </div>
 
             <!-- Weapon 7: Flamethrower -->
-            <div class="weapon-card" data-weapon="flamethrower" onclick="window.gameApp.selectWeapon('flamethrower')">
+            <div
+              class="weapon-card"
+              data-weapon="flamethrower"
+              onclick="window.selectWeaponCard('flamethrower')"
+            >
+              <div class="weapon-preview-stage">
+                <canvas class="weapon-preview-canvas" width="140" height="72" data-weapon-key="flamethrower"></canvas>
+              </div>
               <div class="weapon-card-header">
                 <div class="weapon-card-title-group">
                   <span class="weapon-card-name">Flamethrower</span>
                   <span class="weapon-card-type">Semburan Api Berkelanjutan</span>
                 </div>
+                <span class="weapon-card-badge badge-slot-1">Slot 1</span>
+                <span class="weapon-card-badge badge-slot-2">Slot 2</span>
               </div>
-              <div class="weapon-stats-table">
-                <div class="weapon-stat-row"><span class="stat-label">Kerusakan</span><span class="stat-value">14 / tick</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Bakar</span><span class="stat-value">10/s (2.5d)</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Kapasitas Magazin</span><span class="stat-value">40 Unit</span></div>
-                <div class="weapon-stat-row"><span class="stat-label">Jangkauan</span><span class="stat-value">180 px</span></div>
-              </div>
-              <span class="weapon-card-perk">Semburan Api Cepat + Efek Bakar Massal</span>
+              <span class="weapon-card-perk">Semburan Lidah Api Cepat & Bakar Massal</span>
             </div>
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-primary" id="confirmWeapon" onclick="window.gameApp.startGame()" disabled>Mulai Permainan</button>
-            <button class="btn btn-outline" onclick="window.gameApp.backToMenu()">Kembali ke Menu</button>
-            <a href="index.html" class="btn btn-outline" style="text-decoration: none">Kembali ke Beranda</a>
+            <button
+              class="btn btn-primary"
+              id="confirmWeapon"
+              onclick="window.goToCharacterSelect()"
+            >
+              Lanjut: Pilih Karakter (2/3) →
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="window.gameApp.backToMenu()"
+              type="button"
+            >
+              ← Kembali ke Menu
+            </button>
           </div>
         </div>
       </div>
@@ -336,13 +484,31 @@
           <div class="overlay-header">
             <span class="overlay-badge">Simulasi Dijeda</span>
             <h2 class="overlay-title">Operasi Dijeda</h2>
-            <p class="overlay-desc">Waktu arena dihentikan. Tinjau kembali strategi pertahanan atau lanjutkan pertempuran.</p>
+            <p class="overlay-desc">
+              Waktu arena dihentikan. Tinjau kembali strategi pertahanan atau
+              lanjutkan pertempuran.
+            </p>
           </div>
 
           <div class="start-menu-actions">
-            <button class="btn btn-primary" onclick="window.gameApp.togglePause()">Lanjutkan Permainan</button>
-            <button class="btn" onclick="openOverlay('settingsModal')">Pengaturan Audio & Visual</button>
-            <button class="btn btn-outline" onclick="window.gameApp.backToMenu()">Kembali ke Pos Menu</button>
+            <button
+              class="btn btn-primary"
+              onclick="window.gameApp.togglePause()"
+            >
+              Lanjutkan Permainan
+            </button>
+            <button class="btn" onclick="window.openTutorialFromPause()">
+              Panduan Kontrol & Taktis
+            </button>
+            <button class="btn" onclick="openOverlay('settingsModal')">
+              Pengaturan Audio & Visual
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="window.gameApp.backToMenu()"
+            >
+              Kembali ke Pos Menu
+            </button>
           </div>
         </div>
       </div>
@@ -351,9 +517,14 @@
       <div id="gameOver" class="app-overlay hidden">
         <div class="overlay-panel" style="max-width: 520px">
           <div class="overlay-header">
-            <span class="overlay-badge" style="color: var(--negative)">Operasi Berakhir</span>
+            <span class="overlay-badge" style="color: var(--negative)"
+              >Operasi Berakhir</span
+            >
             <h2 class="overlay-title">Pemburu Gugur</h2>
-            <p class="overlay-desc">Sinyal tanda vital pemburu terputus. Evaluasi hasil debriefing taktikal lapangan berikut.</p>
+            <p class="overlay-desc">
+              Sinyal tanda vital pemburu terputus. Evaluasi hasil debriefing
+              taktikal lapangan berikut.
+            </p>
           </div>
 
           <div class="debrief-stats-grid">
@@ -379,13 +550,28 @@
             </div>
             <div class="debrief-cell">
               <span class="debrief-label">Status Catatan</span>
-              <span class="debrief-val" id="finalRecord" style="color: var(--accent); font-size: 15px">Tersimpan di Sektor</span>
+              <span
+                class="debrief-val"
+                id="finalRecord"
+                style="color: var(--accent); font-size: 15px"
+                >Tersimpan di Sektor</span
+              >
             </div>
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-primary" onclick="window.gameApp.restartGame()">Main Lagi</button>
-            <button class="btn btn-outline" onclick="window.gameApp.backToMenu()">Kembali ke Menu</button>
+            <button
+              class="btn btn-primary"
+              onclick="window.gameApp.restartGame()"
+            >
+              Main Lagi
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="window.gameApp.backToMenu()"
+            >
+              Kembali ke Menu
+            </button>
           </div>
         </div>
       </div>
@@ -396,7 +582,10 @@
           <div class="overlay-header">
             <span class="overlay-badge">Peningkatan Taktis</span>
             <h2 class="overlay-title">Pilih Modifikasi Operatif</h2>
-            <p class="overlay-desc">Sektor berhasil diamankan sementara. Tentukan satu modifikasi persenjataan untuk menghadapi gelombang berikutnya.</p>
+            <p class="overlay-desc">
+              Sektor berhasil diamankan sementara. Tentukan satu modifikasi
+              persenjataan untuk menghadapi gelombang berikutnya.
+            </p>
           </div>
 
           <div class="upgrade-grid" id="waveUpgradeCards">
@@ -409,12 +598,26 @@
       <div id="shopModal" class="app-overlay hidden">
         <div class="overlay-panel" style="max-width: 640px">
           <div class="overlay-header">
-            <div style="display: flex; justify-content: space-between; align-items: center">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              "
+            >
               <span class="overlay-badge">Pedagang Karantina</span>
-              <span id="shopPlayerCoins" class="overlay-badge" style="color: var(--accent); border-color: var(--accent)">Koin: 0</span>
+              <span
+                id="shopPlayerCoins"
+                class="overlay-badge"
+                style="color: var(--accent); border-color: var(--accent)"
+                >Koin: 0</span
+              >
             </div>
             <h2 class="overlay-title">Pos Logistik Perbekalan</h2>
-            <p class="overlay-desc">Tukarkan Koin Pemburu hasil eliminasi dengan perbekalan darurat sebelum wave berikutnya.</p>
+            <p class="overlay-desc">
+              Tukarkan Koin Pemburu hasil eliminasi dengan perbekalan darurat
+              sebelum wave berikutnya.
+            </p>
           </div>
 
           <div class="shop-inventory-grid" id="shopItemsContainer">
@@ -422,7 +625,9 @@
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-outline" onclick="window.closeShopModal()">Lanjut ke Wave Berikutnya</button>
+            <button class="btn btn-outline" onclick="window.closeShopModal()">
+              Lanjut ke Wave Berikutnya
+            </button>
           </div>
         </div>
       </div>
@@ -433,73 +638,233 @@
           <div class="overlay-header">
             <span class="overlay-badge">Seleksi Operatif</span>
             <h2 class="overlay-title">Profil Karakter Pemburu</h2>
-            <p class="overlay-desc">Setiap operatif membawa karakteristik spesialisasi pertahanan dan skill aktif yang unik.</p>
+            <p class="overlay-desc">
+              Setiap operatif membawa karakteristik spesialisasi pertahanan dan
+              skill aktif yang unik.
+            </p>
+          </div>
+
+          <!-- Wizard Stepper (Step 2/3: Karakter) -->
+          <div class="wizard-stepper">
+            <div class="step-node completed">
+              <span class="step-num">✓</span>
+              <span class="step-text">Senjata</span>
+            </div>
+            <div class="step-line active"></div>
+            <div class="step-node active">
+              <span class="step-num">2</span>
+              <span class="step-text">Karakter</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-node">
+              <span class="step-num">3</span>
+              <span class="step-text">Kesulitan</span>
+            </div>
           </div>
 
           <div class="upgrade-grid" id="characterCardsContainer">
-            <div class="upgrade-card selected" id="char-card-scout" onclick="window.selectCharacter('scout')">
+            <div
+              class="upgrade-card selected"
+              id="char-card-scout"
+              onclick="window.selectCharacter('scout')"
+            >
               <h4 class="upgrade-name">Scout Hunter</h4>
               <span class="upgrade-effect">Mobilitas + Tactical Dash</span>
-              <p class="upgrade-desc">Lari 15% lebih lincah. Skill Aktif: Dash cepat ke arah hadap dengan i-frame (kebal kerusakan) 0.35 detik.</p>
-              <span class="stat-label">Statistik: HP 140 | Speed 1.15x | Skill CD 4s</span>
+              <p class="upgrade-desc">
+                Lari 15% lebih lincah. Skill Aktif: Dash cepat ke arah hadap
+                dengan i-frame (kebal kerusakan) 0.35 detik.
+              </p>
+              <span class="stat-label"
+                >Statistik: HP 140 | Speed 1.15x | Skill CD 4s</span
+              >
             </div>
 
-            <div class="upgrade-card" id="char-card-vanguard" onclick="window.selectCharacter('vanguard')">
+            <div
+              class="upgrade-card"
+              id="char-card-vanguard"
+              onclick="window.selectCharacter('vanguard')"
+            >
               <h4 class="upgrade-name">Vanguard Guard</h4>
               <span class="upgrade-effect">Pertahanan Baja + Benteng Baja</span>
-              <p class="upgrade-desc">Ketahanan tinggi dengan armor alami 15%. Skill Aktif: Kebal mutlak (i-frame) selama 1.5 detik.</p>
-              <span class="stat-label">Statistik: HP 220 | Armor 15% | Skill CD 7s</span>
+              <p class="upgrade-desc">
+                Ketahanan tinggi dengan armor alami 15%. Skill Aktif: Kebal
+                mutlak (i-frame) selama 1.5 detik.
+              </p>
+              <span class="stat-label"
+                >Statistik: HP 220 | Armor 15% | Skill CD 7s</span
+              >
             </div>
 
-            <div class="upgrade-card" id="char-card-arcane" onclick="window.selectCharacter('arcane')">
+            <div
+              class="upgrade-card"
+              id="char-card-arcane"
+              onclick="window.selectCharacter('arcane')"
+            >
               <h4 class="upgrade-name">Arcane Survivor</h4>
               <span class="upgrade-effect">Spesialis Status + Frost Nova</span>
-              <p class="upgrade-desc">Daya rusak status tinggi. Skill Aktif: Melepaskan ledakan Frost Nova (radius 140px) membekukan kawanan zombie.</p>
-              <span class="stat-label">Statistik: HP 150 | Lifesteal 8% | Skill CD 6s</span>
+              <p class="upgrade-desc">
+                Daya rusak status tinggi. Skill Aktif: Melepaskan ledakan Frost
+                Nova (radius 140px) membekukan kawanan zombie.
+              </p>
+              <span class="stat-label"
+                >Statistik: HP 150 | Lifesteal 8% | Skill CD 6s</span
+              >
             </div>
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-primary" onclick="closeOverlay('characterSelectModal')">Konfirmasi Operatif</button>
-            <button class="btn btn-outline" onclick="closeOverlay('characterSelectModal')">Kembali</button>
+            <button
+              class="btn btn-primary"
+              onclick="window.goToDifficultySelect()"
+            >
+              Lanjut: Tingkat Kesulitan (3/3) →
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="window.goToWeaponSelect()"
+              type="button"
+            >
+              ← Kembali ke Senjata
+            </button>
           </div>
         </div>
       </div>
 
       <!-- REAL OVERLAY 4: Mode & Difficulty (#modeSelectModal) -->
       <div id="modeSelectModal" class="app-overlay hidden">
-        <div class="overlay-panel" style="max-width: 640px">
+        <div class="overlay-panel" style="max-width: 680px">
           <div class="overlay-header">
             <span class="overlay-badge">Konfigurasi Simulasi</span>
             <h2 class="overlay-title">Mode & Tingkat Kesulitan</h2>
-            <p class="overlay-desc">Pilih parameter intensitas gelombang pertempuran.</p>
+            <p class="overlay-desc">
+              Tentukan intensitas mutasi infeksi dan parameter arena operasi.
+            </p>
           </div>
 
-          <div class="settings-group">
-            <div class="settings-row">
-              <label for="gameModeSelect">Mode Permainan</label>
-              <select id="gameModeSelect" class="settings-select">
-                <option value="standard">Standard (Eskalasi Bertahap)</option>
-                <option value="endless">Endless Arena (Gelombang Tanpa Akhir)</option>
-                <option value="bossrush">Boss Rush (Setiap Wave Adalah Boss)</option>
-                <option value="daily">Daily Seed (Peta & Upgrade Harian UTC)</option>
-                <option value="hardcore">Hardcore (1 Nyawa Tanpa Pemulihan)</option>
-              </select>
+          <!-- Wizard Stepper (Step 3/3: Kesulitan & Mode) -->
+          <div class="wizard-stepper">
+            <div class="step-node completed">
+              <span class="step-num">✓</span>
+              <span class="step-text">Senjata</span>
             </div>
+            <div class="step-line active"></div>
+            <div class="step-node completed">
+              <span class="step-num">✓</span>
+              <span class="step-text">Karakter</span>
+            </div>
+            <div class="step-line active"></div>
+            <div class="step-node active">
+              <span class="step-num">3</span>
+              <span class="step-text">Kesulitan</span>
+            </div>
+          </div>
 
-            <div class="settings-row">
-              <label for="difficultySelect">Tingkat Kesulitan</label>
-              <select id="difficultySelect" class="settings-select">
-                <option value="normal">Standar (Baseline 1.0x)</option>
-                <option value="tactical">Taktikal (Agresi +30%)</option>
-                <option value="extreme">Ekstrem (Agresi +75%, Tantangan Maksimal)</option>
-              </select>
+          <!-- Box Model: Tingkat Kesulitan Permainan -->
+          <div class="selection-section">
+            <label class="selection-section-label">Tingkat Kesulitan Permainan</label>
+            <div class="difficulty-box-grid" id="difficultyBoxGrid">
+              <div
+                class="difficulty-card selected"
+                data-diff="normal"
+                onclick="window.selectDifficulty('normal')"
+              >
+                <div class="diff-card-header">
+                  <span class="diff-card-name">Standar</span>
+                  <span class="diff-card-badge badge-normal">1.0x</span>
+                </div>
+                <p class="diff-card-desc">
+                  Kecepatan & HP zombie normal. Ideal untuk operatif baru atau pemanasan taktis.
+                </p>
+              </div>
+
+              <div
+                class="difficulty-card"
+                data-diff="tactical"
+                onclick="window.selectDifficulty('tactical')"
+              >
+                <div class="diff-card-header">
+                  <span class="diff-card-name">Taktikal</span>
+                  <span class="diff-card-badge badge-tactical">1.3x</span>
+                </div>
+                <p class="diff-card-desc">
+                  Agresi +30%. Mutasi infeksi bergerak lebih gesit dan menyerang bertubi-tubi.
+                </p>
+              </div>
+
+              <div
+                class="difficulty-card"
+                data-diff="extreme"
+                onclick="window.selectDifficulty('extreme')"
+              >
+                <div class="diff-card-header">
+                  <span class="diff-card-name">Ekstrem</span>
+                  <span class="diff-card-badge badge-extreme">1.75x</span>
+                </div>
+                <p class="diff-card-desc">
+                  Agresi +75%. Kecepatan penuh, kerusakan fatal. Uji batas pertahanan mutlak.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box Model: Mode Operasi Arena -->
+          <div class="selection-section" style="margin-top: 14px">
+            <label class="selection-section-label">Mode Operasi Arena</label>
+            <div class="mode-box-grid" id="modeBoxGrid">
+              <div
+                class="mode-card selected"
+                data-mode="endless"
+                onclick="window.selectGameMode('endless')"
+              >
+                <span class="mode-card-title">Endless Arena</span>
+                <span class="mode-card-sub">Gelombang Tanpa Akhir</span>
+              </div>
+              <div
+                class="mode-card"
+                data-mode="standard"
+                onclick="window.selectGameMode('standard')"
+              >
+                <span class="mode-card-title">Standard</span>
+                <span class="mode-card-sub">Eskalasi Bertahap</span>
+              </div>
+              <div
+                class="mode-card"
+                data-mode="bossrush"
+                onclick="window.selectGameMode('bossrush')"
+              >
+                <span class="mode-card-title">Boss Rush</span>
+                <span class="mode-card-sub">Boss Tiap Wave</span>
+              </div>
+              <div
+                class="mode-card"
+                data-mode="daily"
+                onclick="window.selectGameMode('daily')"
+              >
+                <span class="mode-card-title">Daily Seed</span>
+                <span class="mode-card-sub">Tantangan Harian</span>
+              </div>
+              <div
+                class="mode-card"
+                data-mode="hardcore"
+                onclick="window.selectGameMode('hardcore')"
+              >
+                <span class="mode-card-title">Hardcore</span>
+                <span class="mode-card-sub">1 Nyawa No Regen</span>
+              </div>
             </div>
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-primary" onclick="window.saveGameMode()">Simpan Pengaturan Mode</button>
-            <button class="btn btn-outline" onclick="closeOverlay('modeSelectModal')">Batal</button>
+            <button class="btn btn-primary" onclick="window.confirmAndStartGame()">
+              Mulai Operasi (Luncurkan) ⚔
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="window.goToCharacterSelect()"
+              type="button"
+            >
+              ← Kembali ke Karakter
+            </button>
           </div>
         </div>
       </div>
@@ -510,30 +875,54 @@
           <div class="overlay-header">
             <span class="overlay-badge">Konfigurasi Sistem</span>
             <h2 class="overlay-title">Pengaturan Operasional</h2>
-            <p class="overlay-desc">Sesuaikan output audio, kenyamanan visual, dan pemetaan tombol kontrol.</p>
+            <p class="overlay-desc">
+              Sesuaikan output audio, kenyamanan visual, dan pemetaan tombol
+              kontrol.
+            </p>
           </div>
 
           <div class="settings-group">
             <div class="settings-row">
               <label for="volumeMusic">Volume Musik Latar</label>
-              <input type="range" id="volumeMusic" class="settings-slider" min="0" max="100" value="70" />
+              <input
+                type="range"
+                id="volumeMusic"
+                class="settings-slider"
+                min="0"
+                max="100"
+                value="70"
+              />
             </div>
 
             <div class="settings-row">
               <label for="volumeSfx">Volume Efek Suara (SFX)</label>
-              <input type="range" id="volumeSfx" class="settings-slider" min="0" max="100" value="85" />
+              <input
+                type="range"
+                id="volumeSfx"
+                class="settings-slider"
+                min="0"
+                max="100"
+                value="85"
+              />
             </div>
 
             <div class="settings-row">
               <span>Guncangan Layar (Screen Shake)</span>
               <label style="display: flex; align-items: center; gap: 8px">
-                <input type="checkbox" id="shakeToggle" checked style="accent-color: var(--accent)" />
+                <input
+                  type="checkbox"
+                  id="shakeToggle"
+                  checked
+                  style="accent-color: var(--accent)"
+                />
                 <span style="font-size: 13px">Aktif</span>
               </label>
             </div>
 
             <div class="settings-row">
-              <label for="particleQuality">Kualitas Partikel Darah & Serpihan</label>
+              <label for="particleQuality"
+                >Kualitas Partikel Darah & Serpihan</label
+              >
               <select id="particleQuality" class="settings-select">
                 <option value="high">Tinggi (300 Partikel)</option>
                 <option value="medium" selected>Sedang (200 Partikel)</option>
@@ -543,19 +932,50 @@
           </div>
 
           <div class="keybind-table">
-            <span style="font-weight: 700; margin-bottom: 4px; color: var(--ink)">Daftar Pemetaan Tombol Taktis</span>
-            <div class="keybind-row"><span class="keybind-key">W, A, S, D</span><span class="keybind-action">Gerak Omni-Directional</span></div>
-            <div class="keybind-row"><span class="keybind-key">KURSOR MOUSE</span><span class="keybind-action">Arah Bidikan Poros</span></div>
-            <div class="keybind-row"><span class="keybind-key">KLIK KIRI</span><span class="keybind-action">Serangan Utama Senjata</span></div>
-            <div class="keybind-row"><span class="keybind-key">Q</span><span class="keybind-action">Ganti Slot Senjata (Swap)</span></div>
-            <div class="keybind-row"><span class="keybind-key">SHIFT / SPASI</span><span class="keybind-action">Pemicu Skill Aktif Karakter</span></div>
-            <div class="keybind-row"><span class="keybind-key">R</span><span class="keybind-action">Isi Ulang Munisi (Reload)</span></div>
-            <div class="keybind-row"><span class="keybind-key">ESC</span><span class="keybind-action">Jeda Permainan</span></div>
+            <span
+              style="font-weight: 700; margin-bottom: 4px; color: var(--ink)"
+              >Daftar Pemetaan Tombol Taktis</span
+            >
+            <div class="keybind-row">
+              <span class="keybind-key">W, A, S, D</span
+              ><span class="keybind-action">Gerak Omni-Directional</span>
+            </div>
+            <div class="keybind-row">
+              <span class="keybind-key">KURSOR MOUSE</span
+              ><span class="keybind-action">Arah Bidikan Poros</span>
+            </div>
+            <div class="keybind-row">
+              <span class="keybind-key">KLIK KIRI</span
+              ><span class="keybind-action">Serangan Utama Senjata</span>
+            </div>
+            <div class="keybind-row">
+              <span class="keybind-key">Q</span
+              ><span class="keybind-action">Ganti Slot Senjata (Swap)</span>
+            </div>
+            <div class="keybind-row">
+              <span class="keybind-key">SHIFT / SPASI</span
+              ><span class="keybind-action">Pemicu Skill Aktif Karakter</span>
+            </div>
+            <div class="keybind-row">
+              <span class="keybind-key">R</span
+              ><span class="keybind-action">Isi Ulang Munisi (Reload)</span>
+            </div>
+            <div class="keybind-row">
+              <span class="keybind-key">ESC</span
+              ><span class="keybind-action">Jeda Permainan</span>
+            </div>
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-primary" onclick="window.saveSettings()">Simpan Pengaturan</button>
-            <button class="btn btn-outline" onclick="closeOverlay('settingsModal')">Batal</button>
+            <button class="btn btn-primary" onclick="window.saveSettings()">
+              Simpan Pengaturan
+            </button>
+            <button
+              class="btn btn-outline"
+              onclick="closeOverlay('settingsModal')"
+            >
+              Batal
+            </button>
           </div>
         </div>
       </div>
@@ -566,7 +986,9 @@
           <div class="overlay-header">
             <span class="overlay-badge">Rekor Operasi</span>
             <h2 class="overlay-title">Catatan Prestasi & Skor Tertinggi</h2>
-            <p class="overlay-desc">Arsip rekor bertahan hidup lokal pemburu di sektor karantina.</p>
+            <p class="overlay-desc">
+              Arsip rekor bertahan hidup lokal pemburu di sektor karantina.
+            </p>
           </div>
 
           <div class="debrief-stats-grid">
@@ -580,12 +1002,21 @@
             </div>
           </div>
 
-          <div class="settings-group" id="achievementsListContainer" style="padding: 12px">
+          <div
+            class="settings-group"
+            id="achievementsListContainer"
+            style="padding: 12px"
+          >
             <!-- Diisi secara dinamis dari src/core/data/achievements.js -->
           </div>
 
           <div class="btn-action-group">
-            <button class="btn btn-outline" onclick="closeOverlay('achievementsModal')">Kembali</button>
+            <button
+              class="btn btn-outline"
+              onclick="closeOverlay('achievementsModal')"
+            >
+              Kembali
+            </button>
           </div>
         </div>
       </div>
@@ -594,7 +1025,13 @@
     <!-- Application Script Logic -->
     <script type="module">
       import { GameManager } from "./src/core/GameManager.js";
-      import { drawRandomUpgrades, UPGRADES, RARITIES } from "./src/core/data/upgrades.js";
+      import { WEAPONS } from "./src/core/Constants.js";
+      import { drawWeaponSprite } from "./src/rendering/SpriteUtils.js";
+      import {
+        drawRandomUpgrades,
+        UPGRADES,
+        RARITIES,
+      } from "./src/core/data/upgrades.js";
       import { SHOP_ITEMS } from "./src/core/data/items.js";
       import { CHARACTERS } from "./src/core/data/characters.js";
       import { MODES, DIFFICULTIES } from "./src/core/data/modes.js";
@@ -624,19 +1061,19 @@
         updateHUD(context) {
           if (!context || !context.player) return;
           const p = context.player;
-          
+
           if (this.cachedValues.wave !== context.wave) {
             this.cachedValues.wave = context.wave;
             const w = document.getElementById("wave");
             if (w) w.textContent = context.wave;
           }
-          
+
           if (this.cachedValues.score !== context.score) {
             this.cachedValues.score = context.score;
             const s = document.getElementById("score");
             if (s) s.textContent = context.score;
           }
-          
+
           const zCount = context.zombies ? context.zombies.length : 0;
           if (this.cachedValues.zombies !== zCount) {
             this.cachedValues.zombies = zCount;
@@ -647,30 +1084,47 @@
           if (this.cachedValues.coins !== context.coins) {
             this.cachedValues.coins = context.coins;
             const c = document.getElementById("coinCount");
-            if (c) c.textContent = context.coins !== undefined ? context.coins : 0;
+            if (c)
+              c.textContent = context.coins !== undefined ? context.coins : 0;
           }
-          
+
           const currentHp = Math.max(0, Math.floor(p.health));
           const maxHp = p.maxHealth || 300;
-          if (this.cachedValues.hp !== currentHp || this.cachedValues.maxHp !== maxHp) {
+          if (
+            this.cachedValues.hp !== currentHp ||
+            this.cachedValues.maxHp !== maxHp
+          ) {
+            const isDamaged =
+              this.cachedValues.hp !== undefined && currentHp < this.cachedValues.hp;
             this.cachedValues.hp = currentHp;
             this.cachedValues.maxHp = maxHp;
             const h = document.getElementById("health");
-            if (h) {
-              const parentVal = h.parentElement;
-              if (parentVal) {
-                parentVal.innerHTML = `<span id="health">${currentHp}</span> / ${maxHp}`;
-              } else {
-                h.textContent = currentHp;
-              }
-            }
-            
+            if (h) h.textContent = currentHp;
+            const mh = document.getElementById("maxHealth");
+            if (mh) mh.textContent = maxHp;
+
             const fill = document.getElementById("healthBar");
+            const hpValEl = document.querySelector(".hud-val-hp");
             const pct = (currentHp / maxHp) * 100;
             if (fill) {
               fill.style.width = Math.max(0, pct) + "%";
-              if (pct <= 30) fill.classList.add("low");
-              else fill.classList.remove("low");
+              fill.classList.remove("low", "medium");
+              if (pct <= 25) fill.classList.add("low");
+              else if (pct <= 50) fill.classList.add("medium");
+
+              // Flash merah pekat ketika terkena hit
+              if (isDamaged || (p && p.hitFlash > 0)) {
+                fill.classList.add("hit");
+                if (this._hitTimer) clearTimeout(this._hitTimer);
+                this._hitTimer = setTimeout(() => {
+                  fill.classList.remove("hit");
+                }, 350);
+              }
+            }
+            if (hpValEl) {
+              hpValEl.classList.remove("low", "medium");
+              if (pct <= 25) hpValEl.classList.add("low");
+              else if (pct <= 50) hpValEl.classList.add("medium");
             }
 
             const vig = document.getElementById("lowHpVignette");
@@ -692,7 +1146,10 @@
               }
               const bossFill = document.getElementById("bossHpFill");
               if (bossFill) {
-                const bossHpPct = Math.max(0, (boss.health / boss.maxHealth) * 100);
+                const bossHpPct = Math.max(
+                  0,
+                  (boss.health / boss.maxHealth) * 100,
+                );
                 bossFill.style.width = `${bossHpPct}%`;
               }
               const stunMeter = document.getElementById("bossStunMeter");
@@ -745,29 +1202,112 @@
               skillEl.style.color = "var(--positive)";
             }
           }
-        }
+        },
       };
 
-      // Modal management helpers
-      window.openOverlay = function(id) {
-        if (id === "settingsModal" && typeof window.loadSettingsToUI === "function") {
+      // Modal management helpers dengan proteksi keamanan in-game
+      window.openOverlay = function (id) {
+        // Keamanan: kunci akses panel pemilihan jika game sedang berjalan
+        const lockedInGameModals = ["weaponSelect", "characterSelectModal", "modeSelectModal"];
+        if (lockedInGameModals.includes(id) && window.gameApp?.context?.running) {
+          console.warn(`Akses ke panel ${id} dikunci saat permainan sedang berjalan.`);
+          return;
+        }
+
+        if (
+          id === "settingsModal" &&
+          typeof window.loadSettingsToUI === "function"
+        ) {
           window.loadSettingsToUI();
-        } else if (id === "achievementsModal" && typeof window.renderAchievementsModal === "function") {
+        } else if (
+          id === "achievementsModal" &&
+          typeof window.renderAchievementsModal === "function"
+        ) {
           window.renderAchievementsModal();
         }
         const el = document.getElementById(id);
         if (el) el.classList.remove("hidden");
       };
 
-      window.closeOverlay = function(id) {
+      window.closeOverlay = function (id) {
         const el = document.getElementById(id);
         if (el) el.classList.add("hidden");
       };
 
       // =====================================================================
+      // Dual-Slot Weapon Selection & Tactical Deployment Loadout
+      // =====================================================================
+      window.selectingSlot = 1;
+      window.selectedWeaponSlot1 = "katana";
+      window.selectedWeaponSlot2 = "dualgun";
+
+      window.setSelectingSlot = function (slot) {
+        if (window.gameApp?.context?.running) return;
+        window.selectingSlot = slot;
+        const tab1 = document.getElementById("slotTab1");
+        const tab2 = document.getElementById("slotTab2");
+        if (tab1) tab1.classList.toggle("active", slot === 1);
+        if (tab2) tab2.classList.toggle("active", slot === 2);
+        window.updateWeaponSelectionUI();
+      };
+
+      window.selectWeaponCard = function (weaponKey) {
+        if (window.gameApp?.context?.running) return;
+        if (!WEAPONS[weaponKey]) return;
+        if (window.selectingSlot === 1) {
+          window.selectedWeaponSlot1 = weaponKey;
+          window.gameApp.selectWeapon(weaponKey, 1);
+        } else {
+          window.selectedWeaponSlot2 = weaponKey;
+          window.gameApp.selectWeapon(weaponKey, 2);
+        }
+        window.updateWeaponSelectionUI();
+      };
+
+      window.updateWeaponSelectionUI = function () {
+        const slot1 = window.selectedWeaponSlot1 || "katana";
+        const slot2 = window.selectedWeaponSlot2 || "dualgun";
+
+        const nameEl1 = document.getElementById("slotName1");
+        const nameEl2 = document.getElementById("slotName2");
+        if (nameEl1) nameEl1.textContent = WEAPONS[slot1]?.name || slot1;
+        if (nameEl2) nameEl2.textContent = WEAPONS[slot2]?.name || slot2;
+
+        document.querySelectorAll(".weapon-card").forEach((card) => {
+          const wKey = card.getAttribute("data-weapon");
+          card.classList.toggle("selected-slot-1", wKey === slot1);
+          card.classList.toggle("selected-slot-2", wKey === slot2);
+        });
+
+        const confirmBtn = document.getElementById("confirmWeapon");
+        if (confirmBtn) {
+          confirmBtn.disabled = !slot1;
+        }
+      };
+
+      // Tutorial navigation helpers
+      window.previousOverlayBeforeTutorial = null;
+      window.openTutorialFromPause = function () {
+        window.previousOverlayBeforeTutorial = "pauseMenu";
+        document.getElementById("pauseMenu")?.classList.add("hidden");
+        document.getElementById("tutorial")?.classList.remove("hidden");
+      };
+
+      window.closeTutorial = function () {
+        document.getElementById("tutorial")?.classList.add("hidden");
+        if (window.previousOverlayBeforeTutorial === "pauseMenu") {
+          document.getElementById("pauseMenu")?.classList.remove("hidden");
+          window.previousOverlayBeforeTutorial = null;
+        } else if (window.gameApp && !window.gameApp.context.running) {
+          document.getElementById("weaponSelect")?.classList.remove("hidden");
+        }
+      };
+
+      // =====================================================================
       // Karakter, Mode, Pengaturan & Prestasi Riil
       // =====================================================================
-      window.selectCharacter = function(characterKey) {
+      window.selectCharacter = function (characterKey) {
+        if (window.gameApp?.context?.running) return;
         if (!CHARACTERS[characterKey]) return;
         if (window.gameApp && window.gameApp.context) {
           window.gameApp.context.selectedCharacter = characterKey;
@@ -775,33 +1315,140 @@
             localStorage.setItem("hz_character_v1", characterKey);
           } catch (e) {}
         }
-        document.querySelectorAll("#characterCardsContainer .upgrade-card").forEach(c => c.classList.remove("selected"));
+        document
+          .querySelectorAll("#characterCardsContainer .upgrade-card")
+          .forEach((c) => c.classList.remove("selected"));
         const card = document.getElementById(`char-card-${characterKey}`);
         if (card) card.classList.add("selected");
+
+        const briefingChar = document.getElementById("briefingCharName");
+        if (briefingChar) {
+          briefingChar.textContent = CHARACTERS[characterKey]?.name || characterKey;
+        }
       };
 
-      window.saveGameMode = function() {
-        const modeSelect = document.getElementById("gameModeSelect");
-        const diffSelect = document.getElementById("difficultySelect");
-        const mode = modeSelect ? modeSelect.value : "standard";
-        const diff = diffSelect ? diffSelect.value : "normal";
+      // State & Box Model Selection: Kesulitan & Mode
+      window.currentSelectedDiff = "normal";
+      window.currentSelectedMode = "endless";
+
+      window.selectDifficulty = function (diffKey) {
+        if (window.gameApp?.context?.running) return;
+        window.currentSelectedDiff = diffKey;
+        document
+          .querySelectorAll("#difficultyBoxGrid .difficulty-card")
+          .forEach((card) => {
+            card.classList.toggle(
+              "selected",
+              card.getAttribute("data-diff") === diffKey
+            );
+          });
+      };
+
+      window.selectGameMode = function (modeKey) {
+        if (window.gameApp?.context?.running) return;
+        window.currentSelectedMode = modeKey;
+        document
+          .querySelectorAll("#modeBoxGrid .mode-card")
+          .forEach((card) => {
+            card.classList.toggle(
+              "selected",
+              card.getAttribute("data-mode") === modeKey
+            );
+          });
+      };
+
+      window.syncDifficultyCardsUI = function () {
+        const diff = window.currentSelectedDiff || "normal";
+        const mode = window.currentSelectedMode || "endless";
+        document
+          .querySelectorAll("#difficultyBoxGrid .difficulty-card")
+          .forEach((card) => {
+            card.classList.toggle(
+              "selected",
+              card.getAttribute("data-diff") === diff
+            );
+          });
+        document
+          .querySelectorAll("#modeBoxGrid .mode-card")
+          .forEach((card) => {
+            card.classList.toggle(
+              "selected",
+              card.getAttribute("data-mode") === mode
+            );
+          });
+      };
+
+      window.saveGameMode = function () {
+        if (window.gameApp?.context?.running) return;
+        const mode = window.currentSelectedMode || "endless";
+        const diff = window.currentSelectedDiff || "normal";
         const diffMultipliers = { normal: 1.0, tactical: 1.3, extreme: 1.75 };
 
         if (window.gameApp && window.gameApp.context) {
           window.gameApp.context.selectedMode = mode;
-          window.gameApp.context.difficultyMultiplier = diffMultipliers[diff] || 1.0;
+          window.gameApp.context.difficultyMultiplier =
+            diffMultipliers[diff] || 1.0;
           try {
             localStorage.setItem("hz_mode_v1", JSON.stringify({ mode, diff }));
           } catch (e) {}
         }
-        window.closeOverlay("modeSelectModal");
+
+        const briefingMode = document.getElementById("briefingModeName");
+        if (briefingMode) {
+          const mName = MODES[mode]?.name || mode;
+          const dName = DIFFICULTIES[diff]?.name || diff;
+          briefingMode.textContent = `${mName} (${dName})`;
+        }
       };
 
-      window.saveSettings = function() {
-        const music = parseInt(document.getElementById("volumeMusic")?.value ?? 70);
+      // Alur Seri Pemilihan Pra-Permainan (1. Senjata -> 2. Karakter -> 3. Kesulitan)
+      window.goToWeaponSelect = function () {
+        if (window.gameApp?.context?.running) return;
+        document.getElementById("menu")?.classList.add("hidden");
+        document.getElementById("characterSelectModal")?.classList.add("hidden");
+        document.getElementById("modeSelectModal")?.classList.add("hidden");
+        document.getElementById("weaponSelect")?.classList.remove("hidden");
+        const pauseBtn = document.getElementById("pauseBtn");
+        if (pauseBtn) pauseBtn.style.display = "none";
+      };
+
+      window.goToCharacterSelect = function () {
+        if (window.gameApp?.context?.running) return;
+        if (!window.selectedWeaponSlot1) {
+          window.selectedWeaponSlot1 = "katana";
+        }
+        document.getElementById("weaponSelect")?.classList.add("hidden");
+        document.getElementById("modeSelectModal")?.classList.add("hidden");
+        document.getElementById("characterSelectModal")?.classList.remove("hidden");
+        const curChar = window.gameApp?.context?.selectedCharacter || "scout";
+        window.selectCharacter(curChar);
+      };
+
+      window.goToDifficultySelect = function () {
+        if (window.gameApp?.context?.running) return;
+        document.getElementById("characterSelectModal")?.classList.add("hidden");
+        document.getElementById("weaponSelect")?.classList.add("hidden");
+        document.getElementById("modeSelectModal")?.classList.remove("hidden");
+        window.syncDifficultyCardsUI();
+      };
+
+      window.confirmAndStartGame = function () {
+        if (window.gameApp?.context?.running) return;
+        window.saveGameMode();
+        document.getElementById("modeSelectModal")?.classList.add("hidden");
+        document.getElementById("characterSelectModal")?.classList.add("hidden");
+        document.getElementById("weaponSelect")?.classList.add("hidden");
+        window.gameApp.startGame();
+      };
+
+      window.saveSettings = function () {
+        const music = parseInt(
+          document.getElementById("volumeMusic")?.value ?? 70,
+        );
         const sfx = parseInt(document.getElementById("volumeSfx")?.value ?? 85);
         const shake = document.getElementById("shakeToggle")?.checked ?? true;
-        const quality = document.getElementById("particleQuality")?.value ?? "medium";
+        const quality =
+          document.getElementById("particleQuality")?.value ?? "medium";
 
         if (window.gameApp) {
           window.gameApp.saveSettings({
@@ -814,12 +1461,12 @@
         window.closeOverlay("settingsModal");
       };
 
-      window.loadSettingsToUI = function() {
+      window.loadSettingsToUI = function () {
         const s = window.gameApp?.context?.settings || {
           musicVolume: 70,
           sfxVolume: 85,
           screenShake: true,
-          particleQuality: "medium"
+          particleQuality: "medium",
         };
         const musicEl = document.getElementById("volumeMusic");
         const sfxEl = document.getElementById("volumeSfx");
@@ -831,12 +1478,12 @@
         if (qualEl) qualEl.value = s.particleQuality;
       };
 
-      window.renderAchievementsModal = function() {
+      window.renderAchievementsModal = function () {
         const tracker = window.gameApp?.context?.achievementTracker;
         const container = document.getElementById("achievementsListContainer");
         if (!container) return;
 
-        container.innerHTML = ACHIEVEMENTS.map(ach => {
+        container.innerHTML = ACHIEVEMENTS.map((ach) => {
           const isUnlocked = tracker ? tracker.isUnlocked(ach.id) : false;
           return `
             <div class="settings-row" style="padding: 10px 0; border-bottom: 1px solid var(--border-subtle)">
@@ -844,8 +1491,8 @@
                 <span style="font-weight: 700; color: var(--ink); font-size: 14px;">${ach.title || ach.name}</span>
                 <span style="font-size: 12px; color: var(--ink-secondary);">${ach.desc}</span>
               </div>
-              <span style="color: ${isUnlocked ? 'var(--positive)' : 'var(--muted)'}; font-weight: 700; font-size: 12px; white-space: nowrap; padding: 2px 8px; border: 1px solid ${isUnlocked ? 'var(--positive)' : 'var(--border-subtle)'}">
-                ${isUnlocked ? 'TERBUKA' : 'TERKUNCI'}
+              <span style="color: ${isUnlocked ? "var(--positive)" : "var(--muted)"}; font-weight: 700; font-size: 12px; white-space: nowrap; padding: 2px 8px; border: 1px solid ${isUnlocked ? "var(--positive)" : "var(--border-subtle)"}">
+                ${isUnlocked ? "TERBUKA" : "TERKUNCI"}
               </span>
             </div>
           `;
@@ -856,7 +1503,8 @@
           if (savedRecord) {
             const hs = document.getElementById("highScoreRecord");
             const hw = document.getElementById("highWaveRecord");
-            if (hs) hs.textContent = (savedRecord.score || 0).toLocaleString("id-ID");
+            if (hs)
+              hs.textContent = (savedRecord.score || 0).toLocaleString("id-ID");
             if (hw) hw.textContent = `Wave ${savedRecord.wave || 1}`;
           }
         } catch (e) {}
@@ -931,10 +1579,10 @@
                 <span class="shop-item-cost">${item.cost} Koin</span>
                 <span style="font-size: 11px; color: var(--ink-secondary); margin-top: 2px;">${item.desc}</span>
               </div>
-              <button class="btn ${canAfford ? 'btn-primary' : 'btn-outline'}" 
+              <button class="btn ${canAfford ? "btn-primary" : "btn-outline"}" 
                       style="padding: 8px 16px; font-size: 13px" 
                       onclick="window.buyShopItem('${item.id}')"
-                      ${!canAfford ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                      ${!canAfford ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ""}>
                 Beli
               </button>
             </div>
@@ -974,8 +1622,8 @@
                 break;
               case "armor":
                 player.armorReduction = Math.min(
-                  0.60,
-                  (player.armorReduction || 0) + item.effect.reduction
+                  0.6,
+                  (player.armorReduction || 0) + item.effect.reduction,
                 );
                 break;
               case "weapon_damage":
@@ -1013,30 +1661,247 @@
         if (savedRecord) {
           const highScoreRecord = document.getElementById("highScoreRecord");
           const highWaveRecord = document.getElementById("highWaveRecord");
-          if (highScoreRecord) highScoreRecord.textContent = (savedRecord.score || 0).toLocaleString("id-ID");
-          if (highWaveRecord) highWaveRecord.textContent = `Wave ${savedRecord.wave || 1}`;
+          if (highScoreRecord)
+            highScoreRecord.textContent = (
+              savedRecord.score || 0
+            ).toLocaleString("id-ID");
+          if (highWaveRecord)
+            highWaveRecord.textContent = `Wave ${savedRecord.wave || 1}`;
         }
       } catch (e) {}
 
       // Inisialisasi awal karakter & mode dari storage jika ada
       try {
-        const savedChar = localStorage.getItem("hz_character_v1");
-        if (savedChar && CHARACTERS[savedChar]) {
+        const savedChar = localStorage.getItem("hz_character_v1") || "scout";
+        if (CHARACTERS[savedChar]) {
           window.selectCharacter(savedChar);
         }
         const savedModeData = JSON.parse(localStorage.getItem("hz_mode_v1"));
         if (savedModeData) {
-          const mEl = document.getElementById("gameModeSelect");
-          const dEl = document.getElementById("difficultySelect");
-          if (mEl && savedModeData.mode) mEl.value = savedModeData.mode;
-          if (dEl && savedModeData.diff) dEl.value = savedModeData.diff;
+          if (savedModeData.diff) window.currentSelectedDiff = savedModeData.diff;
+          if (savedModeData.mode) window.currentSelectedMode = savedModeData.mode;
           if (window.gameApp && window.gameApp.context) {
             window.gameApp.context.selectedMode = savedModeData.mode;
             const diffMap = { normal: 1.0, tactical: 1.3, extreme: 1.75 };
-            window.gameApp.context.difficultyMultiplier = diffMap[savedModeData.diff] || 1.0;
+            window.gameApp.context.difficultyMultiplier =
+              diffMap[savedModeData.diff] || 1.0;
+          }
+          const briefingMode = document.getElementById("briefingModeName");
+          if (briefingMode) {
+            const mName = MODES[savedModeData.mode]?.name || savedModeData.mode;
+            const dName = DIFFICULTIES[savedModeData.diff]?.name || savedModeData.diff;
+            briefingMode.textContent = `${mName} (${dName})`;
           }
         }
+        if (typeof window.syncDifficultyCardsUI === "function") {
+          window.syncDifficultyCardsUI();
+        }
       } catch (e) {}
+
+      // Inisialisasi awal slot senjata & loop animasi preview senjata
+      if (window.gameApp) {
+        window.gameApp.selectWeapon(window.selectedWeaponSlot1 || "katana", 1);
+        window.gameApp.selectWeapon(window.selectedWeaponSlot2 || "dualgun", 2);
+      }
+      window.updateWeaponSelectionUI();
+      initWeaponPreviewLoop();
+
+      // Weapon Attack Sprite Animation Simulator for Weapon Cards
+      function initWeaponPreviewLoop() {
+        const previewCanvases = document.querySelectorAll(".weapon-preview-canvas");
+        if (previewCanvases.length === 0) return;
+
+        function renderFrame(time) {
+          const animCycle = (time / 1000) % 1.8; // 1.8 detik per siklus serang
+          const isAttacking = animCycle > 0.4 && animCycle < 1.2;
+          const attackProgress = Math.max(0, Math.min(1, (animCycle - 0.4) / 0.8));
+
+          previewCanvases.forEach((c) => {
+            const ctx = c.getContext("2d");
+            if (!ctx) return;
+            const wKey = c.getAttribute("data-weapon-key");
+            const w = c.width;
+            const h = c.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Tactical grid background
+            ctx.fillStyle = "#15171a";
+            ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = "rgba(42, 47, 56, 0.45)";
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 16) {
+              ctx.beginPath();
+              ctx.moveTo(x, 0);
+              ctx.lineTo(x, h);
+              ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 16) {
+              ctx.beginPath();
+              ctx.moveTo(0, y);
+              ctx.lineTo(w, y);
+              ctx.stroke();
+            }
+
+            const centerX = 36;
+            const centerY = 42;
+
+            // Player shadow
+            ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY + 16, 12, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Player Pixel Body (matches sprite design)
+            ctx.save();
+            ctx.translate(centerX, centerY);
+
+            ctx.fillStyle = "#2c4c8c"; // shirt
+            ctx.fillRect(-6, -4, 12, 14);
+            ctx.fillStyle = "#f4a460"; // skin
+            ctx.fillRect(-4, -13, 8, 9);
+            ctx.fillStyle = "#6b4423"; // hair
+            ctx.fillRect(-5, -16, 10, 4);
+            ctx.fillStyle = "#1a1a2e"; // pants
+            ctx.fillRect(-5, 10, 4, 6);
+            ctx.fillRect(1, 10, 4, 6);
+
+            // Weapon & Attack Animation
+            ctx.save();
+            if (wKey === "katana") {
+              const swingAngle = isAttacking
+                ? -Math.PI / 4 + attackProgress * (Math.PI * 0.75)
+                : 0.2;
+              ctx.rotate(swingAngle);
+              drawWeaponSprite(ctx, "Katana", time);
+              ctx.restore();
+
+              if (isAttacking) {
+                ctx.save();
+                ctx.strokeStyle = "#ff4a1f";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(centerX + 18, centerY, 28, -0.6, 0.6);
+                ctx.stroke();
+                ctx.strokeStyle = "#f0b429";
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(centerX + 16, centerY, 24, -0.5, 0.5);
+                ctx.stroke();
+                ctx.restore();
+              }
+            } else if (wKey === "fist") {
+              const punchOffset = isAttacking
+                ? Math.sin(attackProgress * Math.PI) * 16
+                : 0;
+              ctx.translate(punchOffset, 0);
+              drawWeaponSprite(ctx, "Tangan Kosong", time);
+              ctx.restore();
+
+              if (isAttacking && punchOffset > 8) {
+                ctx.fillStyle = "rgba(255, 74, 31, 0.7)";
+                ctx.beginPath();
+                ctx.arc(centerX + 18 + punchOffset, centerY, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#f0b429";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+              }
+            } else if (wKey === "wizard") {
+              ctx.rotate(-0.08);
+              drawWeaponSprite(ctx, "Wizard Book", time);
+              ctx.restore();
+
+              if (isAttacking) {
+                const fireX = centerX + 18 + attackProgress * 70;
+                ctx.fillStyle = "#ff4a1f";
+                ctx.beginPath();
+                ctx.arc(fireX, centerY - 2, 5 + Math.sin(time * 0.02) * 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#f0b429";
+                ctx.beginPath();
+                ctx.arc(fireX - 7, centerY - 2, 3, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            } else if (wKey === "dualgun") {
+              ctx.rotate(0);
+              drawWeaponSprite(ctx, "Dual Gun", time);
+              ctx.restore();
+
+              if (isAttacking) {
+                const bX = centerX + 18 + (attackProgress * 110) % 75;
+                ctx.fillStyle = "#f0b429";
+                ctx.fillRect(bX, centerY - 2, 7, 2);
+                if (attackProgress < 0.25) {
+                  ctx.fillStyle = "#ff4a1f";
+                  ctx.beginPath();
+                  ctx.arc(centerX + 18, centerY - 2, 4, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
+            } else if (wKey === "shotgun") {
+              ctx.rotate(0);
+              drawWeaponSprite(ctx, "Shotgun", time);
+              ctx.restore();
+
+              if (isAttacking && attackProgress < 0.7) {
+                const burst = attackProgress / 0.7;
+                const spread = burst * 14;
+                const pX = centerX + 20 + burst * 60;
+                ctx.fillStyle = "#ff4a1f";
+                ctx.fillRect(pX, centerY - spread, 4, 2);
+                ctx.fillRect(pX + 4, centerY - spread * 0.5, 4, 2);
+                ctx.fillRect(pX + 7, centerY, 4, 2);
+                ctx.fillRect(pX + 4, centerY + spread * 0.5, 4, 2);
+                ctx.fillRect(pX, centerY + spread, 4, 2);
+              }
+            } else if (wKey === "sniper") {
+              ctx.rotate(0);
+              drawWeaponSprite(ctx, "Shotgun", time);
+              ctx.restore();
+
+              if (isAttacking) {
+                ctx.strokeStyle = "rgba(46, 196, 134, 0.4)";
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(centerX + 18, centerY - 1);
+                ctx.lineTo(w, centerY - 1);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const bulletX = centerX + 18 + attackProgress * 160;
+                ctx.fillStyle = "#2ec486";
+                ctx.fillRect(bulletX, centerY - 2, 12, 2);
+              }
+            } else if (wKey === "flamethrower") {
+              ctx.rotate(0);
+              drawWeaponSprite(ctx, "Dual Gun", time);
+              ctx.restore();
+
+              if (isAttacking) {
+                for (let i = 0; i < 5; i++) {
+                  const flameDist = ((attackProgress * 70 + i * 14) % 65);
+                  const flameY = centerY + Math.sin(time * 0.03 + i) * 5;
+                  ctx.fillStyle = i % 2 === 0 ? "#ff4a1f" : "#f0b429";
+                  ctx.beginPath();
+                  ctx.arc(centerX + 18 + flameDist, flameY, 3 + (flameDist / 12), 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
+            } else {
+              drawWeaponSprite(ctx, "Katana", time);
+              ctx.restore();
+            }
+
+            ctx.restore();
+          });
+
+          requestAnimationFrame(renderFrame);
+        }
+
+        requestAnimationFrame(renderFrame);
+      }
 
       // =====================================================================
       // Dev-only URL parameter handler: ?ui=<state> (Section 8)
@@ -1047,10 +1912,18 @@
 
       function hideAllOverlays() {
         [
-          "menu", "weaponSelect", "tutorial", "pauseMenu", "gameOver",
-          "waveUpgradeModal", "shopModal", "characterSelectModal",
-          "modeSelectModal", "settingsModal", "achievementsModal"
-        ].forEach(id => {
+          "menu",
+          "weaponSelect",
+          "tutorial",
+          "pauseMenu",
+          "gameOver",
+          "waveUpgradeModal",
+          "shopModal",
+          "characterSelectModal",
+          "modeSelectModal",
+          "settingsModal",
+          "achievementsModal",
+        ].forEach((id) => {
           const el = document.getElementById(id);
           if (el) el.classList.add("hidden");
         });
@@ -1100,14 +1973,20 @@
             document.getElementById("settingsModal").classList.remove("hidden");
             break;
           case "character":
-            document.getElementById("characterSelectModal").classList.remove("hidden");
+            document
+              .getElementById("characterSelectModal")
+              .classList.remove("hidden");
             break;
           case "mode":
-            document.getElementById("modeSelectModal").classList.remove("hidden");
+            document
+              .getElementById("modeSelectModal")
+              .classList.remove("hidden");
             break;
           case "achievements":
             window.renderAchievementsModal();
-            document.getElementById("achievementsModal").classList.remove("hidden");
+            document
+              .getElementById("achievementsModal")
+              .classList.remove("hidden");
             break;
           default:
             window.gameApp.showWeaponSelect();

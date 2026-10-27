@@ -55,7 +55,7 @@ function generateConnectedMap() {
   const isSolidObstacle = (tx, ty) => {
     if (tx <= 0 || tx >= MAP_WIDTH - 1 || ty <= 0 || ty >= MAP_HEIGHT - 1) return true;
     const t = map[ty][tx];
-    return t === TILES.TREE || t === TILES.ROCK || t === TILES.STONE;
+    return t === TILES.TREE || t === TILES.ROCK || t === TILES.STONE || t === TILES.SPIKE;
   };
 
   // 1. Flood fill konektivitas dari tengah (cx, cy)
@@ -265,6 +265,7 @@ export class GameContext {
 
     this.player = null;
     this.zombies = [];
+    this.npcs = [];
     this.projectiles = [];
     this.effects = [];
     this.pickups = [];
@@ -361,11 +362,12 @@ export class GameContext {
 
     const tile = this.tilemap[tileY][tileX];
 
-    // SPIKE BUKAN LAGI OBSTACLE! Spike adalah hazard lantai yang bisa dilewati.
+    // SPIKE adalah obstacle yang TIDAK BISA DILEWATI oleh player maupun zombie
     return (
       tile === TILES.TREE ||
       tile === TILES.ROCK ||
-      tile === TILES.STONE
+      tile === TILES.STONE ||
+      tile === TILES.SPIKE
     );
   }
 
@@ -374,7 +376,12 @@ export class GameContext {
       return true;
     if (!this.tilemap || !this.tilemap[tileY]) return true;
     const tile = this.tilemap[tileY][tileX];
-    return tile === TILES.TREE || tile === TILES.ROCK || tile === TILES.STONE;
+    return (
+      tile === TILES.TREE ||
+      tile === TILES.ROCK ||
+      tile === TILES.STONE ||
+      tile === TILES.SPIKE
+    );
   }
 
   /**
@@ -561,9 +568,10 @@ export class GameContext {
     this.comboMultiplier = 1.0;
   }
 
-  start(weaponKey, characterKey = null, modeKey = null) {
+  start(weaponKey, characterKey = null, modeKey = null, secondaryWeaponKey = null) {
     if (characterKey) this.selectedCharacter = characterKey;
     if (modeKey) this.selectedMode = modeKey;
+    if (secondaryWeaponKey) this.selectedSecondaryWeapon = secondaryWeaponKey;
 
     this.init();
     this.selectedWeapon = weaponKey;
@@ -575,7 +583,10 @@ export class GameContext {
       this.player.setCharacter(this.selectedCharacter);
     }
     if (weaponKey) {
-      this.player.setWeapon(weaponKey);
+      this.player.setPrimaryWeapon(weaponKey);
+    }
+    if (this.selectedSecondaryWeapon) {
+      this.player.setSecondaryWeapon(this.selectedSecondaryWeapon);
     }
 
     // Jika mode Hardcore: tanpa heal (waveRegen 0%)

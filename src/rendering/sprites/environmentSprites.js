@@ -727,53 +727,53 @@ export const ROCK_VARIANTS = [
 // ==========================================
 // 6. JEBAKAN SPIKE LOGAM (SPIKES) — 2 KEADAAN (20x20)
 // ==========================================
-// Palet: 0: void, 2: slate-shadow, K: ichor-dark, L: ichor-mid, P: steel-mid, Q: steel-light, R: steel-gleam
+// Palet: 0: void, 2: slate-shadow, K: ichor-dark, L: ichor-mid, P: steel-mid, Q: steel-light, R: steel-gleam, S: hazard-deep, T: safety-orange, U: amber-spark
 export const SPIKE_STATES = {
-  // State 0: Tersembunyi di Lantai (Retakan & Lubang Gelap bernoda)
+  // State 0: Tersembunyi di Lantai (Retakan & Lubang Bergaris Peringatan Hazard Kuning/Merah)
   retracted: [
     "22222222222222222222",
-    "20000022222222000002",
-    "20111022222222011102",
+    "20UU00222222220UU002",
+    "20SS10222222220SS102",
     "201K102222222201K102",
     "20000022222222000002",
     "22222222222222222222",
-    "22222222000002222222",
-    "22222222011102222222",
-    "2222222201K102222222",
-    "22222222000002222222",
+    "222222220UU000222222",
+    "222222220SS110222222",
+    "2222222201K110222222",
+    "22222222000000222222",
     "22222222222222222222",
-    "22222222000002222222",
-    "22222222011102222222",
-    "2222222201K102222222",
-    "22222222000002222222",
+    "222222220UU000222222",
+    "222222220SS110222222",
+    "2222222201K110222222",
+    "22222222000000222222",
     "22222222222222222222",
-    "20000022222222000002",
-    "20111022222222011102",
+    "20UU00222222220UU002",
+    "20SS10222222220SS102",
     "201K102222222201K102",
     "20000022222222000002",
   ],
-  // State 1: Menonjol Naik Tajam & Berdarah Gelap
+  // State 1: Menonjol Tajam dengan Ujung Berdarah Merah/Oranye & Marka Bahaya
   extended: [
     "..00........00......",
-    ".0RR0......0RR0.....",
+    ".0TT0......0TT0.....",
+    ".0SS0......0SS0.....",
     ".0QRL0....0QRL0.....",
     ".0QPLL0..0QPLL0.....",
     "0QQPPLL00QQPPLL0....",
-    "0QPPPLL00QPPPLL0....",
     "0000000000000000....",
     "....00........00....",
-    "...0RR0......0RR0...",
+    "...0TT0......0TT0...",
+    "...0SS0......0SS0...",
     "...0QRL0....0QRL0...",
     "...0QPLL0..0QPLL0...",
     "..0QQPPLL00QQPPLL0..",
-    "..0QPPPLL00QPPPLL0..",
     "..0000000000000000..",
     "..00........00......",
-    ".0RR0......0RR0.....",
+    ".0TT0......0TT0.....",
+    ".0SS0......0SS0.....",
     ".0QRL0....0QRL0.....",
     ".0QPLL0..0QPLL0.....",
     "0QQPPLL00QQPPLL0....",
-    "0000000000000000....",
   ],
 };
 
